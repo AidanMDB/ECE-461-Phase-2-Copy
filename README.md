@@ -23,6 +23,7 @@ Our goal is to simplify the process of assessing open-source software.
     {"URL":"https://www.npmjs.com/package/express", "NetScore":0, "NetScore_Latency": 0.133,"RampUp":0.5,"RampUp_Latency": 0.002, "Correctness":0.7, "Correctness_Latency":0.076, "BusFactor":-1, "BusFactor_Latency":-1, "ResponsiveMaintainer":0.6, "ResponsiveMaintainer_Latency": 0.009, "License":0, "License_Latency": 0.046}
     ```
 ### `./run test`
+* export GITHUB_TOKEN='your token'
 * Runs tests on project-f2024 repository using jest
 * Test can be found in /test directory
 * Sample Output:
