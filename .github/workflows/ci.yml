@@ -10,7 +10,7 @@ jobs:
         runs-on: ubuntu-latest
 
         steps:
-            - uses: actions/checkout@v2 # CHECK VERSION
+            - uses: actions/checkout@v2
 
             - name: Setup Node.js version 18.17.1
               uses: actions/setup-node@v1
@@ -43,17 +43,21 @@ jobs:
     #             aws-region: us-east-1
             
             
-            # - name: Deploy to Lambda
-            #   run: |
+    #         - name: Deploy to Lambda
+    #           run: |
+    #             aws lambda update-function-code --function-name myLambdaFunction --zip-file fileb://function.zip
 
-            # - name: Deploy to S3
-            #   run: |
+    #         - name: Deploy to S3
+    #           run: |
+    #             aws s3 sync ./my-local-directory s3://my-s3-bucket
             
-            # - name: EC2 Deployment
-            #   run: |
+    #         - name: EC2 Deployment
+    #           run: |
+    #             ssh -i "my-key.pem" ec2-user@my-ec2-instance "cd /path/to/deployment && ./deploy.sh"
             
-            # - name: CodeBuilder
-            #     run: |
+    #         - name: CodeBuilder
+    #           run: |
+    #             aws codebuild start-build --project-name my-codebuild-project
         
 
                 
