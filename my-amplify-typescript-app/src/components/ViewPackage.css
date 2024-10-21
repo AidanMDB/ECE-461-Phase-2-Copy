@@ -1,15 +1,85 @@
-.App {
-    text-align: center;
-    font-size: 25px;
-    font-family: Arial, Helvetica, sans-serif;
-  }
+.view-package-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 40px;
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Center all content */
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #333;
+}
 
-  .App-header {
-    max-width: 1000px;
-    margin: auto;
-    padding: 70px;
-    background-color: #f9f9f9;
-    border-radius: 20px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  }
-  
+h1 {
+  margin-bottom: 20px;
+  font-size: 2rem; /* Consistent font size with homepage */
+  color: #2c3e50; /* Consistent header color */
+}
+
+.package-info {
+  width: 100%;
+  text-align: left;
+  margin-bottom: 30px;
+  font-size: 1.1rem;
+  line-height: 1.6;
+}
+
+.package-info p {
+  margin: 10px 0;
+  color: #555;
+}
+
+.button-container {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px; /* Add some space between the text and buttons */
+}
+
+.package-button {
+  background-color: #273E47; 
+  color: white;
+  padding: 15px 25px;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  cursor: pointer;
+  text-align: center;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.package-button:hover {
+  background-color: grey; 
+  transform: scale(1.05); 
+}
+
+.package-button:focus {
+  outline: 2px solid #273E47;
+  outline-offset: 2px; 
+}
+
+.package-button.download {
+  background-color: #273E47; 
+}
+
+.package-button.download:hover {
+  background-color: grey; 
+}
+
+.package-button.update {
+  background-color: #273E47; 
+  color: white;
+}
+
+.package-button.update:hover {
+  background-color: grey; 
+}
+
+.package-button.upload {
+  background-color: #273E47; 
+}
+
+.package-button.upload:hover {
+  background-color: grey; 
+}
