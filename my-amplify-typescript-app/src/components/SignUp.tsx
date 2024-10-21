@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import './SignUp.css'
+import { useNavigate } from 'react-router-dom';
 
 function SignUp() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [rePassword, setRePassword] = useState("");
   const [email, setEmail] = useState("");
+  const navigate = useNavigate();
 
   async function handleSubmit() {
     console.log("user sign up!")
@@ -13,6 +15,7 @@ function SignUp() {
     console.log(password)
     console.log(rePassword)
     console.log(email)
+    navigate('/')
   }
 
   return (
