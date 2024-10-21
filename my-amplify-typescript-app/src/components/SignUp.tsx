@@ -15,7 +15,7 @@ function SignUp() {
     console.log(password)
     console.log(rePassword)
     console.log(email)
-    navigate('/')
+    navigate('/HomePage')
   }
 
   return (
@@ -35,7 +35,7 @@ function SignUp() {
         ></input>
         <p>Enter Password:</p>
         <input
-          type="text" 
+          type="password" 
           value={password} 
           onChange={e => setPassword(e.target.value)}
           className="input"
@@ -43,7 +43,7 @@ function SignUp() {
         ></input>
         <p>Re-enter Password:</p>
         <input
-          type="text" 
+          type="password" 
           value={rePassword} 
           onChange={e => setRePassword(e.target.value)}
           className="input"

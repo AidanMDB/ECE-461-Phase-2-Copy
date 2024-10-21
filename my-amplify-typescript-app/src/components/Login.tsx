@@ -4,6 +4,7 @@ import './Login.css';
 function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   return (
     <div className='login'>
@@ -21,12 +22,15 @@ function Login() {
         ></input>
         <p>Enter Password:</p>
         <input
-          type="text" 
+          type={showPassword ? "text" : "password"}
           value={password} 
           onChange={e => setPassword(e.target.value)}
           className="input"
           placeholder=""
         ></input>
+        <button className="show-password" onClick={()=> setShowPassword(!showPassword)}>
+          {showPassword ? "Hide Password" : "Show Password"}
+        </button>
         <br />
         <button className="search-button">Login</button>
         <p>Not already a member?</p>
@@ -37,3 +41,4 @@ function Login() {
 }
 
 export default Login;
+

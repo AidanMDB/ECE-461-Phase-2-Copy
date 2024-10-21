@@ -5,6 +5,7 @@ import App from './App';
 import ViewPackage from './components/ViewPackage';
 import Login from './components/Login';
 import SignUp from './components/SignUp'
+import HomePage from './components/HomePage';
 import reportWebVitals from './reportWebVitals';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
@@ -16,6 +17,7 @@ root.render(
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<App />} />
+        <Route path="/HomePage" element={<HomePage />} />
         <Route path="/ViewPackage" element={<ViewPackage />} />
         <Route path="Login" element={<Login />} />
         <Route path="SignUp" element={<SignUp />} />
