@@ -14,6 +14,7 @@ function App() {
     <div className="App">
       <header className="App-header">
         {/* <img src={logo} className="App-logo" alt="logo" /> */}
+        <a className="sign-up" href="/Login"><button className="search-button">Login</button></a>
         <h1>Package Manager</h1>
         <div className="search-container">
           <input 

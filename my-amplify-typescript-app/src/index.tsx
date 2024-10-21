@@ -3,6 +3,8 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import ViewPackage from './components/ViewPackage';
+import Login from './components/Login';
+import SignUp from './components/SignUp'
 import reportWebVitals from './reportWebVitals';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
@@ -15,6 +17,8 @@ root.render(
       <Routes>
         <Route path="/" element={<App />} />
         <Route path="/ViewPackage" element={<ViewPackage />} />
+        <Route path="Login" element={<Login />} />
+        <Route path="SignUp" element={<SignUp />} />
       </Routes>
     </BrowserRouter>
   </React.StrictMode>

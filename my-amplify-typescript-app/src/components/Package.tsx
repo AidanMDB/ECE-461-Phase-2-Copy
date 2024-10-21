@@ -13,7 +13,7 @@ async function viewPackage() {
       <header>
         <h1>Package Name by Author</h1>
         <div className="view">
-        <a href="/ViewPackage"><button>View Package</button></a>
+        <a href="/ViewPackage"><button className="search-button">View Package</button></a>
         </div>
       </header>
       <hr className="package-divider" />
