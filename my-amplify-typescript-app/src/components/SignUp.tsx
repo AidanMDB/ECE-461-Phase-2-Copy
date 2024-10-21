@@ -58,8 +58,8 @@ function SignUp() {
           placeholder=""
         ></input>
         <br />
+        <br />
         <button type="submit" className="search-button" >Sign Up</button>
-        {/* <a href="/"><button className="search-button">Sign Up</button></a> */}
         </form>
       </body>
     </div>

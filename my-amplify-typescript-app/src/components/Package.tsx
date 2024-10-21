@@ -11,9 +11,11 @@ async function viewPackage() {
   return (
     <div className="Package">
       <header>
-        <h1>Package Name by Author</h1>
-        <div className="view">
-        <a href="/ViewPackage"><button className="search-button">View Package</button></a>
+        <div className="Package-text">
+          <h1>Package Name by Author</h1>
+        </div>
+        <div className="header">
+          <button className="view-button">View Package</button>
         </div>
       </header>
       <hr className="package-divider" />

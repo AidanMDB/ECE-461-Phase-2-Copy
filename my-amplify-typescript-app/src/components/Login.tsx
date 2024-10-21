@@ -39,7 +39,6 @@ function Login() {
         </div>
 
         <div className="button-group">
-          <button className="search-button" aria-label="Login Button">Login</button>
           <a href="/HomePage">
             <button className="search-button" aria-label="Login Button">Login</button>
           </a>

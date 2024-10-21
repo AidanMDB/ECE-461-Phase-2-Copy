@@ -1,4 +1,68 @@
 .signUp {
-    padding-left: 5%;
-    padding-top: 1%;
+    max-width: 400px;
+    margin: auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  header {
+    text-align: center;
+  }
+  
+  .form-group {
+    margin-bottom: 20px;
+  }
+  
+  .label {
+    display: block;
+    font-size: 16px;
+    color: #333;
+    margin-bottom: 8px;
+  }
+  
+  .input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+  }
+  
+  .button-group {
+    text-align: center;
+  }
+  
+  .search-button {
+    background-color: #273E47;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  
+  .search-button:hover {
+    background-color: #273E47;
+  }
+  
+  .sign-up-section {
+    text-align: center;
+    margin-top: 20px;
+  }
+  
+  .sign-up-section a {
+    text-decoration: none;
+  }
+  
+  .sign-up-section button {
+    margin-top: 10px;
+  }
+  
+.sign-up {
+    align-self: right;
+    padding-left: 80%;
 }
+

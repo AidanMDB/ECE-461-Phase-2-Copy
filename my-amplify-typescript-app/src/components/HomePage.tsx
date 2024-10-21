@@ -12,9 +12,10 @@ function HomePage() {
   return (
     <div className="App">
       <header className="App-header">
-        {/* <img src={logo} className="App-logo" alt="logo" /> */}
         <a className="sign-up" href="/"><button className="search-button">Log Out</button></a>
+        <div className="title-container">
         <h1>Package Manager</h1> 
+        </div>
             <div className="search-container">
               <input 
                 type="text" 

@@ -1,4 +1,15 @@
-.name {
-    background-color: #273E47;
-    color: white;
-}
+.App {
+    text-align: center;
+    font-size: 25px;
+    font-family: Arial, Helvetica, sans-serif;
+  }
+
+  .App-header {
+    max-width: 1000px;
+    margin: auto;
+    padding: 70px;
+    background-color: #f9f9f9;
+    border-radius: 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  }
+  
