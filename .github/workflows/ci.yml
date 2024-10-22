@@ -1,33 +1,55 @@
-name: CI workflow
+name: CI?CD workflow
 
 on: 
     push:
         branches:
-            - build
+            - main
 
 jobs:
-    build:
-        runs-on: ubuntu-latest
+    test:
+      runs-on: ubuntu-latest
+      steps:
+        - name: Checkout code
+          uses: actions/checkout@v2
 
-        steps:
-            - uses: actions/checkout@v2
+        - name: Setup Node.js
+          uses: actions/setup-node@v2
+          with:
+            node-version: '18.17.1'
+        
+        - name: Install dependencies
+          run: npm install
 
-            - name: Setup Node.js version 18.17.1
-              uses: actions/setup-node@v1
-              with:
-                node-version: '18.17.1'
+        - name: Run tests
+          run: npm test
 
-            - name: Remove node_modules
-              run: rm -rf node_modules
+    delpoy:
+      runs-on: ubuntu-latest
+      needs: test
+      steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-            - name: Install dependencies
-              run: npm install
-            
-            - name: Run tests
-              env:
-                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              run: ./run test
-    
+      - name: Copy Files to EC2
+        uses: appleboy/scp-action@main
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_KEY }}
+          source: "../src/*"  # Adjust this to your application files
+          target: "/path/on/ec2/"  # Target directory on the EC2 instance
+
+      - name: SSH Commands to Restart Application
+        uses: appleboy/ssh-action@v0.1.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_KEY }}
+          script: |
+            cd /path/on/ec2/  # Navigate to your application directory
+            npm install  # Reinstall dependencies if necessary
+            pm2 restart all  # Restart the application using PM2 (or your method)
+
     # deploy:
     #     runs-on: ubuntu-latest
     #     needs: build
@@ -62,3 +84,24 @@ jobs:
 
                 
                 
+#    build:
+#        runs-on: ubuntu-latest
+#
+#        steps:
+#            - uses: actions/checkout@v2
+
+#            - name: Setup Node.js version 18.17.1
+#              uses: actions/setup-node@v1
+#              with:
+#                node-version: '18.17.1'
+#
+#            - name: Remove node_modules
+#              run: rm -rf node_modules
+
+#            - name: Install dependencies
+#              run: npm install
+            
+#            - name: Run tests
+#              env:
+#                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#              run: ./run test
