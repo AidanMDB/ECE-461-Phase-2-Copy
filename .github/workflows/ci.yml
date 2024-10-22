@@ -1,9 +1,13 @@
-name: CI?CD workflow
+name: CI/CD workflow
 
 on: 
-    push:
-        branches:
-            - main
+  push:
+    branches:
+      - main
+
+  pull_request:
+    branches:
+      - main
 
 jobs:
     test:
@@ -17,38 +21,51 @@ jobs:
           with:
             node-version: '18.17.1'
         
+        - name: Make run file Executable
+          run: chmod +x run
+
         - name: Install dependencies
-          run: npm install
+          run: ./run install
 
         - name: Run tests
-          run: npm test
+          run: ./run test | tee test_output.txt
 
-    delpoy:
-      runs-on: ubuntu-latest
-      needs: test
-      steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+        - name: Parse coverage and check threshold
+          run: |
+            coverage=$(grep "Coverage:" test_output.txt | awk '{print $2}' | sed 's/%//')
+            if (( $(echo "$coverage < 70" | bc -l) )); then
+              echo "Coverage is below 70%. Current coverage is $coverage%"
+              exit 1
+            else
+              echo "Coverage is $coverage%. Test passed!"
 
-      - name: Copy Files to EC2
-        uses: appleboy/scp-action@main
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_KEY }}
-          source: "../src/*"  # Adjust this to your application files
-          target: "/path/on/ec2/"  # Target directory on the EC2 instance
 
-      - name: SSH Commands to Restart Application
-        uses: appleboy/ssh-action@v0.1.0
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_KEY }}
-          script: |
-            cd /path/on/ec2/  # Navigate to your application directory
-            npm install  # Reinstall dependencies if necessary
-            pm2 restart all  # Restart the application using PM2 (or your method)
+#    delpoy:
+#      runs-on: ubuntu-latest
+#      needs: test
+#      steps:
+#      - name: Checkout code
+#        uses: actions/checkout@v2
+
+#      - name: Copy Files to EC2
+#        uses: appleboy/scp-action@main
+#        with:
+#          host: ${{ secrets.EC2_HOST }}
+#          username: ${{ secrets.EC2_USER }}
+#          key: ${{ secrets.EC2_KEY }}
+#          source: "/"  # Adjust this to your application files
+#          target: "/path/on/ec2/"  # Target directory on the EC2 instance
+
+#      - name: SSH Commands to Restart Application
+#        uses: appleboy/ssh-action@v0.1.0
+#        with:
+#          host: ${{ secrets.EC2_HOST }}
+#          username: ${{ secrets.EC2_USER }}
+#          key: ${{ secrets.EC2_KEY }}
+#          script: |
+#            cd /path/on/ec2/  # Navigate to your application directory
+#            npm install  # Reinstall dependencies if necessary
+#            pm2 restart all  # Restart the application using PM2 (or your method)
 
     # deploy:
     #     runs-on: ubuntu-latest
