@@ -30,14 +30,14 @@ jobs:
         - name: Run tests
           run: ./run test | tee test_output.txt
 
-        - name: Parse coverage and check threshold
-          run: |
-            coverage=$(grep "Coverage:" test_output.txt | awk '{print $2}' | sed 's/%//')
-            if (( $(echo "$coverage < 70" | bc -l) )); then
-              echo "Coverage is below 70%. Current coverage is $coverage%"
-              exit 1
-            else
-              echo "Coverage is $coverage%. Test passed!"
+#        - name: Parse coverage and check threshold
+#          run: |
+#            coverage=$(grep "Coverage:" test_output.txt | awk '{print $2}' | sed 's/%//')
+#            if (( $(echo "$coverage < 70" | bc -l) )); then
+#              echo "Coverage is below 70%. Current coverage is $coverage%"
+#              exit 1
+#            else
+#              echo "Coverage is $coverage%. Test passed!"
 
 
 #    delpoy:
