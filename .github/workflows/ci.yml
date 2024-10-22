@@ -14,10 +14,10 @@ jobs:
       runs-on: ubuntu-latest
       steps:
         - name: Checkout code
-          uses: actions/checkout@v2
+          uses: actions/checkout@v3
 
         - name: Setup Node.js
-          uses: actions/setup-node@v2
+          uses: actions/setup-node@v3
           with:
             node-version: '18.17.1'
         
@@ -28,7 +28,9 @@ jobs:
           run: ./run install
 
         - name: Run tests
-          run: ./run test | tee test_output.txt
+          run: |
+            export GITHUB_TOKEN='${{ secrets.TOKEN }}'
+            ./run test
 
 #        - name: Parse coverage and check threshold
 #          run: |
