@@ -49,6 +49,7 @@ jobs:
         key: ${{ secrets.EC2_KEY }}
         script: |
           ls -all
+          ls
           rsync -rvz . ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/webapp  # Copy all files from your repository to the EC2 instance
 
 
