@@ -1,0 +1,59 @@
+name: CI/CD workflow
+
+on: 
+  push:
+    branches:
+      - yml-CI/CD-testing
+
+
+jobs:
+  continuous-integration:
+    runs-on: ubuntu-latest
+    steps:
+      # Step 1
+      - uses: actions/checkout@v2
+      # Step 2
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18.17.1'
+      # Step 3
+      - name: Make run file Executable
+        run: |
+            chmod +x run
+            ./run install
+
+      # Step 4  (not sure why this would be needed here)
+#      - name: Configure AWS credentials
+#        uses: aws-actions/configure-aws-credentials@v1
+#        with:
+#          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+#          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+#          aws-region: us-east-2
+      # Step 5
+      - name: Run tests (will become build application)
+        run: |
+          export GITHUB_TOKEN='${{ secrets.TOKEN }}'
+          ./run test
+
+  continuous-deployment:
+    runs-on: ubuntu-latest
+    needs: [continuous-integration]
+    if: github.ref == 'refs/heads/yml-CI/CD-testing'
+    steps:
+     # Step 1
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-2
+     # Step 2
+      - name: Create CodeDeploy Deployment
+        id: deploy
+        run: |
+          aws deploy create-deployment \
+            --application-name Phase2Webserver \
+            --deployment-group-name WebserverDeploymentGroup \
+            --deployment-config-name CodeDeployDefault.OneAtATime \
+            --github-location repository=${{ github.repository }},commitId=${{ github.sha }}
