@@ -19,8 +19,8 @@ root.render(
         <Route path="/" element={<App />} />
         <Route path="/HomePage" element={<HomePage />} />
         <Route path="/ViewPackage" element={<ViewPackage />} />
-        <Route path="Login" element={<Login />} />
-        <Route path="SignUp" element={<SignUp />} />
+        <Route path="/Login" element={<Login />} />
+        <Route path="/SignUp" element={<SignUp />} />
       </Routes>
     </BrowserRouter>
   </React.StrictMode>

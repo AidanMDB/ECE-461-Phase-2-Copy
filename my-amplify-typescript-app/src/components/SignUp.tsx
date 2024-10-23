@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
+import React from 'react';
 import './SignUp.css'
 import { useNavigate } from 'react-router-dom';
 
 function SignUp() {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [rePassword, setRePassword] = useState("");
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = React.useState('');
+  const [password, setPassword] = React.useState('');
+  const [rePassword, setRePassword] = React.useState('');
+  const [email, setEmail] = React.useState('');
   const navigate = useNavigate();
 
   async function handleSubmit() {

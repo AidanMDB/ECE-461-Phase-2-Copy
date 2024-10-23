@@ -1,11 +1,19 @@
+.App {
+  text-align: center;
+  font-family: Arial, Helvetica, sans-serif;
+}
 
 .App-header {
-  max-width: 1000px;
-  margin: auto;
-  padding: 70px;
-  background-color: #f9f9f9;
-  border-radius: 20px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  /* background-color: #ccc6ca; */
+  background-color: #89B0AE;
+  /* min-height: 100vh; */
+  display: flex;
+  flex-direction: column;
+  padding-top: 5%;
+  padding-bottom: 5%;
+  align-items: center;
+  font-size: calc(10px + 2vmin);
+  color: black;
 }
 
 .App-link {
@@ -15,7 +23,6 @@
 .search-container {
   display: flex;
   align-items: center;
-  justify-content: center;
   margin-top: 20px;
 }
 
@@ -43,4 +50,3 @@
 .search-button:hover {
   background-color: grey;
 }
-

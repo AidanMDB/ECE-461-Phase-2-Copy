@@ -1,6 +1,7 @@
 import React from 'react';
 import {useState} from 'react';
 import Package from './Package';
+import './HomePage.css';
 
 function HomePage() {
   const [search, setSearch] = useState('');
