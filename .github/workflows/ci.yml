@@ -10,45 +10,48 @@ on:
       - main
 
 jobs:
-    test:
-      runs-on: ubuntu-latest
-      steps:
-        - name: Checkout code
-          uses: actions/checkout@v3
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-        - name: Setup Node.js
-          uses: actions/setup-node@v3
-          with:
-            node-version: '18.17.1'
-        
-        - name: Make run file Executable
-          run: chmod +x run
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18.17.1'
+      
+      - name: Make run file Executable
+        run: chmod +x run
 
-        - name: Install dependencies
-          run: ./run install
+      - name: Install dependencies
+        run: ./run install
 
-        - name: Run tests
-          run: |
-            export GITHUB_TOKEN='${{ secrets.TOKEN }}'
-            ./run test
+      - name: Run tests
+        run: |
+          export GITHUB_TOKEN='${{ secrets.TOKEN }}'
+          ./run test
 
 
-    delpoy:
-      runs-on: ubuntu-latest
-      needs: test
+  delpoy:
+    runs-on: ubuntu-latest
+    needs: test
 
-      steps:
-      - name: Checkout files
-        uses: actions/checkout@v2
+    steps:
+    - name: Checkout files
+      uses: actions/checkout@v3
+    
+    - name: Copy Files to EC2
+      uses: appleboy/scp-action@v1.1.0
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USER }}
+        key: ${{ secrets.EC2_KEY }}
+        script: |
+          cd /webapp/  # Navigate to your application directory
+          rm -rf *  # Remove all existing files
+          rsync -rvz . ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/webapp/  # Copy all files from your repository to the EC2 instance
 
-      - name: Copy Files to EC2
-        uses: easythemes/ssh-deploy@main
-        env:
-          REMOTE_HOST: ${{ secrets.EC2_HOST }}
-          REMOTE_USER: ${{ secrets.EC2_USER }}
-          SSH_KEY: ${{ secrets.EC2_KEY }}
-          TARGET: ${{ secrets.EC2_DIR }}  # Target directory on the EC2 instance
-          #source: "/"  # Adjust this to your application files (if I only want to deploy specific parts of the repository)
 
 #      - name: SSH Commands to Restart Application
 #        uses: appleboy/ssh-action@v0.1.0
