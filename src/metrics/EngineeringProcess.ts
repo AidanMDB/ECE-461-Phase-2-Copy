@@ -54,9 +54,9 @@ export class EngineeringProcess extends Metric {
         let apiEndpoint = `https://api.github.com/graphql`;   // Get the base API endpoint for GraphQL requests
 
         const query = `
-            query {
+            query ($after: String) {
                 repository(owner: "${this.url.getOwnerName()}", name: "${this.url.getRepoName()}") {
-                    pullRequests(states: MERGED, first: 100) {
+                    pullRequests(states: MERGED, first: 100, after: $after) {
                         nodes {
                             title
                             reviewDecision
@@ -74,23 +74,26 @@ export class EngineeringProcess extends Metric {
 
         try {
             let hasNextPage = true;         // flag to check if there are more pages of pull requests
-            let approved_additions = 0;     // total number of lines of code approved in pull requests
-            let total_additions = 0;        // total number of lines of code in pull requests
+            let approved_additions = 0.0;     // total number of lines of code approved in pull requests
+            let total_additions = 0.0;        // total number of lines of code in pull requests
 
             while (hasNextPage) {
                 const response = await axios.post(apiEndpoint, {query, variables}, {headers: {'Authorization': `token ${process.env.GITHUB_TOKEN}`}});
-                
+                //console.log(response.data.data.repository.pullRequests.nodes);
                 // search through returned pull requests
-                for (const pullRequest of response.data.repository.pullRequests.nodes) {
-                    if (pullRequest.reviewDecision === 'APPROVED') {
+                for (const pullRequest of response.data.data.repository.pullRequests.nodes) {
+                    if (pullRequest.reviewDecision === "APPROVED") {
                         approved_additions += pullRequest.additions;
                     }
+                    //console.log(pullRequest.additions);
                     total_additions += pullRequest.additions;
                 }
                 
                 // check for next page of pull requests
-                hasNextPage = response.data.repository.pullRequests.pageInfo.hasNextPage;
-                variables.after = response.data.repository.pullRequests.pageInfo.endCursor;
+                hasNextPage = response.data.data.repository.pullRequests.pageInfo.hasNextPage;
+                console.log(hasNextPage);
+                variables.after = response.data.data.repository.pullRequests.pageInfo.endCursor;
+                console.log(variables.after);
             }
             
             this.score = approved_additions / total_additions;  // calculate the engineering process score

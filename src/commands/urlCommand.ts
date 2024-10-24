@@ -32,7 +32,7 @@ export async function urlCommand (argument:string) {
         const rampUp = new RampUp(url);
         const licScore = new LicenseMetric(url);
         const respMet = new ResponsiveMetric(url);
-        const engineeringProcess = new EngineeringProcess(url);
+        const engProc = new EngineeringProcess(url);
   
         // Calculate metrics
         netScore.startTimer();
@@ -42,13 +42,13 @@ export async function urlCommand (argument:string) {
                                   rampUp.calculateScore(), 
                                   licScore.calculateScore(), 
                                   respMet.calculateScore(),
-                                  engineeringProcess.calculateScore()
+                                  engProc.calculateScore()
                                 ]);
   
-        netScore.calculateScore(busFactor, corScore, licScore, rampUp,  respMet, engineeringProcess);
+        netScore.calculateScore(busFactor, corScore, licScore, rampUp,  respMet, engProc);
         netScore.endTimer();
   
-        const ndjsonResult = createNDJsonResult(netScore, [rampUp, corScore, busFactor, respMet, licScore]);
+        const ndjsonResult = createNDJsonResult(netScore, [rampUp, corScore, busFactor, respMet, licScore, engProc]);
         
         // Final Output
         console.log(ndjsonResult);
