@@ -2,9 +2,8 @@ name: CI/CD workflow
 
 on: 
   push:
-  pull_request:
     branches:
-      - development
+      - yml-CI/CD-testing
 
 
 jobs:
