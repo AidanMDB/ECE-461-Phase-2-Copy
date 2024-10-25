@@ -1,9 +1,9 @@
 name: CI/CD workflow
 
 on: 
-  push:
+  pull_request:
     branches:
-      - yml-CI/CD-testing
+      - main
 
 
 jobs:
@@ -39,7 +39,7 @@ jobs:
   continuous-deployment:
     runs-on: ubuntu-latest
     needs: [continuous-integration]
-    if: github.ref == 'refs/heads/yml-CI/CD-testing'
+    if: github.ref == 'refs/heads/main'
     steps:
      # Step 1 - rangom change for testin
       - name: Configure AWS credentials
