@@ -1,8 +1,9 @@
 version: 0.0
 os: linux
 files:
- - source: .
-   destination: /home/ubuntu/ECE-461-Phase-2-Copy
+  - source: .
+    destination: /home/ubuntu/ECE-461-Phase-2-Copy
+file_exists_behavior: overwrite
 #hooks:
 #  AfterInstall:
 #   - location: scripts/install_app_dependencies
