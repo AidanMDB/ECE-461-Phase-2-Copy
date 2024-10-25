@@ -41,7 +41,7 @@ describe('urlCommand', () => {
 
             // Check if stdout contains the expected results
             expect(consoleSpy).toHaveBeenCalledWith(expect.stringMatching(
-                /{"URL":"(https:\/\/www\.npmjs\.com\/package\/[a-zA-Z0-9\-]+|https:\/\/github\.com\/[a-zA-Z0-9\-]+\/[a-zA-Z0-9\-]+)",\s*"NetScore":(-1|\d+(\.\d+)?),\s*"NetScore_Latency":(-1|\d+(\.\d+)?),\s*"RampUp":(-1|\d+(\.\d+)?),\s*"RampUp_Latency":(-1|\d+(\.\d+)?),\s*"Correctness":(-1|\d+(\.\d+)?),\s*"Correctness_Latency":(-1|\d+(\.\d+)?),\s*"BusFactor":(-1|\d+(\.\d+)?),\s*"BusFactor_Latency":(-1|\d+(\.\d+)?),\s*"ResponsiveMaintainer":(-1|\d+(\.\d+)?),\s*"ResponsiveMaintainer_Latency":(-1|\d+(\.\d+)?),\s*"License":(-1|\d+(\.\d+)?),\s*"License_Latency":(-1|\d+(\.\d+)?)}/
+                /{"URL":"(https:\/\/www\.npmjs\.com\/package\/[a-zA-Z0-9\-]+|https:\/\/github\.com\/[a-zA-Z0-9\-]+\/[a-zA-Z0-9\-]+)",\s*"NetScore":(-1|\d+(\.\d+)?),\s*"NetScore_Latency":(-1|\d+(\.\d+)?),\s*"RampUp":(-1|\d+(\.\d+)?),\s*"RampUp_Latency":(-1|\d+(\.\d+)?),\s*"Correctness":(-1|\d+(\.\d+)?),\s*"Correctness_Latency":(-1|\d+(\.\d+)?),\s*"BusFactor":(-1|\d+(\.\d+)?),\s*"BusFactor_Latency":(-1|\d+(\.\d+)?),\s*"ResponsiveMaintainer":(-1|\d+(\.\d+)?),\s*"ResponsiveMaintainer_Latency":(-1|\d+(\.\d+)?),\s*"License":(-1|\d+(\.\d+)?),\s*"License_Latency":(-1|\d+(\.\d+)?),\s*"EngineeringProcess":(-1|\d+(\.\d+)?),\s*"EngineeringProcess_Latency":(-1|\d+(\.\d+)?)}/
             ));            
         }, 10000);
     });

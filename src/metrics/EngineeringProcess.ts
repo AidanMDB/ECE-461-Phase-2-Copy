@@ -58,7 +58,6 @@ export class EngineeringProcess extends Metric {
                 repository(owner: "${this.url.getOwnerName()}", name: "${this.url.getRepoName()}") {
                     pullRequests(states: MERGED, first: 100, after: $after) {
                         nodes {
-                            title
                             reviewDecision
                             additions
                         }
@@ -79,21 +78,18 @@ export class EngineeringProcess extends Metric {
 
             while (hasNextPage) {
                 const response = await axios.post(apiEndpoint, {query, variables}, {headers: {'Authorization': `token ${process.env.GITHUB_TOKEN}`}});
-                //console.log(response.data.data.repository.pullRequests.nodes);
+
                 // search through returned pull requests
                 for (const pullRequest of response.data.data.repository.pullRequests.nodes) {
                     if (pullRequest.reviewDecision === "APPROVED") {
                         approved_additions += pullRequest.additions;
                     }
-                    //console.log(pullRequest.additions);
                     total_additions += pullRequest.additions;
                 }
                 
                 // check for next page of pull requests
                 hasNextPage = response.data.data.repository.pullRequests.pageInfo.hasNextPage;
-                console.log(hasNextPage);
                 variables.after = response.data.data.repository.pullRequests.pageInfo.endCursor;
-                console.log(variables.after);
             }
             
             this.score = approved_additions / total_additions;  // calculate the engineering process score
