@@ -7,6 +7,7 @@ import { LicenseMetric } from '../metrics/License';
 import { ResponsiveMetric } from '../metrics/ResponsiveMetric';
 import { NetScore } from '../metrics/NetScore';
 import { createNDJsonResult } from '../metrics/resultsHelper';
+import { VersionPinning } from '../metrics/VersionPinning';
 
 /**
  * Function to process a file containing URLs to Github repositories and output the metrics
@@ -31,15 +32,16 @@ export async function urlCommand (argument:string) {
         const rampUp = new RampUp(url);
         const licScore = new LicenseMetric(url);
         const respMet = new ResponsiveMetric(url);
+        const versionPinning = new VersionPinning(url);
   
         // Calculate metrics
         netScore.startTimer();
-        await Promise.allSettled([busFactor.calculateScore(), corScore.calculateScore(), rampUp.calculateScore(), licScore.calculateScore(), respMet.calculateScore()]);
+        await Promise.allSettled([busFactor.calculateScore(), corScore.calculateScore(), rampUp.calculateScore(), licScore.calculateScore(), respMet.calculateScore(), versionPinning.calculateScore()]);
   
-        netScore.calculateScore(busFactor, corScore, licScore, rampUp,  respMet);
+        netScore.calculateScore(busFactor, corScore, licScore, rampUp,  respMet, versionPinning);
         netScore.endTimer();
   
-        const ndjsonResult = createNDJsonResult(netScore, [rampUp, corScore, busFactor, respMet, licScore]);
+        const ndjsonResult = createNDJsonResult(netScore, [rampUp, corScore, busFactor, respMet, licScore, versionPinning]);
         
         // Final Output
         console.log(ndjsonResult);
