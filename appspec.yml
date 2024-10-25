@@ -3,7 +3,7 @@ os: linux
 files:
  - source: .
    destination: /home/ubuntu/ECE-461-Phase-2-Copy
-hooks:
+#hooks:
 #  AfterInstall:
 #   - location: scripts/install_app_dependencies
 #     timeout: 300
