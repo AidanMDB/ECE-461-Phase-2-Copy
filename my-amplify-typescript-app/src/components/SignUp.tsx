@@ -1,13 +1,13 @@
 import React from 'react';
 import './SignUp.css'
-import { useNavigate } from 'react-router-dom';
+// import { useNavigate } from 'react-router-dom';
 
 function SignUp() {
   const [username, setUsername] = React.useState('');
   const [password, setPassword] = React.useState('');
   const [rePassword, setRePassword] = React.useState('');
   const [email, setEmail] = React.useState('');
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   async function handleSubmit() {
     console.log("user sign up!")
@@ -15,7 +15,7 @@ function SignUp() {
     console.log(password)
     console.log(rePassword)
     console.log(email)
-    navigate('/HomePage')
+    // navigate('/HomePage')
   }
 
   return (
@@ -61,6 +61,7 @@ function SignUp() {
         <br />
         <button type="submit" className="search-button" >Sign Up</button>
         </form>
+        <a href="/HomePage"><button className="search-button">Go to Search Package Page</button></a>
       </body>
     </div>
   );

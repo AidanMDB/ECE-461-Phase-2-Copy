@@ -5,6 +5,7 @@ import { RampUp } from './RampUp';
 import { ResponsiveMetric } from './ResponsiveMetric';
 import { LicenseMetric } from './License';
 import { VersionPinning } from './VersionPinning';
+import { EngineeringProcess } from './EngineeringProcess';
 
 export class NetScore{
     jsonKey: string = "NetScore";
@@ -26,12 +27,13 @@ export class NetScore{
         this.latency =  parseFloat(((Date.now() - this.start) / 1000).toFixed(3));
     }
     
-    public calculateScore(busFactor: BusFactor, correctness: Correctness, license: LicenseMetric, rampUp: RampUp, respMet: ResponsiveMetric, versionPin: VersionPinning): number {
-        const busWeight = 0.4; // Highest priority
+    public calculateScore(busFactor: BusFactor, correctness: Correctness, license: LicenseMetric, rampUp: RampUp, respMet: ResponsiveMetric, engProc: EngineeringProcess, versionPin:VersionPinning): number {
+        const busWeight = 0.30; // Highest priority
         const correctnessWeight = 0.15;
         const rampUpWeight = 0.15;
-        const respMetWeight = 0.2;
-        const versionPinningWeight = 0.1;
+        const respMetWeight = 0.30;
+        const engProcWeight = 0.05; 
+        const versionPinningWeight = 0.05; // Lowest priority
 
         let totalWeight = 0;
         // -1 is an edge case where the score is not calculated
@@ -58,8 +60,12 @@ export class NetScore{
         if (license.getScore() !== -1) {
             this.score *= license.getScore();
         }
-        
-        
+
+        if (engProc.getScore() !== -1) {
+            this.score += engProc.getScore() * engProcWeight;
+            totalWeight += engProcWeight;
+        }
+
         if (totalWeight > 0) {
             this.score /= totalWeight;
         } else {

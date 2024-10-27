@@ -8,6 +8,8 @@ import { ResponsiveMetric } from '../metrics/ResponsiveMetric';
 import { NetScore } from '../metrics/NetScore';
 import { createNDJsonResult } from '../metrics/resultsHelper';
 import { VersionPinning } from '../metrics/VersionPinning';
+import { EngineeringProcess } from '../metrics/EngineeringProcess';
+
 
 /**
  * Function to process a file containing URLs to Github repositories and output the metrics
@@ -33,15 +35,24 @@ export async function urlCommand (argument:string) {
         const licScore = new LicenseMetric(url);
         const respMet = new ResponsiveMetric(url);
         const versionPinning = new VersionPinning(url);
+        const engProc = new EngineeringProcess(url);
   
         // Calculate metrics
         netScore.startTimer();
-        await Promise.allSettled([busFactor.calculateScore(), corScore.calculateScore(), rampUp.calculateScore(), licScore.calculateScore(), respMet.calculateScore(), versionPinning.calculateScore()]);
+        await Promise.allSettled([
+                                  busFactor.calculateScore(), 
+                                  corScore.calculateScore(), 
+                                  rampUp.calculateScore(), 
+                                  licScore.calculateScore(), 
+                                  respMet.calculateScore(),
+                                  engProc.calculateScore(),
+                                  versionPinning.calculateScore()
+                                ]);
   
-        netScore.calculateScore(busFactor, corScore, licScore, rampUp,  respMet, versionPinning);
+        netScore.calculateScore(busFactor, corScore, licScore, rampUp,  respMet, engProc, versionPinning);
         netScore.endTimer();
   
-        const ndjsonResult = createNDJsonResult(netScore, [rampUp, corScore, busFactor, respMet, licScore, versionPinning]);
+        const ndjsonResult = createNDJsonResult(netScore, [rampUp, corScore, busFactor, respMet, licScore, engProc, versionPinning]);
         
         // Final Output
         console.log(ndjsonResult);
