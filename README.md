@@ -6,6 +6,16 @@ This repository is an implementation of a command line tool which aims to help d
 Our goal is to simplify the process of assessing open-source software.
 
 ## Usage
+### npm next build 
+* builds the webserver
+
+### npm next start
+* launches the webserver at localhost
+
+### npm next dev
+* launches the server to allow for real time updates to edits made on the server
+
+# OUTDATED - KEPT JUST IN CASE
 ### `./run install`
 * Installs all dependencies required for project-f2024 reposistory
 

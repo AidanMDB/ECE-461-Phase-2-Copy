@@ -57,7 +57,7 @@ else
     fi
 
     # run.js handles "test" and "<url_file>" commands
-    npx ts-node src/run.ts "$@"
+    npx ts-node src/metric_src/run.ts "$@"
     STATUS=$?
 
     exit $STATUS
