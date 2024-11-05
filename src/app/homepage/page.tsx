@@ -2,6 +2,8 @@
 import { useState } from 'react';
 import './homepage.css';
 import Link from 'next/link';
+// import { packagelist } from 'src/app/packageList/page';
+// import Packagelist from '../packagelist/page';
 
 const HomePage = () => {
     const [search, setSearch] = useState('');
@@ -37,7 +39,26 @@ const HomePage = () => {
       <body>
         <br />
         {fileNames.map((item, index) => (
-          <p key={index}><Link href='/package'>{item}</Link></p> //will be <Package data={item}/>
+          <p key={index}>
+            {/* <Link href='/package'>{item}</Link> */}
+            {/* <Packagelist data={item} /> */}
+            <div className="Package">
+              <header>
+                <h1>{item} by Package Author</h1>
+                <div className="view">
+                  <Link href={{
+                      pathname: '/package',
+                      query: {
+                        name: item
+                      }
+                      }}>
+                    <button className="search-button">View Package</button>
+                  </Link>
+                </div>
+              </header>
+              <hr className="package-divider" />
+            </div>
+          </p>
         ))}
       </body>
     </div>
