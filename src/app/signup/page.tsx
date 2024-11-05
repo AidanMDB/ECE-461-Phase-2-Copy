@@ -1,12 +1,14 @@
 "use client";
-import './login.css';
+import './signup.css';
 // import React from 'react';
 import { useState } from 'react';
 // import Form from 'next/form';
 
-const LoginPage = () => {
+const SignUp = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [repassword, setRepassword] = useState('');
+
     return (
       <div className='login'>
       <header>
@@ -41,22 +43,26 @@ const LoginPage = () => {
           />
         </div>
 
+        <div className="form-group">
+          <label htmlFor="password">Re-enter Password:</label>
+          <input
+            id="repassword"
+            type="password"
+            value={repassword}
+            onChange={e => setRepassword(e.target.value)}
+            className="input"
+            aria-label="Password"
+            placeholder="Password"
+          />
+        </div>
+
         <div className="button-group">
-          {/* <a href="/HomePage"> */}
-            {/* <button className="search-button" aria-label="Login Button">Login</button> */}
-          {/* </a> */}
-            <button type='submit'>Login</button>
+            <button type='submit'>Sign Up</button>
         </div>
         </form>
-        <div className="sign-up-section">
-          <p>Not already a member?</p>
-          <a href="/signup">
-            <button className="search-button" aria-label="Sign Up Button">Sign Up</button>
-          </a>
-        </div>
       </main>
     </div>
     )
 };
 
-export default LoginPage;
+export default SignUp;
