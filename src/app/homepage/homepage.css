@@ -19,7 +19,7 @@
   }
 
   .login-container {
-    padding-left: 85%;
+    padding-left: 75%;
   }
 
   .login-button {
@@ -33,4 +33,5 @@
     /* margin-left: 90%; */
     /* padding-left: 90%; */
     min-width: 10vh;
+    margin: 0 5px;
   }

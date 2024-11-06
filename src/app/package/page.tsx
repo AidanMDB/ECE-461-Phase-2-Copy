@@ -9,7 +9,10 @@ const Package = async (data:any) => {
           <Link href="/homepage">
             <button className="package-button">Download Package</button>
           </Link>
-          <button className="package-button">Update Package</button>
+          <form action="/action_page.php">
+          <input type="file" id="myFile" name="filename"></input>
+          <button className="package-button" type="submit">Update Package</button>
+          </form>
           {/* <button className="package-button upload">Upload New Package</button> */}
         </div>
         <h1>{(data.searchParams.name)} by package author</h1>
