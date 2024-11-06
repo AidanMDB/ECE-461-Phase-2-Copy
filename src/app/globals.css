@@ -70,3 +70,20 @@ body {
 .search-button:hover {
   background-color: grey;
 }
+
+.login-container {
+  padding-left: 85%;
+}
+
+.login-button {
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #273E47;
+  border: none;
+  border-radius: 4px;
+  color: white;
+  cursor: pointer;
+  /* margin-left: 90%; */
+  /* padding-left: 90%; */
+  min-width: 10vh;
+}

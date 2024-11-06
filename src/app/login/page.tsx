@@ -9,45 +9,45 @@ const LoginPage = () => {
   const [password, setPassword] = useState('');
     return (
       <div className='login'>
-      <header>
-        <h1>Login Page</h1>
-      </header>
+        <header className="App-header">
+          <h1>Login Page</h1>
+        </header>
 
-      <main>
-        <form action="/homepage">
-        <div className="form-group">
-          <label htmlFor="username">Enter Username:</label>
-          <input
-            id="username"
-            type="text"
-            value={username}
-            onChange={e => setUsername(e.target.value)}
-            className="input"
-            aria-label="Username"
-            placeholder="Username"
-          />
-        </div>
+        <main>
+          <form action="/homepage" className='input-section'>
+          <div className="form-group">
+            <label htmlFor="username">Enter Username:</label>
+            <input
+              id="username"
+              type="text"
+              value={username}
+              onChange={e => setUsername(e.target.value)}
+              className="input"
+              aria-label="Username"
+              placeholder="Username"
+            />
+          </div>
 
-        <div className="form-group">
-          <label htmlFor="password">Enter Password:</label>
-          <input
-            id="password"
-            type="password"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            className="input"
-            aria-label="Password"
-            placeholder="Password"
-          />
-        </div>
+          <div className="form-group">
+            <label htmlFor="password">Enter Password:</label>
+            <input
+              id="password"
+              type="password"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              className="input"
+              aria-label="Password"
+              placeholder="Password"
+            />
+          </div>
 
-        <div className="button-group">
-          {/* <a href="/HomePage"> */}
-            {/* <button className="search-button" aria-label="Login Button">Login</button> */}
-          {/* </a> */}
-            <button type='submit'>Login</button>
-        </div>
-        </form>
+          <div className="button-group">
+            {/* <a href="/HomePage"> */}
+              {/* <button className="search-button" aria-label="Login Button">Login</button> */}
+            {/* </a> */}
+              <button className="search-button" type='submit'>Login</button>
+          </div>
+          </form>
         <div className="sign-up-section">
           <p>Not already a member?</p>
           <a href="/signup">

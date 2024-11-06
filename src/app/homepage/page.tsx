@@ -21,7 +21,9 @@ const HomePage = () => {
   return (
     <div className="App">
       <header className="App-header">
-        <Link className="sign-up" href="/"><button className="search-button">Log Out</button></Link>
+        <div className="login-container">
+          <Link className="sign-up" href="/"><button className="login-button">Log Out</button></Link>
+        </div>
         <div className="title-container">
         <h1>Package Manager</h1> 
         </div>
