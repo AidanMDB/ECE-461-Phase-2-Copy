@@ -21,7 +21,7 @@ Commands:
  * 
  * Note: "./run install" is handled in the bash script 
  */
-async function main() {
+async function main(): Promise<void> {
   // Parse command line arguments
   const args = minimist(process.argv.slice(2));
 

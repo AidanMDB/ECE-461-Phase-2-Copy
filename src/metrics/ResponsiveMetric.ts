@@ -46,6 +46,7 @@ export class ResponsiveMetric extends Metric {
         } catch (error) {
             Logger.logInfo(`Error in calculating ResponsiveMaintainer metric... Score set to 0... Repo Name: ${this.url.getRepoName()}`);
             Logger.logDebug(error);
+            //console.error("Error in calculateScore:", error);
             throw new Error("Responsive Metric: Error in calculating score.");
         } 
         // End timer for latency

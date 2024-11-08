@@ -27,8 +27,7 @@ describe ('ResponsiveMetric', () => {
     // Expect: score = 0
     it('should calculate score of 0 for a URL with no issues/PR', async () => {
         const mockResponse = {
-            data: [
-            ],
+            data: [],
             headers: {'x-ratelimit-remaining': 1000}
         };
         (axios.get as jest.Mock).mockResolvedValueOnce(mockResponse);

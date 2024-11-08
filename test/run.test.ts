@@ -24,7 +24,7 @@ describe('Test run.ts main', () => {
     it('should throw error, print error, and print usage', async () => {
       // Run the command
       try {
-        const { stdout: stdout, stderr:stderr } = await execPromise('./run');
+        const { stdout: stdout, stderr:stderr } = await execPromise('npx ts-node src/run.ts');
         // Check for errors
         if (stderr) {
             throw new Error(`Error: ${stderr}`);
@@ -34,6 +34,7 @@ describe('Test run.ts main', () => {
       catch (error: any) {
         expect(error.code).not.toBe(0);
         expect(error.stderr).toContain('No arguments provided to ./run');
+        //expect(error.stderr).toContain('TSError: ⨯ Unable to compile TypeScript');
         expect(error.stderr).toContain(usage);
         
       }      
