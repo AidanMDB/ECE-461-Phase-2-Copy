@@ -1,7 +1,0 @@
-https://www.npmjs.com/package/commander
-https://www.npmjs.com/package/command-line-args
-https://github.com/yargs/yargs
-https://github.com/prathameshnetake/libvlc
-https://www.npmjs.com/package/react
-https://www.npmjs.com/package/unlicensed
-https://github.com/socketio/socket.io

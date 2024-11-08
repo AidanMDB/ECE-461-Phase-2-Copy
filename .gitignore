@@ -1,15 +1,41 @@
-node_modules/
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-# Build output
-dist/
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+.yarn/install-state.gz
 
-# Environment variables
-.env
+# testing
+/coverage
 
-# Log Files
-*.log
+# next.js
+/.next/
+/out/
 
-# Coverage output
-coverage/
+# production
+/build
 
-cloned_repos
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# local env files
+.env*.local
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# amplify
+.amplify
+amplify_outputs*
+amplifyconfiguration*
