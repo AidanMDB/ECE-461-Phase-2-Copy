@@ -23,10 +23,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <Authenticator>
-          {children}
-        </Authenticator>
+        {children}
       </body>
     </html>
   );
 }
+
+//<Authenticator>
+//{children}
+//</Authenticator>
