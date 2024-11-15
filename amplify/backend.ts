@@ -11,7 +11,10 @@ import {
   Model,
   JsonSchemaType
 } from 'aws-cdk-lib/aws-apigateway';
+
 import { myApiFunction } from './functions/api-function/resource.js';
+import { apiReset } from './functions/api-reset/resource.js';
+
 import { ApiGateway } from 'aws-cdk-lib/aws-events-targets';
 import { Stack } from 'aws-cdk-lib';
 
@@ -20,6 +23,7 @@ const backend = defineBackend({
   data,           // creates dynamodb
   storage,        // creates s3
   myApiFunction,  // creates lambda
+  apiReset        // creates lambda
 });
 
 // create API stack
@@ -38,8 +42,6 @@ const myRestApi = new RestApi(apiStack, "RestApi", {
     allowHeaders: Cors.DEFAULT_HEADERS, // Specify only the headers you need to allow
   },
 });
-
-
 
 
 // creates PackageData model from the API reference
@@ -69,10 +71,16 @@ const packageData: Model = myRestApi.addModel('PackageData', {
 });
 
 
-// create lambda integration
+// create lambda integration for api package
 const lambdaIntegration = new LambdaIntegration(
   backend.myApiFunction.resources.lambda
 );
+
+// create lambda for api reset
+const apiResetLambda = new LambdaIntegration(
+  backend.apiReset.resources.lambda
+);
+
 
 // create new API path
 const packagePath = myRestApi.root.addResource('package');
@@ -88,12 +96,23 @@ packagePath.addMethod('POST', lambdaIntegration, {
   }
 });
 
+// create new API path for api reset
+const resetPath = myRestApi.root.addResource('reset');
+
+resetPath.addMethod('DELETE', apiResetLambda, {
+  requestParameters: {
+    "method.request.header.X-authorization": true,  // Requires 'X-authorization' header
+  },
+  requestValidatorOptions: {
+    validateRequestParameters: true
+  }
+});
+
+
 packagePath.addProxy({
   anyMethod: false,
   defaultIntegration: lambdaIntegration
 })
-
-
 
 
 // add outputs to the configuration files (should allow for the frontend and backend to call the API)
