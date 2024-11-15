@@ -13,6 +13,7 @@ import {
 } from 'aws-cdk-lib/aws-apigateway';
 import { myApiFunction } from './functions/api-function/resource.js';
 import { ApiGateway } from 'aws-cdk-lib/aws-events-targets';
+import { Stack } from 'aws-cdk-lib';
 
 const backend = defineBackend({
   auth,           // creates cognito
@@ -73,7 +74,7 @@ const lambdaIntegration = new LambdaIntegration(
   backend.myApiFunction.resources.lambda
 );
 
-// create new REST API path
+// create new API path
 const packagePath = myRestApi.root.addResource('package');
 
 packagePath.addMethod('POST', lambdaIntegration, {
@@ -86,3 +87,24 @@ packagePath.addMethod('POST', lambdaIntegration, {
     validateRequestParameters: true
   }
 });
+
+packagePath.addProxy({
+  anyMethod: false,
+  defaultIntegration: lambdaIntegration
+})
+
+
+
+
+// add outputs to the configuration files (should allow for the frontend and backend to call the API)
+backend.addOutput({
+  custom: {
+    API: {
+      [myRestApi.restApiName]: {
+        endpoint: myRestApi.url,
+        region: Stack.of(myRestApi).region,
+        apiName: myRestApi.restApiName
+      }
+    }
+  }
+})

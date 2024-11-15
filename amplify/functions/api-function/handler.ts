@@ -8,7 +8,7 @@ const BUCKET_NAME = "packageStorage";
 
 export const handler: APIGatewayProxyHandler = async (event) => {
   console.log("event", event);
-
+  
   // check for 'X-authorization' header
   const authHeader = event.headers["X-authorization"];
   if (!authHeader) {
