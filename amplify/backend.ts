@@ -13,6 +13,7 @@ import {
 } from 'aws-cdk-lib/aws-apigateway';
 import { myApiFunction } from './functions/api-function/resource.js';
 import { ApiGateway } from 'aws-cdk-lib/aws-events-targets';
+import { apiPackageRate } from './functions/api-package-id-rate/resource.js';
 import { Stack } from 'aws-cdk-lib';
 
 const backend = defineBackend({
@@ -20,6 +21,7 @@ const backend = defineBackend({
   data,           // creates dynamodb
   storage,        // creates s3
   myApiFunction,  // creates lambda
+  apiPackageRate, // creates lambda
 });
 
 // create API stack
@@ -38,8 +40,6 @@ const myRestApi = new RestApi(apiStack, "RestApi", {
     allowHeaders: Cors.DEFAULT_HEADERS, // Specify only the headers you need to allow
   },
 });
-
-
 
 
 // creates PackageData model from the API reference
@@ -74,6 +74,11 @@ const lambdaIntegration = new LambdaIntegration(
   backend.myApiFunction.resources.lambda
 );
 
+// create lambda integration for package rate
+const lambdaIntegrationPackageRate = new LambdaIntegration(
+  backend.apiPackageRate.resources.lambda
+);
+
 // create new API path
 const packagePath = myRestApi.root.addResource('package');
 
@@ -88,12 +93,18 @@ packagePath.addMethod('POST', lambdaIntegration, {
   }
 });
 
+// create new API path for package rate
+const packageRatePath = packagePath.addResource('{id}');
+packageRatePath.addMethod('GET', lambdaIntegrationPackageRate, {
+  requestParameters: {
+    "method.request.header.X-authorization": true,  // Requires 'X-authorization' header
+  }
+});
+
 packagePath.addProxy({
   anyMethod: false,
   defaultIntegration: lambdaIntegration
 })
-
-
 
 
 // add outputs to the configuration files (should allow for the frontend and backend to call the API)
