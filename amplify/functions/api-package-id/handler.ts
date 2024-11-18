@@ -42,7 +42,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
         };
     }
 
-    // TODO: implement JSPorgram rule
+    // TODO: implement JSProgram rule
 
     // Check if package exists in S3 already
     try {
@@ -92,11 +92,11 @@ export const handler: APIGatewayProxyHandler = async (event) => {
 
     // Update metric calculation
 
-    // update metadata in bynamoDB
+    // update metadata in dynamoDB
 
     // Upload the package to S3
 
-    //return?
+    //return
     return {
         statusCode: 200,
         // Modify the CORS settings below to match your specific requirements
@@ -153,4 +153,10 @@ export const handler: APIGatewayProxyHandler = async (event) => {
       body: JSON.stringify("Hello from myFunction!"),
     };
   }
+
+  // Return a default response if no conditions are met
+  return {
+    statusCode: 400,
+    body: JSON.stringify({ error: "Unsupported method or missing fields." }),
+  };
 };
