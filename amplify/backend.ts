@@ -12,6 +12,7 @@ import {
   JsonSchemaType
 } from 'aws-cdk-lib/aws-apigateway';
 import { myApiFunction } from './functions/api-function/resource.js';
+import { apiPackageID } from './functions/api-package-id/resource.js';
 import { ApiGateway } from 'aws-cdk-lib/aws-events-targets';
 import { Stack } from 'aws-cdk-lib';
 
@@ -20,6 +21,7 @@ const backend = defineBackend({
   data,           // creates dynamodb
   storage,        // creates s3
   myApiFunction,  // creates lambda
+  apiPackageID    // creates lambda
 });
 
 // create API stack
@@ -63,8 +65,39 @@ const packageData: Model = myRestApi.addModel('PackageData', {
         type: JsonSchemaType.STRING
       }
     },
-    required: ["JSProgram", "Debloat", "Name"],
+    required: ["JSProgram", "Debloat", "Name"], // should name be required???
     oneOf: [{required: ["Content"]}, {required: ["URL"]}]
+  }
+});
+
+// creates PackageID model from the API reference for POST
+const packageID: Model = myRestApi.addModel('PackageID', {
+  schema: {
+    type: JsonSchemaType.OBJECT,
+    properties: {
+      metadata: {
+        type: JsonSchemaType.OBJECT,
+        properties: {
+          Name: { type: JsonSchemaType.STRING },
+          Version: { type: JsonSchemaType.STRING },
+          ID: { type: JsonSchemaType.STRING }
+        },
+        required: ["Name", "Version", "ID"]
+      },
+      data: {
+        type: JsonSchemaType.OBJECT,
+        properties: {
+          Name: { type: JsonSchemaType.STRING },
+          Content: { type: JsonSchemaType.STRING },
+          URL: { type: JsonSchemaType.STRING },
+          debloat: { type: JsonSchemaType.BOOLEAN },
+          JSProgram: { type: JsonSchemaType.STRING }
+        },
+        required: ["JSProgram", "Debloat", "Name"], // should name be required???
+        oneOf: [{required: ["Content"]}, {required: ["URL"]}]
+      }
+    },
+    required: ["metadata", "data"]
   }
 });
 
@@ -73,6 +106,10 @@ const packageData: Model = myRestApi.addModel('PackageData', {
 const lambdaIntegration = new LambdaIntegration(
   backend.myApiFunction.resources.lambda
 );
+
+const lamddaIntegrationPackageID = new LambdaIntegration(
+  backend.apiPackageID.resources.lambda
+)
 
 // create new API path
 const packagePath = myRestApi.root.addResource('package');
@@ -93,8 +130,25 @@ packagePath.addProxy({
   defaultIntegration: lambdaIntegration
 })
 
+packagePath.addResource('{id}').addMethod('GET', lamddaIntegrationPackageID, {
+  requestParameters: {
+    "method.request.header.X-authorization": true,  // Requires 'X-authorization' header
+  },
+  requestValidatorOptions: {
+    validateRequestParameters: true
+  }
+});
 
-
+packagePath.addResource('{id}').addMethod('POST', lamddaIntegrationPackageID, {
+  requestParameters: {
+    "method.request.header.X-authorization": true,  // Requires 'X-authorization' header
+  },
+  requestModels: {'application/json': packageID},
+  requestValidatorOptions: {
+    validateRequestBody: true,
+    validateRequestParameters: true
+  }
+});
 
 // add outputs to the configuration files (should allow for the frontend and backend to call the API)
 backend.addOutput({
