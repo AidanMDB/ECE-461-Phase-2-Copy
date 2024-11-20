@@ -12,6 +12,7 @@ import {
   JsonSchemaType
 } from 'aws-cdk-lib/aws-apigateway';
 import { myApiFunction } from './functions/api-function/resource.js';
+import { apiTracksList } from './functions/api-package-list/resource.js'; 
 import { ApiGateway } from 'aws-cdk-lib/aws-events-targets';
 import { Stack } from 'aws-cdk-lib';
 
@@ -20,6 +21,7 @@ const backend = defineBackend({
   data,           // creates dynamodb
   storage,        // creates s3
   myApiFunction,  // creates lambda
+  apiTracksList   // creates lambda
 });
 
 // create API stack
@@ -38,8 +40,6 @@ const myRestApi = new RestApi(apiStack, "RestApi", {
     allowHeaders: Cors.DEFAULT_HEADERS, // Specify only the headers you need to allow
   },
 });
-
-
 
 
 // creates PackageData model from the API reference
@@ -74,6 +74,10 @@ const lambdaIntegration = new LambdaIntegration(
   backend.myApiFunction.resources.lambda
 );
 
+const lambdaTrackList = new LambdaIntegration(
+  backend.apiTracksList.resources.lambda
+)
+
 // create new API path
 const packagePath = myRestApi.root.addResource('package');
 
@@ -84,6 +88,15 @@ packagePath.addMethod('POST', lambdaIntegration, {
   requestModels: {'application/json': packageData},
   requestValidatorOptions: {
     validateRequestBody: true,
+    validateRequestParameters: true
+  }
+});
+
+packagePath.addMethod('GET', lambdaTrackList, {
+  requestParameters: {
+    "method.request.header.X-authorization": true,  // Requires 'X-authorization' header
+  },
+  requestValidatorOptions: {
     validateRequestParameters: true
   }
 });
