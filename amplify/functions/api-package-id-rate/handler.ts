@@ -1,100 +1,79 @@
-import { defineFunction } from '@aws-amplify/backend';
-import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { DynamoDBClient, GetItemCommand } from '@aws-sdk/client-dynamodb';
-import { CognitoJwtVerifier } from 'aws-jwt-verify'; // Cognito JWT verification library
-    
-const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-        try {
-            const dynamoDB = new DynamoDBClient({});
-            const { id } = event.pathParameters || {};
-            const authToken = event.headers['X-Authorization'];
+import type { APIGatewayProxyHandler } from "aws-lambda";
+import { S3Client, HeadObjectCommand } from "@aws-sdk/client-s3";
+import AdmZip from "adm-zip";
 
-            // Validate required path and header parameters
-            if (!id) {
-                return {
-                    statusCode: 400,
-                    body: JSON.stringify({ error: 'Missing field: PackageID' }),
-                };
-            }
+const s3 = new S3Client();
+const BUCKET_NAME = "packageStorage";
 
-            if (!authToken) {
-                return {
-                    statusCode: 403,
-                    body: JSON.stringify({ error: 'Missing or invalid AuthenticationToken' }),
-                };
-            }
-
-            // Validate authentication token with Cognito
-            const isValidAuth = await validateAuthToken(authToken);
-            if (!isValidAuth) {
-                return {
-                    statusCode: 403,
-                    body: JSON.stringify({ error: 'Authentication failed' }),
-                };
-            }
-
-            // Fetch package rating from DynamoDB
-            const command = new GetItemCommand({
-                TableName: process.env.PACKAGE_TABLE_NAME!,
-                Key: {
-                    PackageID: { S: id },
-                },
-            });
-                    const result = await dynamoDB.send(command);
-    
-                    if (!result.Item) {
-                        return {
-                            statusCode: 404,
-                            body: JSON.stringify({ error: 'Package does not exist' }),
-                        };
-                    }
-    
-                    // Assume PackageRating is stored as a JSON object in DynamoDB
-                    const packageRating = result.Item.PackageRating?.S;
-    
-                    if (!packageRating) {
-                        return {
-                            statusCode: 500,
-                            body: JSON.stringify({ error: 'Failed to compute one or more metrics' }),
-                        };
-                    }
-    
-                    return {
-                        statusCode: 200,
-                        body: packageRating,
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                    };
-                } catch (error) {
-                    console.error('Error fetching package rating:', error);
-                    return {
-                        statusCode: 500,
-                        body: JSON.stringify({ error: 'Internal Server Error' }),
-                    };
-                }
+export const handler: APIGatewayProxyHandler = async (event) => {
+  console.log("event", event);
+  
+  // check for 'X-authorization' header
+  const authHeader = event.headers["X-authorization"];
+  if (!authHeader) {
+    return {
+      statusCode: 403,
+      body: JSON.stringify("Authentication failed due to invalid or missing AuthenticationToken.")
+    };
+  }
+    // Handle GET request
+    if (event.httpMethod === "GET") {
+        const packageID = event.pathParameters?.id;
+        if (!packageID) {
+            return {
+                statusCode: 400,
+                body: JSON.stringify("There is missing field(s) in the PackageID."),
             };
-    
-            export const apiPackageRate = defineFunction({
-                name: 'api-package-id-rate',
-            });
-            
-            export { handler as apiPackageRateHandler };
+        }
+    // TODO: implement JSProgram rule
 
-
-// Validate Cognito token
-const validateAuthToken = async (token: string): Promise<boolean> => {
+    // Check if package exists in S3 already
     try {
-        const verifier = CognitoJwtVerifier.create({
-            userPoolId: process.env.COGNITO_USER_POOL_ID!,
-            tokenUse: 'access', // Validate an access token, can be 'id' or 'access'
-            clientId: process.env.COGNITO_APP_CLIENT_ID!,
+        const command = new HeadObjectCommand({
+        Bucket: BUCKET_NAME,
+        Key: packageID,
         });
 
-        await verifier.verify(token);
-        return true;
+        await s3.send(command);
+
+        // Return the rating  --- placeholder for phase 1 metric rating calls
+      const packageRating = {
+        BusFactor: 0.8,
+        Correctness: 0.9,
+        RampUp: 0.7,
+        ResponsiveMaintainer: 0.85,
+        LicenseScore: 0.95,
+        GoodPinningPractice: 0.9,
+        PullRequest: 0.75,
+        NetScore: 0.85,
+      };
+
+      return {
+        statusCode: 200,
+        headers: {
+            "Access-Control-Allow-Origin": "*", // Restrict this to domains you trust
+            "Access-Control-Allow-Headers": "*", // Specify only the headers you need to allow
+        },
+        body: JSON.stringify(packageRating),
+      };
     } catch (error) {
-        console.error('Token validation error:', error);
-        return false;
+        if (error instanceof Error && (error as any).code === "NotFound") {
+          return {
+            statusCode: 404,
+            body: JSON.stringify({ error: "Package does not exist." }),
+          };
+        } else {
+          return {
+            statusCode: 500,
+            body: JSON.stringify({ error: "The package rating system choked on at least one of the metrics." }),
+          };
+        }
+      }
     }
-};
+  
+    // Return a default response if no conditions are met
+    return {
+      statusCode: 400,
+      body: JSON.stringify({ error: "There is missing field(s) in the PackageID" }),
+    };
+  };
