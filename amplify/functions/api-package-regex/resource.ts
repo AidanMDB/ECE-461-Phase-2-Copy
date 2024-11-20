@@ -1,5 +1,5 @@
 import { defineFunction } from '@aws-amplify/backend';
 
-export const myApiFunction = defineFunction({ 
-    name: 'api-package-regex',
+export const myApiFunctionRegex = defineFunction({ 
+    name: 'api-package-regex',   
 });
