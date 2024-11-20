@@ -12,13 +12,16 @@ import {
   JsonSchemaType
 } from 'aws-cdk-lib/aws-apigateway';
 import { myApiFunction } from './functions/api-function/resource.js';
+import { myApiFunctionRegex } from './functions/api-package-regex/resource.js';
 import { ApiGateway } from 'aws-cdk-lib/aws-events-targets';
+import { Stack } from 'aws-cdk-lib';
 
 const backend = defineBackend({
   auth,           // creates cognito
   data,           // creates dynamodb
   storage,        // creates s3
-  myApiFunction,  // creates lambda
+  myApiFunction,  // creates lambda 
+  myApiFunctionRegex // creates lambda for regex search
 });
 
 // create API stack
@@ -70,10 +73,10 @@ const packageData: Model = myRestApi.addModel('PackageData', {
 
 // create lambda integration
 const lambdaIntegration = new LambdaIntegration(
-  backend.myApiFunction.resources.lambda
+  backend.myApiFunction.resources.lambda,
 );
 
-// create new REST API path
+// create new API path
 const packagePath = myRestApi.root.addResource('package');
 
 packagePath.addMethod('POST', lambdaIntegration, {
@@ -84,5 +87,45 @@ packagePath.addMethod('POST', lambdaIntegration, {
   requestValidatorOptions: {
     validateRequestBody: true,
     validateRequestParameters: true
+  }
+});
+
+packagePath.addProxy({
+  anyMethod: false,
+  defaultIntegration: lambdaIntegration
+})
+
+// add lambda integration for regex search api
+const lambdaIntegrationRegex = new LambdaIntegration(
+  backend.myApiFunctionRegex.resources.lambda
+);
+
+// create new API path for regex search
+const regexPath = myRestApi.root.addResource('package').addResource('byRegEx');
+
+regexPath.addMethod('POST', lambdaIntegrationRegex, {
+  requestParameters: {
+    "method.request.header.X-authorization": true,  // Requires 'X-authorization' header
+  },
+  requestModels: {'application/json': packageData},
+  requestValidatorOptions: {
+    validateRequestBody: true,
+    validateRequestParameters: true
+  }
+});
+
+
+
+
+// add outputs to the configuration files (should allow for the frontend and backend to call the API)
+backend.addOutput({
+  custom: {
+    API: {
+      [myRestApi.restApiName]: {
+        endpoint: myRestApi.url,
+        region: Stack.of(myRestApi).region,
+        apiName: myRestApi.restApiName
+      }
+    }
   }
 });
