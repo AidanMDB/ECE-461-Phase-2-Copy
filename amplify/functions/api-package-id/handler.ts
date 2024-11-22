@@ -18,8 +18,11 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     };
   }
 
+  // get httpMethod from path parameter
+  const httpMethod = event.pathParameters?.httpMethod;
+
   // Handle POST request
-  if (event.httpMethod === "POST") {
+  if (httpMethod === "POST") {
     // Parse the JSON body to see if it exists
     let requestBody;
     try {
@@ -109,10 +112,27 @@ export const handler: APIGatewayProxyHandler = async (event) => {
   }
 
   // Handle GET request
-  if (event.httpMethod === "GET") {
+  if (httpMethod === "GET") {
     // get package ID from path parameter
-    const packageID = event.pathParameters?.packageID;
+    // const packageID = event.pathParameters?.packageID;
+
+    // Parse the JSON body to see if it exists
+    let requestBody;
+    try {
+        requestBody = JSON.parse(event.body || "{}");
+    } catch (error) {
+        console.log("can't parse request body");
+        return {
+            statusCode: 400,
+            body: JSON.stringify("There is missing field(s) in the PackageData or it is formed improperly, or is invalid."),
+        };
+    }
+
+    // get JSON Body
+    const { packageID } = requestBody;
+
     if (!packageID) {
+        console.log("can't find packageID");
       return {
         statusCode: 400,
         body: JSON.stringify("There is missing field(s) in the PackageID or it is formed improperly, or is invalid."),
@@ -129,10 +149,10 @@ export const handler: APIGatewayProxyHandler = async (event) => {
         await s3.send(command);
 
     } catch (error) {
-        if (error instanceof Error && (error as any).code === "NotFound") {
+        if (error instanceof Error && (error as any).name === "NotFound") {
             return {
                 statusCode: 404,
-                body: JSON.stringify({ error: "Package does not exists." }),
+                body: JSON.stringify({ error: "Package does not exist." }),
             };
         } else { 
             return {

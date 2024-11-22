@@ -1,6 +1,6 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { handler } from '../functions/api-package-id/handler'; // Update path as per your project structure
-import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import { DynamoDBClient, ScanCommand } from '@aws-sdk/client-dynamodb';
 import { S3Client } from '@aws-sdk/client-s3';
 import { mockClient } from 'aws-sdk-client-mock';
 
@@ -14,36 +14,41 @@ describe('Package API Handler', () => {
     s3Mock.reset();
   });
 
-//   test('GET /package/{id} - Success (200)', async () => {
-//     dynamoDBMock.onAnyCommand().resolves({
-//       Item: {
-//         ID: { S: 'underscore' },
-//         Name: { S: 'Underscore' },
-//         Version: { S: '1.0.0' },
-//         Content: { S: 'UEsDBAoAAAAAACAfUFk...' }, // Truncated content
-//       },
-//     });
+  // test('GET /package/{id} - Success (200)', async () => {
+  //   const event: APIGatewayProxyEvent = {
+  //     headers: { 'X-authorization': 'Bearer token' },
+  //     body: JSON.stringify({ packageID: '123' }),
+  //     pathParameters: ({ httpMethod: 'GET' }),
+  //   } as any;
 
-//     const event: APIGatewayProxyEvent = {
-//       pathParameters: { id: 'underscore' },
-//       headers: { 'X-Authorization': 'Bearer token' },
-//     } as any;
+  // // s3Mock.onAnyCommand().resolves({ 
+  // //   metadata: {
+  // //     Name: 'test package',
+  // //     Version: 'test version',
+  // //     ID: 'test id',
+  // //   },
+  // //   data: {
+  // //     Content: 'UEsDBAoAAAAAACAfUFk...', // Truncated content
+  // //     JSProgram: expect.any(String),
+  // //   },
+  // // });
+  // // });
 
-//     const result = (await handler(event, {} as any, () => {})) as APIGatewayProxyResult;
+  // const result = (await handler(event, {} as any, () => {})) as APIGatewayProxyResult;
 
-//     expect(result.statusCode).toBe(200);
-//     expect(JSON.parse(result.body)).toEqual({
-//       metadata: {
-//         Name: 'Underscore',
-//         Version: '1.0.0',
-//         ID: 'underscore',
-//       },
-//       data: {
-//         Content: 'UEsDBAoAAAAAACAfUFk...', // Truncated content
-//         JSProgram: expect.any(String),
-//       },
-//     });
-//   });
+  //   expect(result.statusCode).toBe(200);
+  //   expect(JSON.parse(result.body)).toEqual({
+  //     metadata: {
+  //       Name: 'test package',
+  //       Version: 'test version',
+  //       ID: 'test id',
+  //     },
+  //     data: {
+  //       Content: 'UEsDBAoAAAAAACAfUFk...', // Truncated content
+  //       JSProgram: expect.any(String),
+  //     },
+  //   });
+  // });
 
   test('GET /package/{id} - Missing ID (400)', async () => {
     const event: APIGatewayProxyEvent = {
@@ -52,10 +57,6 @@ describe('Package API Handler', () => {
       } as any;
 
     const result = (await handler(event, {} as any, () => {})) as APIGatewayProxyResult;
-
-    // console.log(result);
-    // console.log(result.body);
-    // console.log(result.statusCode);
 
     expect(result.statusCode).toBe(400);
     const responseBody = JSON.parse(result.body);
@@ -75,17 +76,15 @@ describe('Package API Handler', () => {
   });
 
   test('GET /package/{id} - Package Not Found (404)', async () => {
-    dynamoDBMock.onAnyCommand().resolves({});
-
     const event: APIGatewayProxyEvent = {
         headers: { 'X-authorization': 'Bearer token' },
-        body: ({ id: 'invalid-body' }),
+        body: JSON.stringify({ packageID: '123' }),
+        pathParameters: ({ httpMethod: 'GET' }),
       } as any;
 
-    const result = (await handler(event, {} as any, () => {})) as APIGatewayProxyResult;
+    s3Mock.onAnyCommand().rejects({ name: "NotFound" });
 
-    console.log(result);
-    console.log(result.body);
+    const result = (await handler(event, {} as any, () => {})) as APIGatewayProxyResult;
 
     expect(result.statusCode).toBe(404);
     const responseBody = JSON.parse(result.body);
