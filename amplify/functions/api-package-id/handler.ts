@@ -1,6 +1,7 @@
 import type { APIGatewayProxyHandler } from "aws-lambda";
-import { S3Client, HeadObjectCommand } from "@aws-sdk/client-s3";
+import { S3Client, HeadObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
 import AdmZip from "adm-zip";
+import { Readable } from "stream";
 
 
 const s3 = new S3Client();
@@ -141,12 +142,47 @@ export const handler: APIGatewayProxyHandler = async (event) => {
 
     // Check if package exists in S3
     try {
-        const command = new HeadObjectCommand({
+        const command = new GetObjectCommand({
         Bucket: BUCKET_NAME,
         Key: packageID,
         });
 
-        await s3.send(command);
+        const response = await s3.send(command);
+
+        // Convert the response Body (stream) into a string
+        const streamToString = (stream: Readable): Promise<string> =>
+            new Promise((resolve, reject) => {
+                const chunks: Uint8Array[] = [];
+                stream.on("data", (chunk) => chunks.push(chunk));
+                stream.on("end", () => resolve(Buffer.concat(chunks).toString("utf-8")));
+                stream.on("error", reject);
+            });
+
+        const fileContent = await streamToString(response.Body as Readable);
+
+        const version = response.Metadata?.Version;
+        const fileName = response.Metadata?.Name;
+
+        // return package
+        return {
+            statusCode: 200,
+            // Modify the CORS settings below to match your specific requirements
+            headers: {
+            "Access-Control-Allow-Origin": "*", // Restrict this to domains you trust
+            "Access-Control-Allow-Headers": "*", // Specify only the headers you need to allow
+            },
+            body: JSON.stringify({
+                Metadata: {
+                    Name: fileName,
+                    Version: version,
+                    ID: packageID,
+                },
+                data: {
+                    Content: fileContent,
+                    JSProgram: expect.any(String),
+                },
+            }),
+        };
 
     } catch (error) {
         if (error instanceof Error && (error as any).name === "NotFound") {
@@ -161,17 +197,6 @@ export const handler: APIGatewayProxyHandler = async (event) => {
             };
         }
     } 
-
-    // return package
-    return {
-      statusCode: 200,
-      // Modify the CORS settings below to match your specific requirements
-      headers: {
-        "Access-Control-Allow-Origin": "*", // Restrict this to domains you trust
-        "Access-Control-Allow-Headers": "*", // Specify only the headers you need to allow
-      },
-      body: JSON.stringify("Hello from myFunction!"),
-    };
   }
 
   // Return a default response if no conditions are met

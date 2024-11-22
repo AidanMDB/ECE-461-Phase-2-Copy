@@ -1,8 +1,10 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { handler } from '../functions/api-package-id/handler'; // Update path as per your project structure
-import { DynamoDBClient, ScanCommand } from '@aws-sdk/client-dynamodb';
-import { S3Client } from '@aws-sdk/client-s3';
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
 import { mockClient } from 'aws-sdk-client-mock';
+import { Readable } from 'stream';
+import { SdkStreamMixin } from '@aws-sdk/types';
 
 // Mock the DynamoDB client
 const dynamoDBMock = mockClient(DynamoDBClient);
@@ -14,53 +16,47 @@ describe('Package API Handler', () => {
     s3Mock.reset();
   });
 
-  // test('GET /package/{id} - Success (200)', async () => {
-  //   const event: APIGatewayProxyEvent = {
-  //     headers: { 'X-authorization': 'Bearer token' },
-  //     body: JSON.stringify({ packageID: '123' }),
-  //     pathParameters: ({ httpMethod: 'GET' }),
-  //   } as any;
+  test('GET /package/{id} - Success (200)', async () => {
+    jest.setTimeout(300000);
 
-  // // s3Mock.onAnyCommand().resolves({ 
-  // //   metadata: {
-  // //     Name: 'test package',
-  // //     Version: 'test version',
-  // //     ID: 'test id',
-  // //   },
-  // //   data: {
-  // //     Content: 'UEsDBAoAAAAAACAfUFk...', // Truncated content
-  // //     JSProgram: expect.any(String),
-  // //   },
-  // // });
-  // // });
-
-  // const result = (await handler(event, {} as any, () => {})) as APIGatewayProxyResult;
-
-  //   expect(result.statusCode).toBe(200);
-  //   expect(JSON.parse(result.body)).toEqual({
-  //     metadata: {
-  //       Name: 'test package',
-  //       Version: 'test version',
-  //       ID: 'test id',
-  //     },
-  //     data: {
-  //       Content: 'UEsDBAoAAAAAACAfUFk...', // Truncated content
-  //       JSProgram: expect.any(String),
-  //     },
-  //   });
-  // });
-
-  test('GET /package/{id} - Missing ID (400)', async () => {
     const event: APIGatewayProxyEvent = {
-        headers: { 'X-authorization': 'Bearer token' },
-        body: ({ id: 'invalid-body' }),
-      } as any;
+      headers: { 'X-authorization': 'Bearer token' },
+      body: JSON.stringify({ packageID: '123' }),
+      pathParameters: ({ httpMethod: 'GET' }),
+    } as any;
+
+    const mockStream = Readable.from([
+      JSON.stringify({
+          Content: "UEsDBAoAAAAAACAfUFk...",
+          JSProgram: 'console.log("Hello, World!");',
+      }),
+  ]) as unknown as Readable & SdkStreamMixin;
+
+    s3Mock.on(GetObjectCommand).resolves({ 
+      Metadata: {
+        Name: 'test package',
+        Version: 'test version',
+        ID: 'test id',
+      },
+      Body: mockStream
+    });
 
     const result = (await handler(event, {} as any, () => {})) as APIGatewayProxyResult;
 
-    expect(result.statusCode).toBe(400);
-    const responseBody = JSON.parse(result.body);
-    expect(responseBody.error).toBe("Unsupported method or missing fields.");
+    console.log('result:', result);
+
+    expect(result.statusCode).toBe(200);
+    expect(JSON.parse(result.body)).toEqual({
+      metadata: {
+        Name: 'test package',
+        Version: 'test version',
+        ID: 'test id',
+      },
+      data: {
+        Content: 'UEsDBAoAAAAAACAfUFk...', // Truncated content
+        JSProgram: expect.any(String),
+      },
+    });
   });
 
   test('GET /package/{id} - Unauthorized (403)', async () => {
@@ -73,6 +69,32 @@ describe('Package API Handler', () => {
 
     expect(result.statusCode).toBe(403);
     expect(result.body).toBe(JSON.stringify("Authentication failed due to invalid or missing AuthenticationToken."));
+  });
+
+  test('GET /package/{id} - Missing ID (400)', async () => {
+    const event: APIGatewayProxyEvent = {
+        headers: { 'X-authorization': 'Bearer token' },
+        body: ({}),
+      } as any;
+
+    const result = (await handler(event, {} as any, () => {})) as APIGatewayProxyResult;
+
+    expect(result.statusCode).toBe(400);
+    const responseBody = JSON.parse(result.body);
+    expect(responseBody.error).toBe("Unsupported method or missing fields.");
+  });
+
+  test('GET /package/{id} - Invalid ID (400)', async () => {
+    const event: APIGatewayProxyEvent = {
+        headers: { 'X-authorization': 'Bearer token' },
+        body: ({ id: 'invalid-body' }),
+      } as any;
+
+    const result = (await handler(event, {} as any, () => {})) as APIGatewayProxyResult;
+
+    expect(result.statusCode).toBe(400);
+    const responseBody = JSON.parse(result.body);
+    expect(responseBody.error).toBe("Unsupported method or missing fields.");
   });
 
   test('GET /package/{id} - Package Not Found (404)', async () => {
