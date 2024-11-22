@@ -36,6 +36,14 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     };
   }
 
+  /*
+  *   This is a simple search function that searches for a package based on the regex provided
+  *   Example requestBody: { "RegEx": "regex" }
+  *   Example response: { "Version": "1.0.0", "Name": "package-name", "ID": "package-id" }
+  *   
+  *   The FilterExpression uses the contains function to check if the Name or Readme attributes 
+  *     contain the substring specified by the RegEx value.
+  */
   const params = {
     TableName: TABLE_NAME,
     FilterExpression: 'contains(#name, :regex) OR contains(#readme, :regex)',
@@ -52,11 +60,18 @@ export const handler: APIGatewayProxyHandler = async (event) => {
   };
 
   try {
+    // May need to modify this dynamoDb scan based on how they are stored
     const result = await dynamoDb.send(new ScanCommand(params));
     if (result.Items && result.Items.length > 0) {
+      const formattedItems = result.Items.map(item => ({
+        Version: item.Version.S,
+        Name: item.Name.S,
+        ID: item.ID.S,
+      }));
         return {
             statusCode: 200,
-            body: JSON.stringify(result.Items),
+            //body: JSON.stringify(result.Items),
+            body: JSON.stringify(formattedItems),
         };
     } else {
         return {
