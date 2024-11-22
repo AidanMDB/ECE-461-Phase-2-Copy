@@ -1,4 +1,4 @@
-import type { APIGatewayProxyHandler } from "aws-lambda";
+import type { APIGatewayProxyHandler, APIGatewayProxyResult } from "aws-lambda";
 import { DynamoDBClient, ScanCommand } from "@aws-sdk/client-dynamodb";
 
 const dynamoDb = new DynamoDBClient();

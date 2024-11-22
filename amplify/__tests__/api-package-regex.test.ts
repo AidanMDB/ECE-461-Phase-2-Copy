@@ -1,0 +1,103 @@
+import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
+import { handler } from "../functions/api-package-regex/handler";
+import { DynamoDBClient, ScanCommand } from "@aws-sdk/client-dynamodb";
+import { mockClient } from "aws-sdk-client-mock";
+
+// Mock the DynamoDB client
+const dynamoDbMock = mockClient(DynamoDBClient);
+
+describe("POST /package/byRegEx", () => {
+  beforeEach(() => {
+    dynamoDbMock.reset();
+  });
+
+  it("should return 403 if the X-authorization header is missing", async () => {
+    const event: APIGatewayProxyEvent = {
+      headers: {},
+      body: JSON.stringify({ RegEx: ".*?Underscore.*" }),
+    } as any;
+
+    const result = (await handler(event, {} as any, () => {})) as APIGatewayProxyResult;
+
+    expect(result.statusCode).toBe(403);
+    expect(result.body).toBe(JSON.stringify("Authentication failed due to invalid or missing AuthenticationToken."));
+  });
+
+  it("should return 400 if the request body is invalid", async () => {
+    const event: APIGatewayProxyEvent = {
+      headers: { "X-authorization": "Bearer token" },
+      body: "invalid-json",
+    } as any;
+
+    const result = await handler(event, {} as any, () => {}) as APIGatewayProxyResult;
+
+    expect(result.statusCode).toBe(400);
+    expect(result.body).toBe(JSON.stringify("Invalid request body"));
+  });
+
+  it("should return 400 if the RegEx field is missing", async () => {
+    const event: APIGatewayProxyEvent = {
+      headers: { "X-authorization": "Bearer token" },
+      body: JSON.stringify({}),
+    } as any;
+
+    const result = await handler(event, {} as any, () => {}) as APIGatewayProxyResult;
+
+    expect(result.statusCode).toBe(400);
+    expect(result.body).toBe(JSON.stringify("Missing required field: RegEx"));
+  });
+
+  it("should return 200 with matching packages", async () => {
+    const event: APIGatewayProxyEvent = {
+      headers: { "X-authorization": "Bearer token" },
+      body: JSON.stringify({ RegEx: ".*?Underscore.*" }),
+    } as any;
+
+    dynamoDbMock.on(ScanCommand).resolves({
+      Items: [
+        { Version: { S: "1.2.3" }, Name: { S: "Underscore" }, ID: { S: "underscore" } },
+        { Version: { S: "2.1.0" }, Name: { S: "Lodash" }, ID: { S: "lodash" } },
+      ],
+    });
+
+    const result = await handler(event, {} as any, () => {}) as APIGatewayProxyResult;
+
+    expect(result.statusCode).toBe(200);
+    expect(result.body).toBe(
+      JSON.stringify([
+        { Version: "1.2.3", Name: "Underscore", ID: "underscore" },
+        { Version: "2.1.0", Name: "Lodash", ID: "lodash" },
+      ])
+    );
+  });
+
+  it("should return 404 if no packages match the regex", async () => {
+    const event: APIGatewayProxyEvent = {
+      headers: { "X-authorization": "Bearer token" },
+      body: JSON.stringify({ RegEx: ".*?NonExistent.*" }),
+    } as any;
+
+    dynamoDbMock.on(ScanCommand).resolves({
+      Items: [],
+    });
+
+    const result= await handler(event, {} as any, () => {}) as APIGatewayProxyResult;
+
+    expect(result.statusCode).toBe(404);
+    expect(result.body).toBe(JSON.stringify({ error: "No package found under this regex" }));
+  });
+
+  it("should return 500 if there is an error scanning DynamoDB", async () => {
+    const event: APIGatewayProxyEvent = {
+      headers: { "X-authorization": "Bearer token" },
+      body: JSON.stringify({ RegEx: ".*?Underscore.*" }),
+    } as any;
+
+    dynamoDbMock.on(ScanCommand).rejects(new Error("DynamoDB error"));
+
+    const result = await handler(event, {} as any, () => {}) as APIGatewayProxyResult;
+
+    expect(result.statusCode).toBe(500);
+    expect(result.body).toBe(JSON.stringify({ error: "Could not search packages" }));
+  });
+});
