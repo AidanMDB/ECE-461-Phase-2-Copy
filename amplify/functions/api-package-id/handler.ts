@@ -15,7 +15,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
   if (!authHeader) {
     return {
       statusCode: 403,
-      body: JSON.stringify("Authentication failed due to invalid or missing AuthenticationToken.")
+      body: JSON.stringify({error: "Authentication failed due to invalid or missing AuthenticationToken."})
     };
   }
 
@@ -29,9 +29,10 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     try {
         requestBody = JSON.parse(event.body || "{}");
     } catch (error) {
+        console.log("can't parse request body POST");
         return {
             statusCode: 400,
-            body: JSON.stringify("There is missing field(s) in the PackageData or it is formed improperly (e.g. Content and URL ar both set)")
+            body: JSON.stringify({error: "There is missing field(s) in the PackageData or it is formed improperly (e.g. Content and URL ar both set)"})
         };
     }
 
@@ -39,7 +40,8 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     const { Name, Version, ID, Content, URL, debloat, JSProgram } = requestBody;
 
     // Validate that either "Content" or "URL" is present, but not both
-    if ((Content && !URL) || (!Content && URL)) {
+    if (Content && URL) {
+        console.log("Content and url set");
         return {
             statusCode: 400,
             body: JSON.stringify({ error: "There is missing field(s) in the PackageData or it is formed improperly (e.g. Content and URL ar both set)" }),
@@ -58,7 +60,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
         await s3.send(command);
 
     } catch (error) {
-        if (error instanceof Error && (error as any).code === "NotFound") {
+        if (error instanceof Error && (error as any).name === "NotFound") {
             return {
                 statusCode: 404,
                 body: JSON.stringify({ error: "Package does not exists." }),
@@ -122,10 +124,10 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     try {
         requestBody = JSON.parse(event.body || "{}");
     } catch (error) {
-        console.log("can't parse request body");
+        console.log("can't parse request body GET");
         return {
             statusCode: 400,
-            body: JSON.stringify("There is missing field(s) in the PackageData or it is formed improperly, or is invalid."),
+            body: JSON.stringify({error: "There is missing field(s) in the PackageData or it is formed improperly, or is invalid."}),
         };
     }
 
@@ -136,7 +138,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
         console.log("can't find packageID");
       return {
         statusCode: 400,
-        body: JSON.stringify("There is missing field(s) in the PackageID or it is formed improperly, or is invalid."),
+        body: JSON.stringify({error: "There is missing field(s) in the PackageID or it is formed improperly, or is invalid."}),
       };
     }
 
@@ -182,7 +184,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
         };
 
     } catch (error) {
-        if (error instanceof Error && (error as any).name === "NotFound") {
+        if (error instanceof Error && (error as any).name === "NoSuchKey") {
             return {
                 statusCode: 404,
                 body: JSON.stringify({ error: "Package does not exist." }),
