@@ -152,10 +152,10 @@ export const handler: APIGatewayProxyHandler = async (event) => {
         // Convert the response Body (stream) into a string
         const streamToString = (stream: Readable): Promise<string> =>
             new Promise((resolve, reject) => {
-                const chunks: Uint8Array[] = [];
-                stream.on("data", (chunk) => chunks.push(chunk));
-                stream.on("end", () => resolve(Buffer.concat(chunks).toString("utf-8")));
-                stream.on("error", reject);
+              const chunks: Uint8Array[] = [];
+              stream.on('data', (chunk) => chunks.push(Buffer.from(chunk)));
+              stream.on('end', () => resolve(Buffer.concat(chunks).toString('utf-8')));
+              stream.on('error', reject);
             });
 
         const fileContent = await streamToString(response.Body as Readable);
@@ -177,10 +177,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
                     Version: version,
                     ID: packageID,
                 },
-                data: {
-                    Content: fileContent,
-                    JSProgram: expect.any(String),
-                },
+                Body: JSON.parse(fileContent)
             }),
         };
 

@@ -28,7 +28,7 @@ describe('Package API Handler', () => {
     const mockStream = Readable.from([
       JSON.stringify({
           Content: "UEsDBAoAAAAAACAfUFk...",
-          JSProgram: 'console.log("Hello, World!");',
+          JSProgram: 'a string',
       }),
   ]) as unknown as Readable & SdkStreamMixin;
 
@@ -36,7 +36,7 @@ describe('Package API Handler', () => {
       Metadata: {
         Name: 'test package',
         Version: 'test version',
-        ID: 'test id',
+        ID: '123',
       },
       Body: mockStream
     });
@@ -47,12 +47,12 @@ describe('Package API Handler', () => {
 
     expect(result.statusCode).toBe(200);
     expect(JSON.parse(result.body)).toEqual({
-      metadata: {
+      Metadata: {
         Name: 'test package',
         Version: 'test version',
-        ID: 'test id',
+        ID: '123',
       },
-      data: {
+      Body: {
         Content: 'UEsDBAoAAAAAACAfUFk...', // Truncated content
         JSProgram: expect.any(String),
       },
