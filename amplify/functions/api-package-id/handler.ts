@@ -35,7 +35,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
         console.log("can't parse request body POST");
         return {
             statusCode: 400,
-            body: JSON.stringify({error: "There is missing field(s) in the PackageData or it is formed improperly (e.g. Content and URL ar both set)"})
+            body: JSON.stringify({error: "There is missing field(s) in the PackageID or it is formed improperly, or is invalid."})
         };
     }
 
@@ -47,7 +47,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
         console.log("Content and url set");
         return {
             statusCode: 400,
-            body: JSON.stringify({ error: "There is missing field(s) in the PackageData or it is formed improperly (e.g. Content and URL ar both set)" }),
+            body: JSON.stringify({error: "There is missing field(s) in the PackageID or it is formed improperly, or is invalid."})
         };
     }
 
@@ -66,12 +66,13 @@ export const handler: APIGatewayProxyHandler = async (event) => {
         if (error instanceof Error && (error as any).name === "NotFound") {
             return {
                 statusCode: 404,
-                body: JSON.stringify({ error: "Package does not exists." }),
+                body: JSON.stringify({ error: "Package does not exist." }),
             };
-        } else { 
+        } 
+        else { 
             return {
-                statusCode: 500,
-                body: JSON.stringify({ error: "Error checking for existing package" }),
+                statusCode: 400,
+                body: JSON.stringify({ error: "There is missing field(s) in the PackageID or it is formed improperly, or is invalid." }),
             };
         }
     } 
@@ -115,8 +116,8 @@ export const handler: APIGatewayProxyHandler = async (event) => {
         await dynamoDB.send(putItemCommand);
     } catch (error) {
         return {
-            statusCode: 500,
-            body: JSON.stringify({ error: "Error adding metadata to DynamoDB." }),
+            statusCode: 400,
+            body: JSON.stringify({ error: "There is missing field(s) in the PackageID or it is formed improperly, or is invalid." }),
         };
     }
 
@@ -132,10 +133,11 @@ export const handler: APIGatewayProxyHandler = async (event) => {
                 ID: ID,
             },
         });
+        await s3.send(putObjectCommand);
     } catch (error) {
         return {
-            statusCode: 500,
-            body: JSON.stringify({ error: "Error uploading file to S3." }),  //check if this is the correct error message
+            statusCode: 400,
+            body: JSON.stringify({ error: "Error uploading file to S3." }),  // check if this is the correct error message
         };
     }
 
@@ -163,7 +165,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
         console.log("can't parse request body GET");
         return {
             statusCode: 400,
-            body: JSON.stringify({error: "There is missing field(s) in the PackageData or it is formed improperly, or is invalid."}),
+            body: JSON.stringify({error: "There is missing field(s) in the PackageID or it is formed improperly, or is invalid."})
         };
     }
 
@@ -174,8 +176,8 @@ export const handler: APIGatewayProxyHandler = async (event) => {
         console.log("can't find packageID");
       return {
         statusCode: 400,
-        body: JSON.stringify({error: "There is missing field(s) in the PackageID or it is formed improperly, or is invalid."}),
-      };
+        body: JSON.stringify({error: "There is missing field(s) in the PackageID or it is formed improperly, or is invalid."})
+    };
     }
 
     // Check if package exists in S3
@@ -227,8 +229,8 @@ export const handler: APIGatewayProxyHandler = async (event) => {
             };
         } else { 
             return {
-                statusCode: 500,
-                body: JSON.stringify({ error: "Error checking for existing package" }),
+                statusCode: 400,
+                body: JSON.stringify({ error: "There is missing field(s) in the PackageID or it is formed improperly, or is invalid." }),
             };
         }
     } 
@@ -237,6 +239,6 @@ export const handler: APIGatewayProxyHandler = async (event) => {
   // Return a default response if no conditions are met
   return {
     statusCode: 400,
-    body: JSON.stringify({ error: "Unsupported method or missing fields." }),
-  };
+    body: JSON.stringify({error: "There is missing field(s) in the PackageID or it is formed improperly, or is invalid."})
+};
 };

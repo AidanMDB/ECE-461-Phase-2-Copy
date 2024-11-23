@@ -86,7 +86,7 @@ describe('Package API Handler', () => {
 
     expect(result.statusCode).toBe(400);
     const responseBody = JSON.parse(result.body);
-    expect(responseBody.error).toBe("There is missing field(s) in the PackageData or it is formed improperly, or is invalid.");
+    expect(responseBody.error).toBe("There is missing field(s) in the PackageID or it is formed improperly, or is invalid.");
   });
 
   test('GET /package/{id} - Invalid ID (400)', async () => {
@@ -102,7 +102,7 @@ describe('Package API Handler', () => {
 
     expect(result.statusCode).toBe(400);
     const responseBody = JSON.parse(result.body);
-    expect(responseBody.error).toBe("There is missing field(s) in the PackageData or it is formed improperly, or is invalid.");
+    expect(responseBody.error).toBe("There is missing field(s) in the PackageID or it is formed improperly, or is invalid.");
   });
 
   test('GET /package/{id} - Package Not Found (404)', async () => {
@@ -121,7 +121,7 @@ describe('Package API Handler', () => {
     expect(responseBody.error).toBe('Package does not exist.');
   });
 
-  test('GET /package/{id} - Error checking for package (500)', async () => {
+  test('GET /package/{id} - Error checking for package (400)', async () => {
     const event: APIGatewayProxyEvent = {
         headers: { 'X-authorization': 'Bearer token' },
         body: JSON.stringify({ packageID: '123' }),
@@ -132,9 +132,9 @@ describe('Package API Handler', () => {
 
     const result = (await handler(event, {} as any, () => {})) as APIGatewayProxyResult;
 
-    expect(result.statusCode).toBe(500);
+    expect(result.statusCode).toBe(400);
     const responseBody = JSON.parse(result.body);
-    expect(responseBody.error).toBe('Error checking for existing package');
+    expect(responseBody.error).toBe('There is missing field(s) in the PackageID or it is formed improperly, or is invalid.');
   });
 
   // POST /package/{id} tests
@@ -189,13 +189,13 @@ describe('Package API Handler', () => {
 
     expect(result.statusCode).toBe(400);
     const responseBody = JSON.parse(result.body);
-    expect(responseBody.error).toBe("There is missing field(s) in the PackageData or it is formed improperly (e.g. Content and URL ar both set)");
+    expect(responseBody.error).toBe("There is missing field(s) in the PackageID or it is formed improperly, or is invalid.");
   });
 
   test('POST /package/{id} - Missing Some Data (400)', async () => {
     const event: APIGatewayProxyEvent = {
       headers: { 'X-authorization': 'Bearer token' },
-      body: ({
+      body: JSON.stringify({
         Name: "test",
         Content: "some content",
         URL: "url too",
@@ -209,7 +209,7 @@ describe('Package API Handler', () => {
 
     expect(result.statusCode).toBe(400);
     const responseBody = JSON.parse(result.body);
-    expect(responseBody.error).toBe("There is missing field(s) in the PackageData or it is formed improperly (e.g. Content and URL ar both set)");
+    expect(responseBody.error).toBe("There is missing field(s) in the PackageID or it is formed improperly, or is invalid.");
   });
 
   test('POST /package/{id} - Invalid Data (Content and URL set) (400)', async () => {
@@ -231,7 +231,7 @@ describe('Package API Handler', () => {
 
     expect(result.statusCode).toBe(400);
     const responseBody = JSON.parse(result.body);
-    expect(responseBody.error).toBe("There is missing field(s) in the PackageData or it is formed improperly (e.g. Content and URL ar both set)");
+    expect(responseBody.error).toBe("There is missing field(s) in the PackageID or it is formed improperly, or is invalid.");
   });
 
   test('POST /package/{id} - Package Data does not exist (404)', async () => {
@@ -256,10 +256,10 @@ describe('Package API Handler', () => {
 
     expect(result.statusCode).toBe(404);
     const responseBody = JSON.parse(result.body);
-    expect(responseBody.error).toBe("Package does not exists.");
+    expect(responseBody.error).toBe("Package does not exist.");
   });
 
-  test('POST /package/{id} - Error checking for existing packages (500)', async () => {
+  test('POST /package/{id} - Error checking for existing packages (400)', async () => {
     const event: APIGatewayProxyEvent = {
       headers: { 'X-authorization': 'Bearer token' },
       body: JSON.stringify({ 
@@ -279,9 +279,9 @@ describe('Package API Handler', () => {
 
     console.log('result:', result);
 
-    expect(result.statusCode).toBe(500);
+    expect(result.statusCode).toBe(400);
     const responseBody = JSON.parse(result.body);
-    expect(responseBody.error).toBe("Error checking for existing package");
+    expect(responseBody.error).toBe("There is missing field(s) in the PackageID or it is formed improperly, or is invalid.");
   });
 
 });
