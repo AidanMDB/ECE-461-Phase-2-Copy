@@ -18,7 +18,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     };
   }
 
-  let performanceTracks = { plannedTracks: ["Access conrol track"] };
+  let performanceTracks = { plannedTracks: ["Access control track"] };
 
   return {
     statusCode: 200,
