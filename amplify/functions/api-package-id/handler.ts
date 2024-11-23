@@ -1,11 +1,14 @@
 import type { APIGatewayProxyHandler } from "aws-lambda";
-import { S3Client, HeadObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
+import { S3Client, HeadObjectCommand, GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import AdmZip from "adm-zip";
 import { Readable } from "stream";
+import { DynamoDBClient, PutItemCommand } from "@aws-sdk/client-dynamodb";
 
 
 const s3 = new S3Client();
 const BUCKET_NAME = "packageStorage";
+const dynamoDB = new DynamoDBClient({});
+const TABLE_NAME = process.env.PACKAGES_TABLE || "PackagesTable";
 
 export const handler: APIGatewayProxyHandler = async (event) => {
   console.log("event", event);
@@ -98,11 +101,44 @@ export const handler: APIGatewayProxyHandler = async (event) => {
 
     // Update metric calculation
 
-    // update metadata in dynamoDB
+    // add new metadata in dynamoDB (version, name, id)?
+    try {
+        const putItemCommand = new PutItemCommand({
+            TableName: TABLE_NAME,
+            Item: {
+                Name: { S: Name },
+                Version: { S: Version },
+                ID: { S: ID },
+                RepositoryURL: { S: repositoryURL },
+            },
+        });
+        await dynamoDB.send(putItemCommand);
+    } catch (error) {
+        return {
+            statusCode: 500,
+            body: JSON.stringify({ error: "Error adding metadata to DynamoDB." }),
+        };
+    }
 
     // Upload the package to S3
+    try {
+        const putObjectCommand = new PutObjectCommand({
+            Bucket: BUCKET_NAME,
+            Key: Name,
+            Body: zip.toBuffer(),
+            Metadata: {
+                Name: Name,
+                Version: Version,
+                ID: ID,
+            },
+        });
+    } catch (error) {
+        return {
+            statusCode: 500,
+            body: JSON.stringify({ error: "Error uploading file to S3." }),  //check if this is the correct error message
+        };
+    }
 
-    //return
     return {
         statusCode: 200,
         // Modify the CORS settings below to match your specific requirements

@@ -1,7 +1,7 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { handler } from '../functions/api-package-id/handler'; // Update path as per your project structure
-import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { S3Client, GetObjectCommand, HeadObjectCommand } from '@aws-sdk/client-s3';
+import { DynamoDBClient, PutItemCommand } from '@aws-sdk/client-dynamodb';
+import { S3Client, GetObjectCommand, HeadObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3';
 import { mockClient } from 'aws-sdk-client-mock';
 import { Readable } from 'stream';
 import { SdkStreamMixin } from '@aws-sdk/types';
@@ -137,34 +137,32 @@ describe('Package API Handler', () => {
     expect(responseBody.error).toBe('Error checking for existing package');
   });
 
-//   test('POST /package/{id} - Update Success (200)', async () => {
-//     dynamoDBMock.onAnyCommand().resolves({
-//       Attributes: {
-//         ID: { S: 'underscore' },
-//         Name: { S: 'Underscore' },
-//         Version: { S: '1.0.1' },
-//       },
-//     });
+  // POST /package/{id} tests
 
-//     const event: APIGatewayProxyEvent = {
-//       pathParameters: { id: 'underscore' },
-//       headers: { 'X-Authorization': 'Bearer token' },
-//       body: JSON.stringify({
-//         metadata: {
-//           Name: 'Underscore',
-//           Version: '1.0.1',
-//         },
-//         data: {
-//           Content: 'UEsDBAoAAAAAACAfUFk...',
-//         },
-//       }),
-//     } as any;
+  test('POST /package/{id} - Update Success (200)', async () => {
+    const event: APIGatewayProxyEvent = {
+      headers: { 'X-authorization': 'Bearer token' },
+      body: JSON.stringify({ 
+        Name: "test",
+        Version: "version",
+        ID: "test id",
+        // Content: "UEsDBBQAAAAIAAeLb0bDQk5",
+        URL: "url",
+        debloat: "true",
+        JSProgram: "true",
+       }),
+      pathParameters: ({ httpMethod: 'POST' }),
+    } as any;
 
-//     const result = (await handler(event, {} as any, () => {})) as APIGatewayProxyResult;
+    dynamoDBMock.on(PutItemCommand).resolves({});
+    s3Mock.on(PutObjectCommand).resolves({});
 
-//     expect(result.statusCode).toBe(200);
-//     expect(JSON.parse(result.body).message).toBe('Version is updated.');
-//   });
+    const result = (await handler(event, {} as any, () => {})) as APIGatewayProxyResult;
+
+    expect(result.statusCode).toBe(200);
+    const responseBody = JSON.parse(result.body);
+    expect(responseBody.error).toBe("Hello from myFunction!");    
+  });
 
   test('POST /package/{id} - Unauthorized (403)', async () => {
     const event: APIGatewayProxyEvent = {
@@ -184,6 +182,26 @@ describe('Package API Handler', () => {
     const event: APIGatewayProxyEvent = {
       headers: { 'X-authorization': 'Bearer token' },
       body: ({ }),
+      pathParameters: ({ httpMethod: 'POST' }),
+    } as any;
+
+    const result = (await handler(event, {} as any, () => {})) as APIGatewayProxyResult;
+
+    expect(result.statusCode).toBe(400);
+    const responseBody = JSON.parse(result.body);
+    expect(responseBody.error).toBe("There is missing field(s) in the PackageData or it is formed improperly (e.g. Content and URL ar both set)");
+  });
+
+  test('POST /package/{id} - Missing Some Data (400)', async () => {
+    const event: APIGatewayProxyEvent = {
+      headers: { 'X-authorization': 'Bearer token' },
+      body: ({
+        Name: "test",
+        Content: "some content",
+        URL: "url too",
+        debloat: "true",
+        JSProgram: "true",
+       }),
       pathParameters: ({ httpMethod: 'POST' }),
     } as any;
 
