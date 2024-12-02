@@ -1,7 +1,7 @@
 "use client";
 
 import "../app.css";
-import "@aws-amplify/ui-react/styles.css";
+// import "@aws-amplify/ui-react/styles.css";
 import React, { useState } from "react";
 import API from "@aws-amplify/api";
 

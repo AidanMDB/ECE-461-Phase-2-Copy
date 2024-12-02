@@ -22,7 +22,7 @@ const HomePage = () => {
     <div className="App">
       <header className="App-header">
         <div className="login-container">
-          <Link className="sign-up" href="/"><button className="login-button">Upload Package</button></Link>
+          <Link className="sign-up" href="/upload"><button className="login-button">Upload Package</button></Link>
           <Link className="sign-up" href="/"><button className="login-button">Log Out</button></Link>
         </div>
         <div className="title-container">

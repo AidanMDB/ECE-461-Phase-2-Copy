@@ -6,7 +6,8 @@ import type { Schema } from "@/amplify/data/resource";
 import "./../app/app.css";
 import { Amplify } from "aws-amplify";
 import outputs from "@/amplify_outputs.json";
-import "@aws-amplify/ui-react/styles.css";
+// import "@aws-amplify/ui-react/styles.css";
+import "./globals.css";
 //import { useAuthenticator } from "@aws-amplify/ui-react";
 import Link from "next/link";
 
@@ -55,9 +56,9 @@ export default function App() {
           <li key={pkg.ID}>{pkg.Name} : {pkg.Version}</li>
         ))}
       </ul>
-      <div>
-      </div>
-      <Link href="/upload"><button>Go to Upload File Page</button></Link>
+      {/* <div>
+        <Link href="/upload"><button>Go to Upload File Page</button></Link>
+      </div> */}
     </main>
   );
 }
