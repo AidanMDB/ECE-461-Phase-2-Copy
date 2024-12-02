@@ -2,7 +2,8 @@
 import './signup.css';
 // import React from 'react';
 import { useState } from 'react';
-// import Form from 'next/form';
+// import Form from 'next/form';e
+import '../globals.css';
 
 const SignUp = () => {
   const [email, setEmail] = useState('');
