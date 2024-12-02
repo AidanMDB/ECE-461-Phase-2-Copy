@@ -1,10 +1,16 @@
 import Link from 'next/link';
 import './package.css';
+import '../globals.css';
 
 const Package = async (data:any) => {
     return (
       <div className="view-package-container">
       <header className='App-header'>
+        <div className="back-button">
+        <Link href="/homepage">
+            <button className="package-button">Back</button>
+          </Link> 
+        </div>
         <div className="button-container">
           <Link href="/homepage">
             <button className="package-button">Download Package</button>

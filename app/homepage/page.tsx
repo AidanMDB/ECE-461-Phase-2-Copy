@@ -1,6 +1,7 @@
 "use client";
 import { useState } from 'react';
 import './homepage.css';
+import '../globals.css';
 import Link from 'next/link';
 // import { packagelist } from 'src/app/packageList/page';
 // import Packagelist from '../packagelist/page';
