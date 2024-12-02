@@ -2,6 +2,7 @@
 
 import "../app.css";
 import "../globals.css";
+import "./upload.css";
 // import "@aws-amplify/ui-react/styles.css";
 import React, { useState } from "react";
 import API from "@aws-amplify/api";
@@ -10,6 +11,8 @@ export default function UploadPage() {
   const [file, setFile] = useState<File | null>(null);
   const [uploadStatus, setUploadStatus] = useState<string>("");
   const [debloat, setDebloat] = useState<boolean>(false);
+  const [url, setUrl] = useState<string>("");
+  const [seeURL, setSeeURL] = useState<boolean>(false);
 
   /*
   * Handles file change event
@@ -68,20 +71,32 @@ export default function UploadPage() {
     return (
       <div>
         <h1>Upload Your Package</h1>
-        <input
-          type="file"
-          accept=".zip"
-          onChange={handleFileChange}
-        />
-        <label>
-          <input 
-            type="checkbox" 
-            checked={debloat}
-            onChange={(e) => setDebloat(e.target.checked)}
-          />
-          Enable Debloat
-        </label>
-        <button onClick={handleUpload} disabled={!file}>Upload</button>
+        <div>
+          <label className="switch">
+            File Upload
+            <input type="checkbox" onChange={() => setSeeURL(!seeURL)} />
+            <span className="slider round"></span>
+            URL Upload
+          </label>
+        </div>
+        {!seeURL &&
+          <div>
+            <input type="file" accept=".zip" onChange={handleFileChange} />
+            <label>
+              <input type="checkbox" checked={debloat} onChange={(e) => setDebloat(e.target.checked)} />
+              Enable Debloat
+            </label>
+          </div>
+        }
+        {seeURL &&
+          <div>
+            <label>
+              Enter URL:
+              <input type="text" value={url} onChange={(e) => setUrl(e.target.value)} />
+            </label>
+          </div>
+        }
+        <button onClick={handleUpload} disabled={!file && !url}>Upload</button>
         {uploadStatus && <p>{uploadStatus}</p>}
       </div>
     );
