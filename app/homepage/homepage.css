@@ -30,8 +30,8 @@
     border-radius: 4px;
     color: white;
     cursor: pointer;
-    /* margin-left: 90%; */
-    /* padding-left: 90%; */
+    margin-left: 90%;
+    padding-left: 90%;
     min-width: 10vh;
     margin: 0 5px;
-  }
+  } 

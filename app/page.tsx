@@ -35,31 +35,28 @@ export default function App() {
   }, []);
 
   return (
-    // <main className="App">
-    //   <header className="App-header">
-    //     <div className="login-container">
-    //       <Link className="sign-up" href="/login"><button className="login-button">Login</button></Link>
-    //     </div>
-    //     <h1>Package Manager</h1>
-    //   </header>
-    //   <body>
-    //     <Link href="/upload"><button>Go to Upload File Page</button></Link>
-    //   </body>
-    // </main>
-    <main>
-      <div className="login-container">
-        <Link className="sign-up" href="/login"><button className="login-button">Login</button></Link>
-      </div>
-      <h1>Packages</h1>
-      <ul>
-        {packages.map((pkg) => (
-          <li key={pkg.ID}>{pkg.Name} : {pkg.Version}</li>
-        ))}
-      </ul>
-      {/* <div>
-        <Link href="/upload"><button>Go to Upload File Page</button></Link>
-      </div> */}
+    <main className="App">
+      <header className="App-header">
+        <div className="login-container">
+          <Link className="sign-up" href="/login"><button className="login-button">Login</button></Link>
+        </div>
+        <h1>Package Manager</h1>
+      </header>
     </main>
+    // <main>
+    //   <div className="login-container">
+    //     <Link className="sign-up" href="/login"><button className="login-button">Login</button></Link>
+    //   </div>
+    //   <h1>Packages</h1>
+    //   <ul>
+    //     {packages.map((pkg) => (
+    //       <li key={pkg.ID}>{pkg.Name} : {pkg.Version}</li>
+    //     ))}
+    //   </ul>
+    //   {/* <div>
+    //     <Link href="/upload"><button>Go to Upload File Page</button></Link>
+    //   </div> */}
+    // </main>
   );
 }
 
