@@ -55,8 +55,8 @@ describe("POST /package/byRegEx", () => {
 
     dynamoDbMock.on(ScanCommand).resolves({
       Items: [
-        { Version: { S: "1.2.3" }, Name: { S: "Underscore" }, ID: { S: "underscore" } },
-        { Version: { S: "2.1.0" }, Name: { S: "Lodash" }, ID: { S: "lodash" } },
+        { Version: { S: "1.2.3" }, Name: { S: "Underscore" }, ID: { S: "underscore" }, ReadME: { S: "ReadME" }, JSProgram: { S: "someProgram" }, S3Location: { S: "s3" } },
+        { Version: { S: "2.1.0" }, Name: { S: "Lodash" }, ID: { S: "lodash" }, ReadME: { S: "ReadME" }, JSProgram: { S: "someProgram" }, S3Location: { S: "s3" } },
       ],
     });
 
@@ -66,9 +66,61 @@ describe("POST /package/byRegEx", () => {
     expect(result.body).toBe(
       JSON.stringify([
         { Version: "1.2.3", Name: "Underscore", ID: "underscore" },
-        { Version: "2.1.0", Name: "Lodash", ID: "lodash" },
+        //{ Version: "2.1.0", Name: "Lodash", ID: "lodash" }, // Doesn't match the regex
       ])
     );
+  });
+
+  it("should return 200 with one matching package out of two", async () => {
+    const event: APIGatewayProxyEvent = {
+      headers: { "X-authorization": "Bearer token" },
+      body: JSON.stringify({ RegEx: "Lodash" }),
+    } as any;
+
+    dynamoDbMock.on(ScanCommand).resolves({
+      Items: [
+        { Version: { S: "1.2.3" }, Name: { S: "Underscore" }, ID: { S: "underscore" }, ReadME: { S: "ReadME" }, JSProgram: { S: "someProgram" }, S3Location: { S: "s3" } },
+        { Version: { S: "2.1.0" }, Name: { S: "Lodash" }, ID: { S: "lodash" }, ReadME: { S: "ReadME" }, JSProgram: { S: "someProgram" }, S3Location: { S: "s3" } },
+      ],
+    });
+
+    const result = await handler(event, {} as any, () => {}) as APIGatewayProxyResult;
+
+    expect(result.statusCode).toBe(200);
+    expect(result.body).toBe(JSON.stringify([{ Version: "2.1.0", Name: "Lodash", ID: "lodash" }]));
+  });
+
+  it("should return 200 with two matching packages out of many from different fields", async () => {
+    const event: APIGatewayProxyEvent = {
+      headers: { "X-authorization": "Bearer token" },
+      body: JSON.stringify({ RegEx: ".*?Lodash.*" }), // Contain 'Lodash' in readME or Name
+    } as any;
+
+    dynamoDbMock.on(ScanCommand).resolves({
+      Items: [
+        // no
+        { Version: { S: "1.1.1" }, Name: { S: "Pizza lshado" }, ID: { S: "loda" }, ReadME: { S: "reading" }, JSProgram: { S: "soLODASmHeProgram Lodash" }, S3Location: { S: "s3" } },
+        // no
+        { Version: { S: "1.1.2" }, Name: { S: "Pizza hsadol" }, ID: { S: "loda" }, ReadME: { S: "reading" }, JSProgram: { S: "soLODASmHeProgram" }, S3Location: { S: "s3" } },
+        // no
+        { Version: { S: "1.1.3" }, Name: { S: "Pizza" }, ID: { S: "loda" }, ReadME: { S: "reading" }, JSProgram: { S: "soLODASmHeProgram Lodash" }, S3Location: { S: "s3" } },
+        // yes readme
+        { Version: { S: "1.2.3" }, Name: { S: "Underscore" }, ID: { S: "underscore" }, ReadME: { S: "ReadME, blah blah Lodash blah" }, JSProgram: { S: "someProgram" }, S3Location: { S: "s3" } },
+        // yes name
+        { Version: { S: "2.1.0" }, Name: { S: "Lodash" }, ID: { S: "lodash" }, ReadME: { S: "ReadME" }, JSProgram: { S: "someProgram" }, S3Location: { S: "s3" } },
+        // no
+        { Version: { S: "1.1.1" }, Name: { S: "Pizza" }, ID: { S: "loda" }, ReadME: { S: "reading" }, JSProgram: { S: "soLODASmHeProgram Lodash" }, S3Location: { S: "s3" } },
+
+      ],
+    });
+
+    const result = await handler(event, {} as any, () => {}) as APIGatewayProxyResult;
+
+    expect(result.statusCode).toBe(200);
+    expect(result.body).toBe(JSON.stringify([
+      { Version: "1.2.3", Name: "Underscore", ID: "underscore" },
+      { Version: "2.1.0", Name: "Lodash", ID: "lodash" },
+    ]));
   });
 
   it("should return 404 if no packages match the regex", async () => {
@@ -100,4 +152,5 @@ describe("POST /package/byRegEx", () => {
     expect(result.statusCode).toBe(500);
     expect(result.body).toBe(JSON.stringify({ error: "Could not search packages" }));
   });
+  
 });

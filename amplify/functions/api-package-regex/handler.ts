@@ -2,7 +2,7 @@ import type { APIGatewayProxyHandler, APIGatewayProxyResult } from "aws-lambda";
 import { DynamoDBClient, ScanCommand } from "@aws-sdk/client-dynamodb";
 
 const dynamoDb = new DynamoDBClient();
-const TABLE_NAME = process.env.PACKAGES_TABLE || "PackagesTable";
+const TABLE_NAME = process.env.PACKAGES_TABLE || "packageTable";
 
 export const handler: APIGatewayProxyHandler = async (event) => {
   console.log("event", event);
@@ -49,7 +49,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     FilterExpression: 'contains(#name, :regex) OR contains(#readme, :regex)',
     ExpressionAttributeNames: {
       '#name': 'Name',
-      '#readme': 'Readme',
+      '#readme': 'ReadME',
     },
     ExpressionAttributeValues: {
       ':regex': { S: RegEx },
@@ -62,8 +62,14 @@ export const handler: APIGatewayProxyHandler = async (event) => {
   try {
     // May need to modify this dynamoDb scan based on how they are stored
     const result = await dynamoDb.send(new ScanCommand(params));
+    //console.log("Scan result:", result);
+
     if (result.Items && result.Items.length > 0) {
-      const formattedItems = result.Items.map(item => ({
+      const regex = new RegExp(RegEx);
+      const filteredItems = result.Items.filter(item => (item.Name.S && regex.test(item.Name.S)) || (item.ReadME.S && regex.test(item.ReadME.S)));
+      //console.log("Filtered items:", filteredItems);
+
+      const formattedItems = filteredItems.map(item => ({
         Version: item.Version.S,
         Name: item.Name.S,
         ID: item.ID.S,
@@ -80,6 +86,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
         };
     }
   } catch (error) {
+    //console.error("Error scanning DynamoDB:", error);
     return {
       statusCode: 500,
       body: JSON.stringify({ error: 'Could not search packages' }),
