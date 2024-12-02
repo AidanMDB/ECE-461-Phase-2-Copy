@@ -13,6 +13,7 @@ import {
 } from 'aws-cdk-lib/aws-apigateway';
 
 import { myApiFunction } from './functions/api-function/resource.js';
+import { myApiFunctionRegex } from './functions/api-package-regex/resource.js';
 import { apiReset } from './functions/api-reset/resource.js';
 
 import { ApiGateway } from 'aws-cdk-lib/aws-events-targets';
@@ -22,7 +23,8 @@ const backend = defineBackend({
   auth,           // creates cognito
   data,           // creates dynamodb
   storage,        // creates s3
-  myApiFunction,  // creates lambda
+  myApiFunction,  // creates lambda 
+  myApiFunctionRegex, // creates lambda for regex search
   apiReset        // creates lambda
 });
 
@@ -114,6 +116,25 @@ packagePath.addProxy({
   defaultIntegration: lambdaIntegration
 })
 
+// add lambda integration for regex search api
+const lambdaIntegrationRegex = new LambdaIntegration(
+  backend.myApiFunctionRegex.resources.lambda
+);
+
+// create new API path for regex search
+const regexPath = myRestApi.root.addResource('package').addResource('byRegEx');
+
+regexPath.addMethod('POST', lambdaIntegrationRegex, {
+  requestParameters: {
+    "method.request.header.X-authorization": true,  // Requires 'X-authorization' header
+  },
+  requestModels: {'application/json': packageData},
+  requestValidatorOptions: {
+    validateRequestBody: true,
+    validateRequestParameters: true
+  }
+});
+
 
 // add outputs to the configuration files (should allow for the frontend and backend to call the API)
 backend.addOutput({
@@ -126,4 +147,4 @@ backend.addOutput({
       }
     }
   }
-})
+});
