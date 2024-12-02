@@ -57,11 +57,10 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     try {
         const command = new HeadObjectCommand({
         Bucket: BUCKET_NAME,
-        Key: Name,
+        Key: ID,
         });
 
         await s3.send(command);
-
     } catch (error) {
         if (error instanceof Error && (error as any).name === "NotFound") {
             return {
@@ -70,6 +69,8 @@ export const handler: APIGatewayProxyHandler = async (event) => {
             };
         } 
         else { 
+            console.log("Error checking if package exists in S3");
+            console.log((error as any).name);
             return {
                 statusCode: 400,
                 body: JSON.stringify({ error: "There is missing field(s) in the PackageID or it is formed improperly, or is invalid." }),
@@ -77,28 +78,48 @@ export const handler: APIGatewayProxyHandler = async (event) => {
         }
     } 
 
-    // Decode base64 'Content' to binary buffer (zip file)
-    const zipBuffer = Buffer.from(Content, "base64");
+    console.log("Line 80 :D");
+    let repositoryURL;
+    let zip = null;
 
-    // Unzip the Content
-    const zip = new AdmZip(zipBuffer);
+    if (Content) {
+        // Decode base64 'Content' to binary buffer (zip file)
+        const zipBuffer = Buffer.from(Content, "base64");
 
-    const packageJsonFile = zip.getEntry("package.json");
+        // Unzip the Content
+        zip = new AdmZip(zipBuffer);
 
-    // CHECK --->  Unsure if this is really needed I think we're allowed to assume package.json exists
-    if (!packageJsonFile) {
-        return {
-            statusCode: 400,
-            body: JSON.stringify({ error: "Package does not contain a package.json file." }),
-        };
+        const packageJsonFile = zip.getEntry("package.json");
+
+        // CHECK --->  Unsure if this is really needed I think we're allowed to assume package.json exists
+        if (!packageJsonFile) {
+            return {
+                statusCode: 400,
+                body: JSON.stringify({ error: "Package does not contain a package.json file." }),
+            };
+        }
+
+        // Extract package.json file
+        const packageJSON = JSON.parse(packageJsonFile.toString());
+        const packageName = packageJSON.name;
+        const repositoryURL = packageJSON.repository.url;
+        console.log("PackageName", packageName);
+        console.log("repositoryURL", repositoryURL);
     }
-
-    // Extract package.json file
-    const packageJSON = JSON.parse(packageJsonFile.toString());
-    const packageName = packageJSON.name;
-    const repositoryURL = packageJSON.repository.url;
-    console.log("PackageName", packageName);
-    console.log("repositoryURL", repositoryURL);
+    else if (URL) {
+       repositoryURL = URL; 
+        try {
+            const response = await fetch(repositoryURL);
+            const responseBody = await response.text();
+            const zipBuffer = Buffer.from(responseBody);
+            zip = new AdmZip(zipBuffer);
+        } catch (error) {
+            return {
+                statusCode: 400,
+                body: JSON.stringify({ error: "Failed to download package from URL." }),
+            };
+        }
+    }
 
     // Update metric calculation
 
@@ -115,6 +136,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
         });
         await dynamoDB.send(putItemCommand);
     } catch (error) {
+        console.log("Error adding metadata to DynamoDB");
         return {
             statusCode: 400,
             body: JSON.stringify({ error: "There is missing field(s) in the PackageID or it is formed improperly, or is invalid." }),
@@ -126,7 +148,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
         const putObjectCommand = new PutObjectCommand({
             Bucket: BUCKET_NAME,
             Key: Name,
-            Body: zip.toBuffer(),
+            Body: zip?.toBuffer(),
             Metadata: {
                 Name: Name,
                 Version: Version,
@@ -183,8 +205,8 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     // Check if package exists in S3
     try {
         const command = new GetObjectCommand({
-        Bucket: BUCKET_NAME,
-        Key: packageID,
+            Bucket: BUCKET_NAME,
+            Key: packageID,
         });
 
         const response = await s3.send(command);

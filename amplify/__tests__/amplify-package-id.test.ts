@@ -154,6 +154,16 @@ describe('Package API Handler', () => {
       pathParameters: ({ httpMethod: 'POST' }),
     } as any;
 
+    s3Mock.on(HeadObjectCommand).resolves({
+      ContentLength: 12345,
+      LastModified: new Date(),
+      ETag: '"etag"',
+      Metadata: {
+        Name: 'test',
+        Version: 'version',
+      },
+    });
+    
     dynamoDBMock.on(PutItemCommand).resolves({});
     s3Mock.on(PutObjectCommand).resolves({});
 
