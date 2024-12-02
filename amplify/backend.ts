@@ -14,6 +14,9 @@ import {
 import { myApiFunction } from './functions/api-function/resource.js';
 import { ApiGateway } from 'aws-cdk-lib/aws-events-targets';
 import { Stack } from 'aws-cdk-lib';
+import { Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
+import { UserPool } from 'aws-cdk-lib/aws-cognito';
+import * as iam from 'aws-cdk-lib/aws-iam';
 
 const backend = defineBackend({
   auth,           // creates cognito
@@ -21,6 +24,9 @@ const backend = defineBackend({
   storage,        // creates s3
   myApiFunction,  // creates lambda
 });
+
+//const {} = backend.auth.resources.cfnResources;
+
 
 // create API stack
 const apiStack = backend.createStack('api-stack');
@@ -33,40 +39,19 @@ const myRestApi = new RestApi(apiStack, "RestApi", {
     stageName: "dev",
   },
   defaultCorsPreflightOptions: {
-    allowOrigins: Cors.ALL_ORIGINS, // Restrict this to domains you trust
-    allowMethods: Cors.ALL_METHODS, // Specify only the methods you need to allow
-    allowHeaders: Cors.DEFAULT_HEADERS, // Specify only the headers you need to allow
+    allowOrigins: ["https://main.dec29zvcbtyi8.amplifyapp.com/", "https://wdyoiqbu66.execute-api.us-east-1.amazonaws.com/dev/"], // Restrict this to domains you trust
+    allowMethods: ["GET", "POST", "DELETE", "PUT"],
+    //allowHeaders: ["X-authorization"], // Specify only the headers you need to allow
   },
 });
 
 
 
-
-// creates PackageData model from the API reference
-const packageData: Model = myRestApi.addModel('PackageData', {
-  schema: {
-    type: JsonSchemaType.OBJECT,
-    properties: {
-      Name: {
-        type: JsonSchemaType.STRING
-      },
-      Content: {
-        type: JsonSchemaType.STRING
-      },
-      URL: {
-        type: JsonSchemaType.STRING
-      },
-      Debloat: {
-        type: JsonSchemaType.BOOLEAN
-      },
-      JSProgram: {
-        type: JsonSchemaType.STRING
-      }
-    },
-    required: ["JSProgram", "Debloat", "Name"],
-    oneOf: [{required: ["Content"]}, {required: ["URL"]}]
-  }
-});
+// cognito user pools authorizer
+//const userPool = new UserPool(apiStack, "UserPool", "us-east-1_cwR5jLfKp");
+//const cognitoAuth = new CognitoUserPoolsAuthorizer(apiStack, "CognitoAuth", {
+//  cognitoUserPools: [backend.auth.resources.userPool],
+//});
 
 
 // create lambda integration
@@ -78,21 +63,8 @@ const lambdaIntegration = new LambdaIntegration(
 const packagePath = myRestApi.root.addResource('package');
 
 packagePath.addMethod('POST', lambdaIntegration, {
-  requestParameters: {
-    "method.request.header.X-authorization": true,  // Requires 'X-authorization' header
-  },
-  requestModels: {'application/json': packageData},
-  requestValidatorOptions: {
-    validateRequestBody: true,
-    validateRequestParameters: true
-  }
+
 });
-
-packagePath.addProxy({
-  anyMethod: false,
-  defaultIntegration: lambdaIntegration
-})
-
 
 
 
@@ -107,4 +79,4 @@ backend.addOutput({
       }
     }
   }
-})
+});

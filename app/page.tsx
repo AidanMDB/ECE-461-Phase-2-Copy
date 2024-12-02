@@ -10,46 +10,38 @@ import "@aws-amplify/ui-react/styles.css";
 //import { useAuthenticator } from "@aws-amplify/ui-react";
 import Link from "next/link";
 
-Amplify.configure(outputs);
+// reference existing AWS cognito
+Amplify.configure(outputs); 
 
 const client = generateClient<Schema>();
 
 export default function App() {
   //const { user, signOut } = useAuthenticator();
-  const [todos, setTodos] = useState<Array<Schema["Todo"]["type"]>>([]);
+  const [packages, setPackages] = useState<Array<Schema["Package"]["type"]>>([]);
 
-  function listTodos() {
-    client.models.Todo.observeQuery().subscribe({
-      next: (data) => setTodos([...data.items]),
+  function listPackages() {
+    client.models.Package.observeQuery().subscribe({
+      next: (data) => setPackages([...data.items]),
     });
   }
+
+  //function listPackageData() {      Edit this so it will display the ratings on click
+
+  //};
 
   useEffect(() => {
-    listTodos();
+    listPackages();
   }, []);
-
-  function createTodo() {
-    client.models.Todo.create({
-      content: window.prompt("Todo content"),
-    });
-  }
-
-  function deleteTodo(id: string) {
-    client.models.Todo.delete({ id });
-  }
 
   return (
     <main>
-      <h1>My todos</h1>
-      <button onClick={createTodo}>+ new</button>
+      <h1>Packages</h1>
       <ul>
-        {todos.map((todo) => (
-          <li onClick={() => deleteTodo(todo.id)} key={todo.id}>{todo.content}</li>
+        {packages.map((pkg) => (
+          <li key={pkg.ID}>{pkg.Name} : {pkg.Version}</li>
         ))}
       </ul>
       <div>
-        🥳 App successfully hosted. Try creating a new todo.
-        <br />
       </div>
       <Link href="/upload"><button>Go to Upload File Page</button></Link>
     </main>
