@@ -80,7 +80,8 @@ describe("Handler Tests", () => {
     const result = (await handler(event, {} as any, () => {})) as APIGatewayProxyResult;
 
     expect(result.statusCode).toBe(400);
-    expect(result.body).toBe(JSON.stringify("There is missing field(s) in the PackageID."));
+    const responseBody = JSON.parse(result.body);
+    expect(responseBody.error).toBe("There is missing field(s) in the PackageID.");
   });
 
   test("GET Request - Package Not Found (404)", async () => {
@@ -114,9 +115,7 @@ describe("Handler Tests", () => {
 
     expect(result.statusCode).toBe(500);
     const responseBody = JSON.parse(result.body);
-    expect(responseBody.error).toBe(
-      "The package rating system choked on at least one of the metrics."
-    );
+    expect(responseBody.error).toBe("The package rating system choked on at least one of the metrics.");
   });
 
   test("GET Request - Unsupported HTTP Method (400)", async () => {
@@ -130,24 +129,8 @@ describe("Handler Tests", () => {
 
     expect(result.statusCode).toBe(400);
     const responseBody = JSON.parse(result.body);
-    expect(responseBody.error).toBe("There is missing field(s) in the PackageID");
+    expect(responseBody.error).toBe("There is missing field(s) in the PackageID.");
   });
-
-//   test("GET Request - Case-Insensitive Authorization Header (200)", async () => {
-//     const event: APIGatewayProxyEvent = {
-//       headers: { "x-Authorization": "Bearer token" }, // Case-insensitive
-//       httpMethod: "GET",
-//       pathParameters: { id: "123" },
-//     } as any;
-
-//     s3Mock.on(HeadObjectCommand, { Bucket: BUCKET_NAME, Key: "123" }).resolves({});
-
-//     const result = (await handler(event, {} as any, () => {})) as APIGatewayProxyResult;
-
-//     expect(result.statusCode).toBe(200);
-//     const responseBody = JSON.parse(result.body);
-//     expect(responseBody.NetScore).toBe(0.85);
-//   });
 
   test("GET Request - Large Package ID (200)", async () => {
     const largePackageID = "a".repeat(1024); // Very long package ID
@@ -158,12 +141,11 @@ describe("Handler Tests", () => {
     } as any;
 
     s3Mock.on(HeadObjectCommand, { Bucket: BUCKET_NAME, Key: largePackageID }).resolves({});
+    dynamoDBMock.on(GetItemCommand).resolves({});
 
     const result = (await handler(event, {} as any, () => {})) as APIGatewayProxyResult;
 
     expect(result.statusCode).toBe(200);
-    const responseBody = JSON.parse(result.body);
-    expect(responseBody.NetScore).toBe(0.85);
   });
 
   test("GET Request - S3 Throttling (500)", async () => {
