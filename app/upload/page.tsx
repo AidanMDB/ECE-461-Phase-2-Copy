@@ -1,22 +1,17 @@
 "use client";
 
-import "../app.css";
+import React, { useState } from "react";
 import "../globals.css";
 import "./upload.css";
-// import "@aws-amplify/ui-react/styles.css";
-import React, { useState } from "react";
 import API from "@aws-amplify/api";
 
 export default function UploadPage() {
+  const [uploadType, setUploadType] = useState<"url" | "zip">("zip"); // "zip" for ZIP file, "url" for URL
   const [file, setFile] = useState<File | null>(null);
   const [uploadStatus, setUploadStatus] = useState<string>("");
   const [debloat, setDebloat] = useState<boolean>(false);
   const [url, setUrl] = useState<string>("");
-  const [seeURL, setSeeURL] = useState<boolean>(false);
 
-  /*
-  * Handles file change event
-  */
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0];
     if (selectedFile) {
@@ -29,76 +24,129 @@ export default function UploadPage() {
     }
   };
 
-  /*
-  * Handles upload button click
-  */
   const handleUpload = async () => {
-    // check if a files is given
-    if (!file) {
+    if (uploadType === "zip" && !file) {
       setUploadStatus("Please select a file");
+      return;
+    }
+    if (uploadType === "url" && !url) {
+      setUploadStatus("Please enter a URL");
       return;
     }
 
     try {
-      // get data from form input
       const formData = new FormData();
-      formData.append("Name", file.name);
-      formData.append("Content", file);
+      if (uploadType === "zip" && file) {
+        formData.append("Name", file.name);
+        formData.append("Content", file);
+      } else if (uploadType === "url") {
+        formData.append("URL", url);
+      }
       formData.append("Debloat", JSON.stringify(debloat));
-      formData.append("JSProgram", '');
+      formData.append("JSProgram", "");
 
       const { response } = await API.post({
         apiName: "Phase2Webapp-RestApi",
         path: "/package",
-        options: {
-          headers: {},      // will have to fill in with cognito
-          body: formData
-          }
-        }
-      )
+        options: { body: formData },
+      });
 
-      if ((await response).statusCode === 200) {
-        setUploadStatus("File Uploaded successfully");
-      }
-      else {
-        setUploadStatus(`Upload failed: ${(await response).body}`);
-      }
+      const status = await response;
+      setUploadStatus(status.statusCode === 200 ? "Upload successful" : `Upload failed: ${status.body}`);
     } catch (error) {
-      setUploadStatus(`Error within upload/pages.tsx: ${error}`);
+      setUploadStatus(`Error during upload: ${error}`);
     }
   };
 
-    return (
-      <div>
+  return (
+    <div>
+      <header className="App-header">
         <h1>Upload Your Package</h1>
-        <div>
-          <label className="switch">
-            File Upload
-            <input type="checkbox" onChange={() => setSeeURL(!seeURL)} />
-            <span className="slider round"></span>
-            URL Upload
-          </label>
-        </div>
-        {!seeURL &&
-        
-          <div>
-            <input type="file" accept=".zip" onChange={handleFileChange} />
-            <label>
-              <input type="checkbox" checked={debloat} onChange={(e) => setDebloat(e.target.checked)} />
-              Enable Debloat
+      </header>
+
+      <main>
+        <form className="input-section">
+          {/* Toggle Switch for Upload Type */}
+          <div className="form-group">
+            <div className="toggle-container">
+              <label>
+                <input
+                  type="radio"
+                  name="uploadType"
+                  value="zip"
+                  checked={uploadType === "zip"}
+                  onChange={() => setUploadType("zip")}
+                />
+                <span className="toggle-option">ZIP File</span>
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name="uploadType"
+                  value="url"
+                  checked={uploadType === "url"}
+                  onChange={() => setUploadType("url")}
+                />
+                <span className="toggle-option">URL</span>
+              </label>
+            </div>
+          </div>
+
+          {/* File or URL Input */}
+          {uploadType === "zip" ? (
+            <div className="form-group">
+              <label htmlFor="file">Select File:</label>
+              <input
+                id="file"
+                type="file"
+                accept=".zip"
+                onChange={handleFileChange}
+                className="input"
+              />
+            </div>
+          ) : (
+            <div className="form-group">
+              <label htmlFor="url">Enter URL:</label>
+              <input
+                id="url"
+                type="text"
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
+                className="input"
+                placeholder="Enter package URL"
+              />
+            </div>
+          )}
+
+          {/* Debloat Toggle */}
+          <div className="form-group">
+            <label className="switch">
+              <span>Enable Debloat</span>
+              <input
+                type="checkbox"
+                checked={debloat}
+                onChange={() => setDebloat(!debloat)}
+              />
+              <span className="slider round"></span>
             </label>
           </div>
-        }
-        {seeURL &&
-          <div>
-            <label>
-              Enter URL:
-              <input type="text" value={url} onChange={(e) => setUrl(e.target.value)} />
-            </label>
+
+          {/* Upload Button */}
+          <div className="button-group">
+            <button
+              className="search-button"
+              type="button"
+              onClick={handleUpload}
+              disabled={uploadType === "zip" ? !file : !url}
+            >
+              Upload
+            </button>
           </div>
-        }
-        <button onClick={handleUpload} disabled={!file && !url}>Upload</button>
-        {uploadStatus && <p>{uploadStatus}</p>}
-      </div>
-    );
-};
+
+          {/* Status Message */}
+          {uploadStatus && <p className="status">{uploadStatus}</p>}
+        </form>
+      </main>
+    </div>
+  );
+}
