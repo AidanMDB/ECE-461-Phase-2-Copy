@@ -60,6 +60,7 @@ export default function UploadPage() {
 
   return (
     <div>
+      <title>Package Manager</title>
       <header className="App-header">
         <h1>Upload Your Package</h1>
       </header>

@@ -9,6 +9,7 @@ const LoginPage = () => {
   const [password, setPassword] = useState('');
     return (
       <div className='login'>
+        <title>Package Manager</title>
         <header className="App-header">
           <h1>Login Page</h1>
         </header>

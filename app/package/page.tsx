@@ -5,6 +5,7 @@ import '../globals.css';
 const Package = async (data:any) => {
     return (
       <div className="view-package-container">
+        <title>Package Manager</title>
       <header className='App-header'>
         <div className="back-button">
         <Link href="/homepage">

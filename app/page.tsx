@@ -36,11 +36,12 @@ export default function App() {
 
   return (
     <main className="App">
+      <title>Package Manager</title>
       <header className="App-header">
         <div className="login-container">
           <Link className="sign-up" href="/login"><button className="login-button">Login</button></Link>
         </div>
-        <h1>Package Manager</h1>
+        <h1 className="title">Package Manager</h1>
       </header>
     </main>
     // <main>

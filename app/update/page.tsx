@@ -70,6 +70,7 @@ export default function UpdatePage({ id }: { id: string }) {
 
   return (
     <div>
+      <title>Package Manager</title>
       <header className="App-header">
         <h1>Update Package</h1>
       </header>

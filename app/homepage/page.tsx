@@ -21,6 +21,7 @@ const HomePage = () => {
     }
   return (
     <div className="App">
+      <title>Package Manager</title>
       <header className="App-header">
         <div className="login-container">
           <Link className="sign-up" href="/upload"><button className="login-button">Upload Package</button></Link>

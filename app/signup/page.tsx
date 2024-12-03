@@ -13,6 +13,7 @@ const SignUp = () => {
 
     return (
       <div className='login'>
+        <title>Package Manager</title>
         <header className="App-header">
           <h1>SignUp Page</h1>
         </header>
