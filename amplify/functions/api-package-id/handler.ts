@@ -83,6 +83,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     let zip = null;
 
     if (Content) {
+        console.log("Content set");
         // Decode base64 'Content' to binary buffer (zip file)
         const zipBuffer = Buffer.from(Content, "base64");
 
@@ -107,9 +108,12 @@ export const handler: APIGatewayProxyHandler = async (event) => {
         console.log("repositoryURL", repositoryURL);
     }
     else if (URL) {
-       repositoryURL = URL; 
+        console.log("URL set");
+        repositoryURL = URL; 
+        console.log("repositoryURL", repositoryURL);
         try {
             const response = await fetch(repositoryURL);
+            console.log("response", response);
             const responseBody = await response.text();
             const zipBuffer = Buffer.from(responseBody);
             zip = new AdmZip(zipBuffer);
@@ -124,6 +128,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     // Update metric calculation
 
     // add new metadata in dynamoDB (version, name, id)?
+    console.log("adding metadata to DynamoDB");
     try {
         const putItemCommand = new PutItemCommand({
             TableName: TABLE_NAME,
@@ -144,6 +149,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     }
 
     // Upload the package to S3
+    console.log("uploading package to S3");
     try {
         const putObjectCommand = new PutObjectCommand({
             Bucket: BUCKET_NAME,

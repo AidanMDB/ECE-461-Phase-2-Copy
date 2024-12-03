@@ -154,10 +154,23 @@ describe('Package API Handler', () => {
       pathParameters: ({ httpMethod: 'POST' }),
     } as any;
 
+    // const zip = new AdmZip();
+    // zip.addFile('package.json', Buffer.from(JSON.stringify({
+    //   name: "example-package",
+    //   version: "1.0.0",
+    //   repository: {
+    //     type: "git",
+    //     url: "https://github.com/example/repo.git"
+    //   }
+    // })));
+    // const zipBuffer = zip.toBuffer();
+
+    // fetch.mockResponseOnce(zipBuffer.toString('binary'), { status: 200 });
+
     s3Mock.on(HeadObjectCommand).resolves({
       ContentLength: 12345,
       LastModified: new Date(),
-      ETag: '"etag"',
+      ETag: 'etag',
       Metadata: {
         Name: 'test',
         Version: 'version',
