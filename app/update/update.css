@@ -1,0 +1,88 @@
+/* Center the content on the page */
+.centered-page {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    text-align: center;
+  }
+  
+  .input-section {
+    width: 100%;
+    max-width: 400px;
+    margin: auto;
+  }
+  
+  .form-group {
+    margin: 15px 0;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .input {
+    width: 100%;
+    padding: 8px;
+    font-size: 16px;
+  }
+  
+  .switch {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 10px 0;
+  }
+  
+  .slider {
+    margin-left: 10px;
+  }
+  
+  .button-group {
+    margin-top: 20px;
+  }
+  
+  .search-button {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  
+  .status {
+    margin-top: 15px;
+    color: #333;
+  }
+  
+  /* Radio Toggle Styles */
+  .toggle-container {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .toggle-container label {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+  }
+  
+  .toggle-container input[type="radio"] {
+    display: none;
+  }
+  
+  .toggle-option {
+    padding: 10px 20px;
+    border-radius: 20px;
+    background-color: #ccc;
+    color: #000;
+    font-size: 16px;
+    transition: background-color 0.3s, color 0.3s;
+  }
+  
+  .toggle-container input[type="radio"]:checked + .toggle-option {
+    background-color: #89B0AE;
+    color: #fff;
+  }
+  
