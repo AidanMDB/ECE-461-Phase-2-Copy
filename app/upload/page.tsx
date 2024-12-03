@@ -80,6 +80,7 @@ export default function UploadPage() {
           </label>
         </div>
         {!seeURL &&
+        
           <div>
             <input type="file" accept=".zip" onChange={handleFileChange} />
             <label>
