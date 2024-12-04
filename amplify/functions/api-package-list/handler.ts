@@ -1,0 +1,98 @@
+import type { APIGatewayProxyHandler } from "aws-lambda";
+import { S3Client, HeadObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
+import { DynamoDBClient, ScanCommand } from '@aws-sdk/client-dynamodb';
+
+const dynamoDb = new DynamoDBClient();
+const TABLE_NAME = process.env.PACKAGES_TABLE || "packageTable";
+
+const s3 = new S3Client();
+const BUCKET_NAME = "packageStorage";
+
+export const handler: APIGatewayProxyHandler = async (event) => {
+  // check for 'X-authorization' header
+  const authHeader = event.headers["X-authorization"];
+  if (!authHeader) {
+    return {
+      statusCode: 403,
+      body: JSON.stringify("Authentication failed due to invalid or missing AuthenticationToken.")
+    };
+  }
+
+  // Parse the JSON body to see if it exists
+  let requestBody;
+  let offset;
+  try {
+    requestBody = JSON.parse(event.body || "{}"); 
+    if(requestBody.offset) {
+        offset = requestBody.offset;
+    }
+    else {
+        offset = 100;
+    }
+  } catch (error) {
+    return {
+      statusCode: 400,
+      body: JSON.stringify("There is missing field(s) in the PackageQuery or it is formed improperly, or is invalid.")
+    };
+  }
+
+  // get list of packages from dynamoDB
+  // need to add version and name !!!
+  let list = []
+  const params = {
+    TableName: TABLE_NAME,
+    FilterExpression: 'contains(#name, :regex) OR contains(#readme, :regex)',
+    ExpressionAttributeNames: {
+      '#name': 'Name',
+      '#readme': 'ReadME',
+    },
+    Limit: offset,
+    // Might need to add this later if we want to implement pagination
+    //ExclusiveStartkey: event.queryStringParameters.LastEvaluatedKey ? JSON.parse(event.queryStringParameters.LastEvaluatedKey) : undefined,
+  };
+
+  try {
+    const result = await dynamoDb.send(new ScanCommand(params));
+
+    if (result.Items && result.Items.length > 0) {
+      const items = result.Items;
+
+      const formattedItems = items.map(item => ({
+        Version: item.Version.S,
+        Name: item.Name.S,
+        ID: item.ID.S,
+      }));
+    } else {
+        return {
+            statusCode: 404,
+            body: JSON.stringify({ error: 'No packages found.' }),
+        };
+    }
+  } catch (error) {
+    return {
+        statusCode: 500,
+        body: JSON.stringify({ error: error }),
+    };
+  }
+
+  if(offset && (offset < list.length)) {
+    return {
+        statusCode: 413,
+        // Modify the CORS settings below to match your specific requirements
+        headers: {
+          "Access-Control-Allow-Origin": "*", // Restrict this to domains you trust
+          "Access-Control-Allow-Headers": "*", // Specify only the headers you need to allow
+        },
+        body: JSON.stringify("Too many packages returned."),
+      };
+  }
+  return {
+    statusCode: 200,
+    // Modify the CORS settings below to match your specific requirements
+    headers: {
+      "Access-Control-Allow-Origin": "*", // Restrict this to domains you trust
+      "Access-Control-Allow-Headers": "*", // Specify only the headers you need to allow
+    },
+    body: JSON.stringify("Hello from myFunction!"),
+  }; 
+};
