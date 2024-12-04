@@ -18,17 +18,17 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     };
   }
 
+  // check for offset
+  let offset = event.headers["offset"];
+  if(!offset) {
+    offset = "100";
+  }
+
   // Parse the JSON body to see if it exists
   let requestBody;
-  let offset;
   try {
     requestBody = JSON.parse(event.body || "{}"); 
-    if(requestBody.offset) {
-        offset = requestBody.offset;
-    }
-    else {
-        offset = 100;
-    }
+    console.log("request body:",requestBody);
   } catch (error) {
     return {
       statusCode: 400,
@@ -38,7 +38,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
 
   // get list of packages from dynamoDB
   // need to add version and name !!!
-  let list = []
+  let list: string | any[] = []
   const params = {
     TableName: TABLE_NAME,
     FilterExpression: 'contains(#name, :regex) OR contains(#readme, :regex)',
@@ -46,7 +46,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
       '#name': 'Name',
       '#readme': 'ReadME',
     },
-    Limit: offset,
+    Limit: parseInt(offset),
     // Might need to add this later if we want to implement pagination
     //ExclusiveStartkey: event.queryStringParameters.LastEvaluatedKey ? JSON.parse(event.queryStringParameters.LastEvaluatedKey) : undefined,
   };
@@ -57,17 +57,12 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     if (result.Items && result.Items.length > 0) {
       const items = result.Items;
 
-      const formattedItems = items.map(item => ({
+      list = items.map(item => ({
         Version: item.Version.S,
         Name: item.Name.S,
         ID: item.ID.S,
       }));
-    } else {
-        return {
-            statusCode: 404,
-            body: JSON.stringify({ error: 'No packages found.' }),
-        };
-    }
+    } 
   } catch (error) {
     return {
         statusCode: 500,
@@ -75,7 +70,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     };
   }
 
-  if(offset && (offset < list.length)) {
+  if((parseInt(offset) < list.length)) {
     return {
         statusCode: 413,
         // Modify the CORS settings below to match your specific requirements
@@ -93,6 +88,6 @@ export const handler: APIGatewayProxyHandler = async (event) => {
       "Access-Control-Allow-Origin": "*", // Restrict this to domains you trust
       "Access-Control-Allow-Headers": "*", // Specify only the headers you need to allow
     },
-    body: JSON.stringify("Hello from myFunction!"),
+    body: JSON.stringify(list),
   }; 
 };
