@@ -125,7 +125,53 @@ try:
     time.sleep(2)  # Wait for the file names to display
 
     print("Search test passed successfully")
-    # 10. Test the upload package functionality . NEED TO FIX.
+
+    # 10. Test the upload package functionality
+    upload_button = driver.find_element(By.XPATH, "//button[text()='Upload Package']")
+    assert upload_button.is_displayed(), "Upload button not found"
+
+    # Click the "Upload Package" button
+    upload_button.click()
+    time.sleep(2)
+
+    # Select the ZIP file radio button
+    zip_radio_button = driver.find_element(By.XPATH, "//input[@name='uploadType' and @value='zip']")
+    assert zip_radio_button.is_selected(), "ZIP radio button not selected."
+    time.sleep(1)
+
+    # Test file upload
+    choose_file_button = driver.find_element(By.NAME, "fileUpload")
+    assert choose_file_button.is_displayed(), "Choose file button not visible"
+    time.sleep(1)
+
+    # Test uploading a file ?
+
+    # Toggle the debloat checkbox
+    debloat_checkbox = driver.find_element(
+        By.XPATH, "//input[@type='checkbox']")
+    debloat_checkbox.click()
+    assert debloat_checkbox.is_selected(), "Debloat checkbox not toggled on"
+    time.sleep(1)
+
+    # Test URL upload
+    url_radio_button = driver.find_element(By.XPATH, "//input[@type='radio' and @name='uploadTypeURL']")
+    driver.execute_script("arguments[0].click();", url_radio_button)
+    time.sleep(2)
+
+    assert url_radio_button.is_displayed(), "URL button not visible."
+    assert url_radio_button.is_selected(), "URL option not selected."
+
+    # Check for URL input field
+    url_input = driver.find_element(By.XPATH, "//input[@id='url']")
+    assert url_input.is_displayed(), "URL input not visible."
+
+    # Test Debloat toggle
+    debloat_checkbox = driver.find_element(
+        By.XPATH, "//input[@type='checkbox']")
+    debloat_checkbox.click()
+    time.sleep(1)
+    assert debloat_checkbox.is_selected(), "Debloat checkbox not working."
+    print("Upload functionality tests passed")
 
     # 11. Test the view package page and functionality
     # Test "Back" button navigation

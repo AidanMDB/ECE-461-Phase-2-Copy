@@ -80,10 +80,10 @@ export default function UploadPage() {
                 />
                 <span className="toggle-option">ZIP File</span>
               </label>
-              <label>
+              <label htmlFor="radio">
                 <input
                   type="radio"
-                  name="uploadType"
+                  name="uploadTypeURL"
                   value="url"
                   checked={uploadType === "url"}
                   onChange={() => setUploadType("url")}
@@ -99,6 +99,7 @@ export default function UploadPage() {
               <label htmlFor="file">Select File:</label>
               <input
                 id="file"
+                name="fileUpload"
                 type="file"
                 accept=".zip"
                 onChange={handleFileChange}
