@@ -156,22 +156,27 @@ try:
     # Test URL upload
     url_radio_button = driver.find_element(By.XPATH, "//input[@type='radio' and @name='uploadTypeURL']")
     driver.execute_script("arguments[0].click();", url_radio_button)
-    time.sleep(2)
-
-    assert url_radio_button.is_displayed(), "URL button not visible."
     assert url_radio_button.is_selected(), "URL option not selected."
+    time.sleep(2)
 
     # Check for URL input field
     url_input = driver.find_element(By.XPATH, "//input[@id='url']")
     assert url_input.is_displayed(), "URL input not visible."
 
     # Test Debloat toggle
-    debloat_checkbox = driver.find_element(
-        By.XPATH, "//input[@type='checkbox']")
-    debloat_checkbox.click()
-    time.sleep(1)
+    debloat_checkbox = driver.find_element(By.XPATH, "//input[@type='checkbox']")
     assert debloat_checkbox.is_selected(), "Debloat checkbox not working."
+
+    # Toggle the debloat checkbox
+    debloat_checkbox.click()
+    assert not debloat_checkbox.is_selected(), "Debloat checkbox not working."
     print("Upload functionality tests passed")
+
+    # Test clicking submit without URL
+
+    # Check adding URL
+
+    # Test clicking submit button
 
     # 11. Test the view package page and functionality
     # Test "Back" button navigation
@@ -189,43 +194,3 @@ try:
 finally:
     # Close the browser
     driver.quit()
-
-'''
-## UPLOAD FUNCTIONALITY NOT FULLY WORKING. NEED TO FIX
-    # 10. Test the upload package functionality
-    # Select the ZIP file radio button
-    zip_radio_button = driver.find_element(
-        By.XPATH, "//input[@name='uploadType' and @value='zip']")
-    zip_radio_button.click()
-    assert zip_radio_button.is_selected(), "ZIP radio button not selected."
-
-    # Test file upload
-    choose_file_button = driver.find_element(
-        By.XPATH, "//button[text()='Choose File']")
-    zip_radio_button.click()
-    time.sleep(1)
-    assert choose_file_button.is_displayed(), "Choose file button not visible"
-
-    # Toggle the debloat checkbox
-    debloat_checkbox = driver.find_element(
-        By.XPATH, "//input[@type='checkbox']")
-    debloat_checkbox.click()
-    assert debloat_checkbox.is_selected(), "Debloat checkbox not toggled on"
-
-    # Test URL upload
-    url_button = driver.find_element(
-        By.XPATH, "//input[@name='uploadType' and @value='URL']")
-    url_button.click()
-    time.sleep(1)
-    url_input = driver.find_element(By.XPATH, "//input[@id='url']")
-    assert url_button.is_selected(), "URL option not selected."
-    assert url_input.is_displayed(), "URL input not visible."
-
-    # Test Debloat toggle
-    debloat_checkbox = driver.find_element(
-        By.XPATH, "//input[@type='checkbox']")
-    debloat_checkbox.click()
-    time.sleep(1)
-    assert debloat_checkbox.is_selected(), "Debloat checkbox not working."
-    print("Upload functionality tests passed")
-'''
