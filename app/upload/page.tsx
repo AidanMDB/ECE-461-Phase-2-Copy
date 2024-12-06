@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import "../globals.css";
 import "./upload.css";
-import API from "@aws-amplify/api";
+import { post } from "@aws-amplify/api";
 
 export default function UploadPage() {
   // const [uploadType, setUploadType] = useState<"url" | "zip">("zip"); // "zip" for ZIP file, "url" for URL
@@ -47,7 +47,7 @@ export default function UploadPage() {
       formData.append("Debloat", JSON.stringify(debloat));
       formData.append("JSProgram", "");
 
-      const { response } = await API.post({
+      const { response } = await post({
         apiName: "Phase2Webapp-RestApi",
         path: "/package",
         options: { body: formData },

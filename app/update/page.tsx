@@ -3,10 +3,10 @@
 import React, { useState, useEffect } from "react";
 import "../globals.css";
 import "./update.css";
-import API from "@aws-amplify/api";
+import { post } from "@aws-amplify/api";
 import Link from "next/link";
 
-export default function UpdatePage({ id }: { id: string }) {
+export default function UpdatePage() {
   const [packageData, setPackageData] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [uploadFileNotURL, setUploadFileNotURL] = useState<boolean>(true);
@@ -54,7 +54,7 @@ export default function UpdatePage({ id }: { id: string }) {
       formData.append("Debloat", JSON.stringify(debloat));
       formData.append("JSProgram", "");
 
-      const { response } = await API.post({
+      const { response } = await post({
         apiName: "Phase2Webapp-RestApi",
         path: "/package",
         options: { body: formData },
