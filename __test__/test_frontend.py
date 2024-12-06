@@ -224,20 +224,19 @@ try:
 
     update_button.click()
     time.sleep(2)
+
     # Get the heading text
-    heading = driver.find_element_by_id("h1").text
+    heading = driver.find_element(By.TAG_NAME, "h1").text
     assert heading == "Update Package", \
         f"Not on update page. Current heading: {heading}"
 
+    # Check for the back button
+    back_button = driver.find_element(By.XPATH, "//button[text()='Back']")
     assert back_button.is_displayed(), "Back button not found"
     back_button.click()
     time.sleep(2)
-    # assert driver.title == "Package Manager", \
-    #     "Not on homepage after pressing back."
-    # update testing is very similar to upload testing,
-    # so not done too closely.
 
-    # print("Update Package navigation passed successfully")
+    print("Update Package navigation passed successfully")
 
 finally:
     # Close the browser
