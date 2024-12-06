@@ -33,6 +33,7 @@ async function getFirstLevelDependencies(packageName: string) {
 
 
 export const handler: APIGatewayProxyHandler = async (event) => {
+    // check for auth header
     try {
         const authHeader = event.headers["X-authorization"];
         console.log("authHeader", authHeader);
@@ -43,6 +44,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
         };
     }
 
+    // retrieve the id of the package
     const id = event.pathParameters?.id;
     if (!id) {
         return {
@@ -51,6 +53,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
         };
     }
 
+    let packageDep;
     try {
         const params = {
             TableName: process.env.TABLE_NAME,
@@ -66,6 +69,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
                 body: JSON.stringify("Package does not exist.")
             }
         }
+        packageDep = response.Item?.packageDep;
 
     } catch (error) {
         return {
@@ -75,9 +79,9 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     }
 
 
-
-
+    const dependencyJSON = JSON.parse(packageDep);
     
+
 
 
 
