@@ -13,6 +13,15 @@ import Link from "next/link";
 
 // reference existing AWS cognito
 Amplify.configure(outputs); 
+const existingConfig = Amplify.getConfig();
+Amplify.configure({
+  ...existingConfig,
+  API: {
+    ...existingConfig.API,
+    REST: outputs.custom.API,
+  },
+});
+
 
 const client = generateClient<Schema>();
 
