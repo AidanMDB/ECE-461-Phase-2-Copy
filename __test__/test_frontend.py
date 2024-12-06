@@ -111,7 +111,7 @@ try:
     assert upload_button.is_displayed(), "Upload button not found"
     assert logout_button.is_displayed(), "Logout button not found"
 
-    print("Signup test passed successfully!")
+    print("Signup test passed successfully")
 
     # 9. Test the search functionality
     search_input = driver.find_element(By.CLASS_NAME, "search-input")
@@ -127,7 +127,8 @@ try:
     print("Search test passed successfully")
 
     # 10. Test the upload package functionality
-    upload_button = driver.find_element(By.XPATH, "//button[text()='Upload Package']")
+    upload_button = driver.find_element(
+        By.XPATH, "//button[text()='Upload Package']")
     assert upload_button.is_displayed(), "Upload button not found"
 
     # Click the "Upload Package" button
@@ -135,7 +136,8 @@ try:
     time.sleep(2)
 
     # Select the ZIP file radio button
-    zip_radio_button = driver.find_element(By.XPATH, "//input[@name='uploadType' and @value='zip']")
+    zip_radio_button = driver.find_element(
+        By.XPATH, "//input[@name='uploadType' and @value='zip']")
     assert zip_radio_button.is_selected(), "ZIP radio button not selected."
     time.sleep(1)
 
@@ -154,7 +156,8 @@ try:
     time.sleep(1)
 
     # Test URL upload
-    url_radio_button = driver.find_element(By.XPATH, "//input[@type='radio' and @name='uploadTypeURL']")
+    url_radio_button = driver.find_element(
+        By.XPATH, "//input[@type='radio' and @name='uploadTypeURL']")
     driver.execute_script("arguments[0].click();", url_radio_button)
     assert url_radio_button.is_selected(), "URL option not selected."
     time.sleep(2)
@@ -164,13 +167,14 @@ try:
     assert url_input.is_displayed(), "URL input not visible."
 
     # Test Debloat toggle
-    debloat_checkbox = driver.find_element(By.XPATH, "//input[@type='checkbox']")
+    debloat_checkbox = driver.find_element(
+        By.XPATH, "//input[@type='checkbox']")
     assert debloat_checkbox.is_selected(), "Debloat checkbox not working."
 
     # Toggle the debloat checkbox
     debloat_checkbox.click()
     assert not debloat_checkbox.is_selected(), "Debloat checkbox not working."
-    print("Upload functionality tests passed")
+    print("Upload test passed successfully")
 
     # Test clicking submit without URL
 
@@ -178,18 +182,62 @@ try:
 
     # Test clicking submit button
 
-    # 11. Test the view package page and functionality
-    # Test "Back" button navigation
+    # 11. Test the back button from upload page and functionality
+    back_button = driver.find_element(By.XPATH, "//button[text()='Back']")
+    assert back_button.is_displayed(), "Back button not found"
+    back_button.click()  # Navigate back to the homepage
+    time.sleep(2)
+    print("Back navigation passed successfully")
 
-    # Navigate back to the "View Package" page for the next test
+    assert driver.title == "Package Manager", \
+        "Not on homepage after pressing back"
 
-    # Test "Download Package" button navigation
+    # Test the search functionality after back navigation
 
-    # Test "Update Package" button navigation
+    search_input = driver.find_element(By.CLASS_NAME, "search-input")
+    search_input.send_keys("test package")
+    assert search_input.get_attribute("value") == "test package", \
+        "Search input failed"
 
-    # 12. Test the download package functionality
+    # Simulate the displayS3Files function
+    search_button = driver.find_element(By.CLASS_NAME, "search-button")
+    search_button.click()
+    time.sleep(2)  # Wait for the file names to display
 
-    # 13. Test the update package functionality
+    # 12. Back to the "View Package" page for functionality testing
+    viewpackage_button = driver.find_element(
+        By.XPATH, "//button[text()='View Package']")
+    assert viewpackage_button.is_displayed(), "View Package button not found"
+    viewpackage_button.click()
+    time.sleep(2)
+    download_button = driver.find_element(
+        By.XPATH, "//button[text()='Download Package']")
+    update_button = driver.find_element(
+        By.XPATH, "//button[text()='Update Package']")
+
+    assert download_button.is_displayed(), "Download Package button not found"
+    assert update_button.is_displayed(), "Update Package button not found"
+
+    print("View Package passed successfully")
+
+    # 12. Test "Update Package" button navigation
+
+    update_button.click()
+    time.sleep(2)
+    # Get the heading text
+    heading = driver.find_element_by_id("h1").text
+    assert heading == "Update Package", \
+        f"Not on update page. Current heading: {heading}"
+
+    assert back_button.is_displayed(), "Back button not found"
+    back_button.click()
+    time.sleep(2)
+    # assert driver.title == "Package Manager", \
+    #     "Not on homepage after pressing back."
+    # update testing is very similar to upload testing,
+    # so not done too closely.
+
+    # print("Update Package navigation passed successfully")
 
 finally:
     # Close the browser

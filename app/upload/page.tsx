@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import "../globals.css";
 import "./upload.css";
 import API from "@aws-amplify/api";
@@ -63,6 +64,11 @@ export default function UploadPage() {
       <title>Package Manager</title>
       <header className="App-header">
         <h1>Upload Your Package</h1>
+        <div className="back-button">
+        <Link href="/homepage">
+            <button className="package-button">Back</button>
+          </Link> 
+        </div>
       </header>
 
       <main>

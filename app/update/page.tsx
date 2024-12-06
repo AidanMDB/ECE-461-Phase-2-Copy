@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import "../globals.css";
 import "./update.css";
 import API from "@aws-amplify/api";
+import Link from "next/link";
 
 export default function UpdatePage({ id }: { id: string }) {
   const [packageData, setPackageData] = useState<any>(null);
@@ -73,6 +74,11 @@ export default function UpdatePage({ id }: { id: string }) {
       <title>Package Manager</title>
       <header className="App-header">
         <h1>Update Package</h1>
+        <div className="back-button">
+        <Link href="/homepage">
+            <button className="package-button">Back</button>
+          </Link> 
+        </div>
       </header>
 
       <main>
