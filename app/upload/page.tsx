@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import "../globals.css";
 import "./upload.css";
-import  post from "aws-amplify";
+import { post } from "@aws-amplify/api";
 
 export default function UploadPage() {
   // const [uploadType, setUploadType] = useState<"url" | "zip">("zip"); // "zip" for ZIP file, "url" for URL
@@ -26,40 +26,6 @@ export default function UploadPage() {
     }
   };
 
-  // const handleUpload = async () => {
-  //   if (uploadFileNotURL && !file) {
-  //     setUploadStatus("Please select a file");
-  //     return;
-  //   }
-  //   if (!uploadFileNotURL && !url) {
-  //     setUploadStatus("Please enter a URL");
-  //     return;
-  //   }
-
-  //   try {
-  //     const formData = new FormData();
-  //     if (uploadFileNotURL && file) {
-  //       formData.append("Name", file.name);
-  //       formData.append("Content", file);
-  //     } else if (!uploadFileNotURL) {
-  //       formData.append("URL", url);
-  //     }
-  //     formData.append("Debloat", JSON.stringify(debloat));
-  //     formData.append("JSProgram", "");
-
-  //     const { response } = await API.post({
-  //       apiName: "Phase2Webapp-RestApi",
-  //       path: "/package",
-  //       options: { body: formData },
-  //     });
-
-  //     const status = await response;
-  //     setUploadStatus(status.statusCode === 200 ? "Upload successful" : `Upload failed: ${status.body}`);
-  //   } catch (error) {
-  //     setUploadStatus(`Error during upload: ${error}`);
-  //   }
-  // };
-
   const handleUpload = async () => {
     if (uploadFileNotURL && !file) {
       setUploadStatus("Please select a file");
@@ -69,7 +35,7 @@ export default function UploadPage() {
       setUploadStatus("Please enter a URL");
       return;
     }
-  
+
     try {
       const formData = new FormData();
       if (uploadFileNotURL && file) {
@@ -80,22 +46,19 @@ export default function UploadPage() {
       }
       formData.append("Debloat", JSON.stringify(debloat));
       formData.append("JSProgram", "");
-  
-      // Call post function
-      const response = await API.post("Phase2Webapp-RestApi", "/package", {
-        body: formData, // Body data
-        headers: { "Content-Type": "multipart/form-data" }, // Headers for form-data
+
+      const { response } = await post({
+        apiName: "Phase2Webapp-RestApi",
+        path: "/package",
+        options: { body: formData },
       });
-  
-      setUploadStatus(response.statusCode === 200 ? "Upload successful" : `Upload failed: ${response.body}`);
+
+      const status = await response;
+      setUploadStatus(status.statusCode === 200 ? "Upload successful" : `Upload failed: ${status.body}`);
     } catch (error) {
-      console.error("Upload error:", error);
-      if (error instanceof Error) {
-        setUploadStatus(`Error during upload: ${error.message}`);
-      } else {
-        setUploadStatus(`Error during upload: ${String(error)}`);
-      }
+      setUploadStatus(`Error during upload: ${error}`);
     }
+  };
 
   return (
     <div>
@@ -195,5 +158,4 @@ export default function UploadPage() {
       </main>
     </div>
   );
-}
 }
