@@ -6,7 +6,7 @@ import "./update.css";
 import { post } from "@aws-amplify/api";
 import Link from "next/link";
 
-export default function UpdatePage({ id }: { id: string }) {
+export default function UpdatePage() {
   const [packageData, setPackageData] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [uploadFileNotURL, setUploadFileNotURL] = useState<boolean>(true);
