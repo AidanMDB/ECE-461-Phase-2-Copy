@@ -4,11 +4,12 @@ import React, { useState, useEffect } from "react";
 import "../globals.css";
 import "./update.css";
 import API from "@aws-amplify/api";
+import Link from "next/link";
 
 export default function UpdatePage({ id }: { id: string }) {
   const [packageData, setPackageData] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const [uploadType, setUploadType] = useState<"url" | "zip">("zip");
+  const [uploadFileNotURL, setUploadFileNotURL] = useState<boolean>(true);
   const [file, setFile] = useState<File | null>(null);
   const [url, setUrl] = useState<string>("");
   const [debloat, setDebloat] = useState<boolean>(false);
@@ -23,9 +24,9 @@ export default function UpdatePage({ id }: { id: string }) {
   };
 
   const handleSubmit = () => {
-    if (uploadType === "zip" && !file) {
+    if (uploadFileNotURL && !file) {
       setStatusMessage("Please select a ZIP file.");
-    } else if (uploadType === "url" && !url) {
+    } else if (!uploadFileNotURL && !url) {
       setStatusMessage("Please enter a URL.");
     } else {
       setStatusMessage("Update submitted!");
@@ -33,21 +34,21 @@ export default function UpdatePage({ id }: { id: string }) {
   };
 
   const handleUpdate = async () => {
-    if (uploadType === "zip" && !file) {
+    if (uploadFileNotURL && !file) {
       setStatusMessage("Please select a file");
       return;
     }
-    if (uploadType === "url" && !url) {
+    if (!uploadFileNotURL && !url) {
         setStatusMessage("Please enter a URL");
       return;
     }
 
     try {
       const formData = new FormData();
-      if (uploadType === "zip" && file) {
+      if (uploadFileNotURL && file) {
         formData.append("Name", file.name);
         formData.append("Content", file);
-      } else if (uploadType === "url") {
+      } else if (!uploadFileNotURL) {
         formData.append("URL", url);
       }
       formData.append("Debloat", JSON.stringify(debloat));
@@ -73,6 +74,11 @@ export default function UpdatePage({ id }: { id: string }) {
       <title>Package Manager</title>
       <header className="App-header">
         <h1>Update Package</h1>
+        <div className="back-button">
+        <Link href="/homepage">
+            <button className="package-button">Back</button>
+          </Link> 
+        </div>
       </header>
 
       <main>
@@ -85,8 +91,8 @@ export default function UpdatePage({ id }: { id: string }) {
                   type="radio"
                   name="uploadType"
                   value="zip"
-                  checked={uploadType === "zip"}
-                  onChange={() => setUploadType("zip")}
+                  checked={uploadFileNotURL}
+                  onChange={() => setUploadFileNotURL(true)}
                 />
                 <span className="toggle-option">ZIP File</span>
               </label>
@@ -95,8 +101,8 @@ export default function UpdatePage({ id }: { id: string }) {
                   type="radio"
                   name="uploadType"
                   value="url"
-                  checked={uploadType === "url"}
-                  onChange={() => setUploadType("url")}
+                  checked={!uploadFileNotURL}
+                  onChange={() => setUploadFileNotURL(false)}
                 />
                 <span className="toggle-option">URL</span>
               </label>
@@ -104,7 +110,7 @@ export default function UpdatePage({ id }: { id: string }) {
           </div>
 
           {/* File or URL Input */}
-          {uploadType === "zip" ? (
+          {uploadFileNotURL ? (
             <div className="form-group">
               <label htmlFor="file">Select File:</label>
               <input
@@ -148,7 +154,7 @@ export default function UpdatePage({ id }: { id: string }) {
               className="search-button"
               type="button"
               onClick={handleUpdate}
-              disabled={uploadType === "zip" ? !file : !url}
+              disabled={uploadFileNotURL ? !file : !url}
             >
               Update Package
             </button>
