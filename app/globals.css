@@ -1,4 +1,4 @@
-:root {
+/* :root {
   --max-width: 1100px;
   --border-radius: 12px;
   --font-mono: ui-monospace, Menlo, Monaco, 'Cascadia Mono', 'Segoe UI Mono',
@@ -59,4 +59,78 @@ a {
   html {
     color-scheme: dark;
   }
+} */
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: Arial, Helvetica, sans-serif;
+} */
+
+.App {
+  text-align: center;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.App-header {
+  background-color: #89B0AE;
+  display: flex;
+  flex-direction: column;
+  padding-top: 5%;
+  padding-bottom: 5%;
+  align-items: center;
+  font-size: calc(10px + 2vmin);
+  color: black;
+}
+
+.App-link {
+  color: black;
+}
+
+.search-container {
+  display: flex;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.search-input {
+  padding: 10px;
+  font-size: 16px;
+  /* border: 1px solid #ccc; */
+  border: 1px solid black;
+  border-radius: 4px;
+  margin-right: 10px;
+  min-width: 50vh;
+}
+
+.search-button {
+  padding: 10px 20px;
+  font-size: 16px;
+  /* background-color: #827191; */
+  background-color: #273E47;
+  border: none;
+  border-radius: 4px;
+  color: white;
+  cursor: pointer;
+}
+
+.search-button:hover {
+  background-color: grey;
+}
+
+.login-container {
+  padding-left: 85%;
+}
+
+.login-button {
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #273E47;
+  border: none;
+  border-radius: 4px;
+  color: white;
+  cursor: pointer;
+  /* margin-left: 90%; */
+  /* padding-left: 90%; */
+  min-width: 10vh;
 }
