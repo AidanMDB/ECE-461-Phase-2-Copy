@@ -1,4 +1,4 @@
-import { type ClientSchema, a, defineData } from "@aws-amplify/backend";
+import { type ClientSchema, a, defineData, defineFunction } from "@aws-amplify/backend";
 
 /*== STEP 1 ===============================================================
 The section below creates a Todo database table with a "content" field. Try
@@ -6,25 +6,57 @@ adding a new "isDone" field as a boolean. The authorization rule below
 specifies that any user authenticated via an API key can "create", "read",
 "update", and "delete" any "Todo" records.
 =========================================================================*/
+const functionWithDataAccess = defineFunction({
+  name: 'api-function',
+  entry: '../functions/api-function/handler.ts',
+})
+
 const schema = a.schema({
-  Todo: a
-    .model({
-      content: a.string(),
-    })
-    .authorization((allow) => [allow.owner()]),
-  
-  
+  Package: a.model({
+    ID: a.string().required(),           // will just be {Name}{Version} concatenated
+    Name: a.string().required(),
+    ReadME: a.string().required(),
+    Version: a.string().required(),
+    JSProgram: a.string(),                // not a baseline requirment
+    S3Location: a.string(),    
+    Rating: a.hasOne("PackageRating", "ID"),
+  }).authorization((allow) => [allow.publicApiKey()]),
+
+  // .authorization((allow) => [allow.owner()])
+
+  PackageRating: a.model({
+    package: a.belongsTo("Package", "ID"),
+    ID: a.string().required(),
+    BusFactor: a.float().required(),
+    BusFactorLatency: a.float().required(),
+    Correctness: a.float().required(),
+    CorrectnessLatency: a.float().required(),
+    RampUp: a.float().required(),
+    RampUpLatency: a.float().required(),
+    ResponsiveMaintainer: a.float().required(),
+    ResponsiveMaintainerLatency: a.float().required(),
+    LicenseScore: a.float().required(),
+    LicenseScoreLatency: a.float().required(),
+    GoodPinningPractice: a.float().required(),
+    GoodPinningPracticeLatency: a.float().required(),
+    PullRequest: a.float().required(),
+    PullRequestLatency: a.float().required(),
+    NetScore: a.float().required(),
+    NetScoreLatency: a.float().required()
+  }).authorization((allow) => [allow.publicApiKey()]),
 });
+
+
 
 export type Schema = ClientSchema<typeof schema>;
 
 export const data = defineData({
   schema,
   authorizationModes: {
-    defaultAuthorizationMode: "userPool",
-    //apiKeyAuthorizationMode: {
-    //  expiresInDays: 30,
-    //},
+    defaultAuthorizationMode: "apiKey",
+    apiKeyAuthorizationMode: {
+      expiresInDays: 30,
+    },
   },
 });
 

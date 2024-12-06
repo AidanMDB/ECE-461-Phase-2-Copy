@@ -1,38 +1,45 @@
 "use client";
 
-import React, { useState } from "react";
-import Link from "next/link";
+import React, { useState, useEffect } from "react";
 import "../globals.css";
-import "./upload.css";
+import "./update.css";
 import API from "@aws-amplify/api";
+import Link from "next/link";
 
-export default function UploadPage() {
-  // const [uploadType, setUploadType] = useState<"url" | "zip">("zip"); // "zip" for ZIP file, "url" for URL
+export default function UpdatePage({ id }: { id: string }) {
+  const [packageData, setPackageData] = useState<any>(null);
+  const [loading, setLoading] = useState<boolean>(true);
   const [uploadFileNotURL, setUploadFileNotURL] = useState<boolean>(true);
   const [file, setFile] = useState<File | null>(null);
-  const [uploadStatus, setUploadStatus] = useState<string>("");
-  const [debloat, setDebloat] = useState<boolean>(false);
   const [url, setUrl] = useState<string>("");
+  const [debloat, setDebloat] = useState<boolean>(false);
+  const [statusMessage, setStatusMessage] = useState<string>("");
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0];
     if (selectedFile) {
-      if (selectedFile.type === "application/zip") {
-        setFile(selectedFile);
-        setUploadStatus("");
-      } else {
-        setUploadStatus("Please select a .zip file");
-      }
+      setFile(selectedFile);
+      setStatusMessage("");
     }
   };
 
-  const handleUpload = async () => {
+  const handleSubmit = () => {
     if (uploadFileNotURL && !file) {
-      setUploadStatus("Please select a file");
+      setStatusMessage("Please select a ZIP file.");
+    } else if (!uploadFileNotURL && !url) {
+      setStatusMessage("Please enter a URL.");
+    } else {
+      setStatusMessage("Update submitted!");
+    }
+  };
+
+  const handleUpdate = async () => {
+    if (uploadFileNotURL && !file) {
+      setStatusMessage("Please select a file");
       return;
     }
     if (!uploadFileNotURL && !url) {
-      setUploadStatus("Please enter a URL");
+        setStatusMessage("Please enter a URL");
       return;
     }
 
@@ -54,17 +61,19 @@ export default function UploadPage() {
       });
 
       const status = await response;
-      setUploadStatus(status.statusCode === 200 ? "Upload successful" : `Upload failed: ${status.body}`);
+      setStatusMessage(status.statusCode === 200 ? "Upload successful" : `Upload failed: ${status.body}`);
     } catch (error) {
-      setUploadStatus(`Error during upload: ${error}`);
+        setStatusMessage(`Error during upload: ${error}`);
     }
   };
+
+//   if (loading) return <p>Loading package details...</p>;
 
   return (
     <div>
       <title>Package Manager</title>
       <header className="App-header">
-        <h1>Upload Your Package</h1>
+        <h1>Update Package</h1>
         <div className="back-button">
         <Link href="/homepage">
             <button className="package-button">Back</button>
@@ -90,7 +99,7 @@ export default function UploadPage() {
               <label>
                 <input
                   type="radio"
-                  name="uploadTypeURL"
+                  name="uploadType"
                   value="url"
                   checked={!uploadFileNotURL}
                   onChange={() => setUploadFileNotURL(false)}
@@ -106,7 +115,6 @@ export default function UploadPage() {
               <label htmlFor="file">Select File:</label>
               <input
                 id="file"
-                name="fileUpload"
                 type="file"
                 accept=".zip"
                 onChange={handleFileChange}
@@ -140,20 +148,20 @@ export default function UploadPage() {
             </label>
           </div>
 
-          {/* Upload Button */}
+          {/* Update Package Button */}
           <div className="button-group">
             <button
               className="search-button"
               type="button"
-              onClick={handleUpload}
+              onClick={handleUpdate}
               disabled={uploadFileNotURL ? !file : !url}
             >
-              Upload
+              Update Package
             </button>
           </div>
 
           {/* Status Message */}
-          {uploadStatus && <p className="status">{uploadStatus}</p>}
+          {statusMessage && <p className="status">{statusMessage}</p>}
         </form>
       </main>
     </div>
