@@ -24,7 +24,7 @@ const Package = async (data:any) => {
           </form>
           {/* <button className="package-button upload">Upload New Package</button> */}
         </div>
-        <h1>{(data.searchParams.name)} by package author</h1>
+        <h1>{((await data.searchParams).name)} by package author</h1>
       </header>
 
       {/* <div className="package-content">

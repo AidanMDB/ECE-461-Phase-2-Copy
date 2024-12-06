@@ -7,7 +7,8 @@ import "./upload.css";
 import API from "@aws-amplify/api";
 
 export default function UploadPage() {
-  const [uploadType, setUploadType] = useState<"url" | "zip">("zip"); // "zip" for ZIP file, "url" for URL
+  // const [uploadType, setUploadType] = useState<"url" | "zip">("zip"); // "zip" for ZIP file, "url" for URL
+  const [uploadFileNotURL, setUploadFileNotURL] = useState<boolean>(true);
   const [file, setFile] = useState<File | null>(null);
   const [uploadStatus, setUploadStatus] = useState<string>("");
   const [debloat, setDebloat] = useState<boolean>(false);
@@ -26,21 +27,21 @@ export default function UploadPage() {
   };
 
   const handleUpload = async () => {
-    if (uploadType === "zip" && !file) {
+    if (uploadFileNotURL && !file) {
       setUploadStatus("Please select a file");
       return;
     }
-    if (uploadType === "url" && !url) {
+    if (!uploadFileNotURL && !url) {
       setUploadStatus("Please enter a URL");
       return;
     }
 
     try {
       const formData = new FormData();
-      if (uploadType === "zip" && file) {
+      if (uploadFileNotURL && file) {
         formData.append("Name", file.name);
         formData.append("Content", file);
-      } else if (uploadType === "url") {
+      } else if (!uploadFileNotURL) {
         formData.append("URL", url);
       }
       formData.append("Debloat", JSON.stringify(debloat));
@@ -81,18 +82,18 @@ export default function UploadPage() {
                   type="radio"
                   name="uploadType"
                   value="zip"
-                  checked={uploadType === "zip"}
-                  onChange={() => setUploadType("zip")}
+                  checked={uploadFileNotURL}
+                  onChange={() => setUploadFileNotURL(true)}
                 />
                 <span className="toggle-option">ZIP File</span>
               </label>
-              <label htmlFor="radio">
+              <label>
                 <input
                   type="radio"
                   name="uploadTypeURL"
                   value="url"
-                  checked={uploadType === "url"}
-                  onChange={() => setUploadType("url")}
+                  checked={!uploadFileNotURL}
+                  onChange={() => setUploadFileNotURL(false)}
                 />
                 <span className="toggle-option">URL</span>
               </label>
@@ -100,7 +101,7 @@ export default function UploadPage() {
           </div>
 
           {/* File or URL Input */}
-          {uploadType === "zip" ? (
+          {uploadFileNotURL ? (
             <div className="form-group">
               <label htmlFor="file">Select File:</label>
               <input
@@ -145,7 +146,7 @@ export default function UploadPage() {
               className="search-button"
               type="button"
               onClick={handleUpload}
-              disabled={uploadType === "zip" ? !file : !url}
+              disabled={uploadFileNotURL ? !file : !url}
             >
               Upload
             </button>

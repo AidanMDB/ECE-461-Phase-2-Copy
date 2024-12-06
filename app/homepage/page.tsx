@@ -41,10 +41,10 @@ const HomePage = () => {
             <button onClick={displayS3Files} className="search-button">Search</button>
           </div>
       </header>
-      <body>
+      {/* <body> */}
         <br />
         {fileNames.map((item, index) => (
-          <p key={index}>
+          <div key={index}>
             {/* <Link href='/package'>{item}</Link> */}
             {/* <Packagelist data={item} /> */}
             <div className="Package">
@@ -63,9 +63,9 @@ const HomePage = () => {
               </header>
               <hr className="package-divider" />
             </div>
-          </p>
+          </div>
         ))}
-      </body>
+      {/* </body> */}
     </div>
   );
 }
