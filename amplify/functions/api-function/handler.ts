@@ -5,7 +5,7 @@ import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient, PutCommand, GetCommand } from "@aws-sdk/lib-dynamodb";
 import axios from "axios";
 import StreamZip from "node-stream-zip";
-import fs, { read } from "fs";
+import fs from "fs";
 import path from "path";
 import archiver from "archiver";
 import * as tar from "tar";
@@ -149,29 +149,55 @@ function extractPackageJSON(packageJsonPath: string) {
  * @param outputZipPath - path to the output zip file
  */
 async function convertTgzToZip(tgzPath: string, outputZipPath: string) {
-  await tar.x({ file: tgzPath, cwd: `${process.cwd()}`}).then(() => {});
+  try{
+    await tar.x({ file: tgzPath, cwd: `${TMP_PATH}`}).then(() => {});
+    
+    // Create a zip file from the extracted folder
+    const zipFilePath = path.join(`${TMP_PATH}`, `${outputZipPath}`);
+    const output = fs.createWriteStream(zipFilePath);
+    const archive = archiver("zip", { zlib: { level: 9 } });
 
-  //console.log("codeFiles: ", codeFiles);
-  
-  
-  // Create a zip file from the extracted folder
-  const zipFilePath = path.join(`${process.cwd()}${TMP_PATH}`, `${outputZipPath}`);
-  const output = fs.createWriteStream(zipFilePath);
-  const archive = archiver("zip", { zlib: { level: 9 } });
-  
-  console.log(`Creating zip file at ${zipFilePath}`);
-  archive.pipe(output);
-  archive.directory(`${process.cwd()}/package`, false);
-  await archive.finalize();
+    return new Promise<void>((resolve, reject) => {
+      output.on('close', () => {
+        console.log(`Zip file created at ${zipFilePath}`);
+        resolve();
+      });
+      output.on('error', (err) => {
+        console.log(`Error in creating zip file: ${err}`);
+        reject(err);
+      });
 
-  fs.unlink(tgzPath, (err) => {
-    if (err) {
-        console.error(`Error in deleting tarball: ${err}`);
+      archive.on('error', (err) => {
+        console.log(`Error in archiving: ${err}`);
+        reject(err);
+      });
+
+      archive.pipe(output);
+      archive.directory(`${TMP_PATH}/package`, false);
+      archive.finalize().then(() => {
+        fs.unlink(tgzPath, (err) => {
+          if (err) {
+              console.error(`Error in deleting tarball: ${err}`);
+          }
+          else {
+              console.log(`Tarball deleted: ${tgzPath}`);
+          }
+        });
+        // deletes the extracted folder
+        try {
+          fs.promises.rm(`${TMP_PATH}/package`, { recursive: true, force: true });
+        } catch (error) {
+          console.error(`Error deleting folder in tgzTOzip:`, error);
+        } 
+      }).catch(reject);
+    });
+  } catch (error) {
+    console.log(`Error in converting tgz to zip: ${error}`);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: "Error in converting tgz to zip" }),
     }
-    else {
-        console.log(`Tarball deleted: ${tgzPath}`);
-    }
-  });
+  } 
 }
 
 
@@ -197,7 +223,7 @@ async function extractPackageInfo(zipPath: string) {
         body: JSON.stringify("package.json not found in the zip file"),
       }
     }
-    console.log("package.json found in the zip file:", packageJsonEntry);
+
     if (!readMeEntry) {
       //console.log("README.md not found in the zip file");
       return {
@@ -205,7 +231,6 @@ async function extractPackageInfo(zipPath: string) {
         body: JSON.stringify("README.md not found in the zip file"),
       };
     }
-    console.log("README.md found in the zip file:", readMeEntry);
 
     // extract data from package.json that is in the zip file
     const stream = await zip.stream(packageJsonEntry)
@@ -217,7 +242,6 @@ async function extractPackageInfo(zipPath: string) {
       stream.on('end', () => resolve(content));
       stream.on('error', reject);
     });
-    console.log("package.json data:", data);
 
     // extract data from README.md that is in the zip file
     const streamReadMe = await zip.stream(readMeEntry)
@@ -229,7 +253,6 @@ async function extractPackageInfo(zipPath: string) {
       streamReadMe.on('end', () => resolve(contentReadMe));
       streamReadMe.on('error', reject);
     });
-    console.log("README.md data:", readMeData);
 
     const packageJSON = JSON.parse(data);
     const packageVersion = packageJSON.version? packageJSON.version : '1.0.0';
@@ -237,7 +260,8 @@ async function extractPackageInfo(zipPath: string) {
     const entryPoint = packageJSON.main ? packageJSON.main : null;
     const repositoryURL = packageJSON.repository.url ? packageJSON.repository.url : packageJSON.repository;
     const packageDep = {...packageJSON.dependencies, ...packageJSON.devDependencies}; 
-    
+    console.log("packageVersion: ", packageVersion);
+
     return {
       jsonData : {packageName, packageVersion, repositoryURL, packageDep, entryPoint},
       readMeData
@@ -327,6 +351,7 @@ async function isNPM(packageName:string, packageVersion: string, Name:string, de
     // get tarball URL
     const registryURL = `https://registry.npmjs.org/${packageName}/${packageVersion}`;
     const {data : packageData} = await axios.get(registryURL);
+    console.log("PackageData: ", packageData);
     const tarballURL = packageData.dist.tarball;
 
     if (!tarballURL) {
@@ -355,10 +380,10 @@ async function isNPM(packageName:string, packageVersion: string, Name:string, de
     }
 
     // convert .tgz to .zip
-    convertTgzToZip(filePath, `${Name}.zip`);
+    await convertTgzToZip(filePath, `${Name}.zip`);
 
     // extract package info from zip file
-    const result = await extractPackageInfo(`${process.cwd()}/${Name}.zip`);
+    const result = await extractPackageInfo(`${TMP_PATH}/${Name}.zip`);
     if (!result) {
       return {
         statusCode: 400,
@@ -376,12 +401,13 @@ async function isNPM(packageName:string, packageVersion: string, Name:string, de
     }
 
     const {repositoryURL, packageDep, entryPoint} = result.jsonData;
+    packageVersion = result.jsonData.packageVersion;
     const readMeData = result.readMeData;
 
     // perform debloat if requested  TODO
     if (debloat) {
       if (entryPoint) {
-        extractZip(`${TMP_PATH}`, `${process.cwd()}/${Name}.zip`);
+        extractZip(`${TMP_PATH}`, `${TMP_PATH}/${Name}.zip`);
       }
     }
 
@@ -396,7 +422,7 @@ async function isNPM(packageName:string, packageVersion: string, Name:string, de
   } catch (error) { 
     return {
       statusCode: 400,
-      body: JSON.stringify({ error: "Error in isNPM URL" }),
+      body: JSON.stringify(`Error in isNPM URL: ${error}`),
     }
   };
 };
