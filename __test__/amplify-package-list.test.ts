@@ -1,5 +1,5 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { handler } from '../functions/api-package-list/handler';
+import { handler } from '../amplify/functions/api-package-list/handler';
 // import { S3Client } from '@aws-sdk/client-s3';
 import { DynamoDBClient, ScanCommand } from '@aws-sdk/client-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
