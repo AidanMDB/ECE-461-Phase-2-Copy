@@ -1,5 +1,5 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { handler } from '../functions/api-package-id/handler'; // Update path as per your project structure
+import { handler } from '../amplify/functions/api-package-id/handler'; // Update path as per your project structure
 import { DynamoDBClient, PutItemCommand } from '@aws-sdk/client-dynamodb';
 import { S3Client, GetObjectCommand, HeadObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3';
 import { mockClient } from 'aws-sdk-client-mock';
