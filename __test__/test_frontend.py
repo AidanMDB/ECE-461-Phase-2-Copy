@@ -167,8 +167,6 @@ try:
     assert url_input.is_displayed(), "URL input not visible."
 
     # Test Debloat toggle
-    debloat_checkbox = driver.find_element(
-        By.XPATH, "//input[@type='checkbox']")
     assert debloat_checkbox.is_selected(), "Debloat checkbox not working."
 
     # Toggle the debloat checkbox
