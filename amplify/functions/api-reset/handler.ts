@@ -15,10 +15,28 @@ const cognito = new CognitoIdentityProviderClient();
 const bucketName = 'packageStorage';
 
 export const handler: APIGatewayProxyHandler = async (event) => {
+    // Check for 'X-authorization' header
+    const authHeader = event.headers["X-authorization"];
+    if (!authHeader) {
+        return {
+            statusCode: 403,
+            body: JSON.stringify("Authentication failed due to invalid or missing AuthenticationToken.")
+        };
+    }
+
+    // Check if the user has permission to reset the registry
+    const userHasPermission = checkUserPermission(authHeader);
+    if (!userHasPermission) {
+        return {
+            statusCode: 401,
+            body: JSON.stringify("You do not have permission to reset the registry.")
+        };
+    }
+
     try {
             
     // 1. Clean S3
-    console.log('Cleaning S3 Buckets...');
+    //console.log('Cleaning S3 Buckets...');
     const { Buckets } = await s3.send(new ListBucketsCommand({}));
 
     if (Buckets) {
@@ -38,7 +56,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     }
 
     // 2. Clean DynamoDB
-    console.log('Cleaning DynamoDB Tables...');
+    //console.log('Cleaning DynamoDB Tables...');
     const { TableNames } = await dynamoDB.send(new ListTablesCommand({}));
     
     if (TableNames) {
@@ -48,7 +66,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     }
 
     // 3. Clean Cognito Users
-    console.log('Cleaning Cognito Users...');
+    //console.log('Cleaning Cognito Users...');
     const userPoolId = process.env.USER_POOL_ID!; // Ensure the user pool ID is available in env
             
     const { Users } = await cognito.send(new ListUsersCommand({ UserPoolId: userPoolId }));
@@ -66,7 +84,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
         }
     }
     
-    console.log('Reset complete.');
+    //console.log('Reset complete.');
     return {
         statusCode: 200,
         body: JSON.stringify({ message: 'Reset complete.' }),
@@ -78,4 +96,10 @@ export const handler: APIGatewayProxyHandler = async (event) => {
         body: JSON.stringify({ message: 'Error during reset.', error: (error as any).message }),
     };
     }
+};
+
+const checkUserPermission = (authHeader: string): boolean => {
+    // Implement your logic to check if the user has permission to reset the registry
+    // For example, you can decode the JWT token and check the user's role or permissions
+    return true; // Replace with actual permission check
 };

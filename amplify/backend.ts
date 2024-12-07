@@ -14,6 +14,8 @@ import {
 
 import { myApiFunction } from './functions/api-function/resource.js';
 import { myApiFunctionRegex } from './functions/api-package-regex/resource.js';
+import { myApiFunctionRegister } from './functions/api-register/resource.js';
+import { myApiFunctionAuthenticate } from './functions/api-authenticate/resource.js';
 import { apiReset } from './functions/api-reset/resource.js';
 
 import { ApiGateway } from 'aws-cdk-lib/aws-events-targets';
@@ -25,6 +27,8 @@ const backend = defineBackend({
   storage,        // creates s3
   myApiFunction,  // creates lambda 
   myApiFunctionRegex, // creates lambda for regex search
+  myApiFunctionRegister, // creates lambda for register
+  myApiFunctionAuthenticate, // creates lambda for authenticate
   apiReset        // creates lambda
 });
 
@@ -83,6 +87,16 @@ const apiResetLambda = new LambdaIntegration(
   backend.apiReset.resources.lambda
 );
 
+// create lambda integration for user register
+const lambdaIntegrationRegister = new LambdaIntegration(
+  backend.myApiFunctionRegister.resources.lambda
+);
+
+// create lambda integration for user authenticate
+const lambdaIntegrationAuthenticate = new LambdaIntegration(
+  backend.myApiFunctionAuthenticate.resources.lambda
+);
+
 
 // create new API path
 const packagePath = myRestApi.root.addResource('package');
@@ -110,7 +124,35 @@ resetPath.addMethod('DELETE', apiResetLambda, {
   }
 });
 
+// create new API path for user register
+const registerPath = myRestApi.root.addResource('register');
 
+registerPath.addMethod('POST', lambdaIntegrationRegister, {
+  requestParameters: {
+    "method.request.header.X-authorization": true,  // Requires 'X-authorization' header
+  },
+  requestModels: {'application/json': packageData},
+  requestValidatorOptions: {
+    validateRequestBody: true,
+    validateRequestParameters: true
+  }
+});
+
+// create new API path for user authenticate
+const authenticatePath = myRestApi.root.addResource('authenticate');
+
+authenticatePath.addMethod('POST', lambdaIntegrationAuthenticate, {
+  requestParameters: {
+    "method.request.header.X-authorization": true,  // Requires 'X-authorization' header
+  },
+  requestModels: {'application/json': packageData},
+  requestValidatorOptions: {
+    validateRequestBody: true,
+    validateRequestParameters: true
+  }
+});
+
+// I'm not sure what this does
 packagePath.addProxy({
   anyMethod: false,
   defaultIntegration: lambdaIntegration

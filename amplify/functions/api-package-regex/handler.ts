@@ -5,7 +5,7 @@ const dynamoDb = new DynamoDBClient();
 const TABLE_NAME = process.env.PACKAGES_TABLE || "packageTable";
 
 export const handler: APIGatewayProxyHandler = async (event) => {
-  console.log("event", event);
+  //console.log("event", event);
 
   // check for 'X-authorization' header
   const authHeader = event.headers["X-authorization"];
@@ -54,7 +54,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     ExpressionAttributeValues: {
       ':regex': { S: RegEx },
     },
-    Limit: 10,
+    Limit: 100,
     // Might need to add this later if we want to implement pagination
     //ExclusiveStartkey: event.queryStringParameters.LastEvaluatedKey ? JSON.parse(event.queryStringParameters.LastEvaluatedKey) : undefined,
   };
