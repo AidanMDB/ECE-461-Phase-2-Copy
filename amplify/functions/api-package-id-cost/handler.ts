@@ -49,10 +49,20 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     if (!id) {
         return {
             statusCode: 400,
-            body: JSON.stringify("Missing id in path parameters.")
+            body: JSON.stringify("There is missing fields in the PackageID.")
         };
     }
 
+    
+    const dependency = event.queryStringParameters?.dependency;
+    if (dependency) {
+        return {
+            statusCode: 400,
+            body: JSON.stringify("There is missing fields in the Dependency.")
+        };
+    }
+
+    // retrieve package dependencies from DynamoDB
     let packageDep;
     try {
         const params = {
@@ -77,6 +87,9 @@ export const handler: APIGatewayProxyHandler = async (event) => {
             body: JSON.stringify("Error fetching data from DynamoDB.")
         }
     }
+
+
+    let packageCosts = {};
 
     // make some recursion function that downloads the tarball from registry.npmjs gets its size and then searches for dependencies and gets their size
 
