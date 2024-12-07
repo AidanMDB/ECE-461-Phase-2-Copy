@@ -1,5 +1,3 @@
-import 'chromedriver'; // Ensure you have the ChromeDriver installed
-
 describe('End-to-End Test', () => {
   beforeAll(async () => {
   });
