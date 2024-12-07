@@ -88,61 +88,29 @@ const lambdaIntegrationAuthenticate = new LambdaIntegration(
 const packagePath = myRestApi.root.addResource('package');
 
 packagePath.addMethod('POST', lambdaIntegration, {
-  requestParameters: {
-    "method.request.header.X-authorization": true,  // Requires 'X-authorization' header
-  },
-  requestModels: {'application/json': packageData},
-  requestValidatorOptions: {
-    validateRequestBody: true,
-    validateRequestParameters: true
-  }
+
 });
 
 // create new API path for api reset
 const resetPath = myRestApi.root.addResource('reset');
 
 resetPath.addMethod('DELETE', apiResetLambda, {
-  requestParameters: {
-    "method.request.header.X-authorization": true,  // Requires 'X-authorization' header
-  },
-  requestValidatorOptions: {
-    validateRequestParameters: true
-  }
+
 });
 
 // create new API path for user register
 const registerPath = myRestApi.root.addResource('register');
 
 registerPath.addMethod('POST', lambdaIntegrationRegister, {
-  requestParameters: {
-    "method.request.header.X-authorization": true,  // Requires 'X-authorization' header
-  },
-  requestModels: {'application/json': packageData},
-  requestValidatorOptions: {
-    validateRequestBody: true,
-    validateRequestParameters: true
-  }
+
 });
 
 // create new API path for user authenticate
 const authenticatePath = myRestApi.root.addResource('authenticate');
 
 authenticatePath.addMethod('POST', lambdaIntegrationAuthenticate, {
-  requestParameters: {
-    "method.request.header.X-authorization": true,  // Requires 'X-authorization' header
-  },
-  requestModels: {'application/json': packageData},
-  requestValidatorOptions: {
-    validateRequestBody: true,
-    validateRequestParameters: true
-  }
-});
 
-// I'm not sure what this does
-packagePath.addProxy({
-  anyMethod: false,
-  defaultIntegration: lambdaIntegration
-})
+});
 
 // add lambda integration for regex search api
 const lambdaIntegrationRegex = new LambdaIntegration(
@@ -153,14 +121,7 @@ const lambdaIntegrationRegex = new LambdaIntegration(
 const regexPath = myRestApi.root.addResource('package').addResource('byRegEx');
 
 regexPath.addMethod('POST', lambdaIntegrationRegex, {
-  requestParameters: {
-    "method.request.header.X-authorization": true,  // Requires 'X-authorization' header
-  },
-  requestModels: {'application/json': packageData},
-  requestValidatorOptions: {
-    validateRequestBody: true,
-    validateRequestParameters: true
-  }
+
 });
 
 
