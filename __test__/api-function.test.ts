@@ -60,7 +60,7 @@ describe('Lambda Function Handler', () => {
     s3Mock.reset();
   });
 
-  xit('should return 403 error for missing X-authorization header', async () => {
+  it('should return 403 error for missing X-authorization header', async () => {
 
     const event: APIGatewayProxyEvent = {
       body: JSON.stringify({
@@ -79,7 +79,7 @@ describe('Lambda Function Handler', () => {
   });
 
 
-  xit('should return 400 error for having URL and Content', async () => {
+  it('should return 400 error for having URL and Content', async () => {
     const event: APIGatewayProxyEvent = {
       headers: {
         'X-authorization': 'your-auth-token', // Add your X-authorization header here
@@ -99,7 +99,7 @@ describe('Lambda Function Handler', () => {
   });
 
 
-  xit ('should return 400 error for missing fields', async () => {
+  it ('should return 400 error for missing fields', async () => {
 
     const event: APIGatewayProxyEvent = {
       headers: {
@@ -116,7 +116,7 @@ describe('Lambda Function Handler', () => {
     expect(result.body).toBe(JSON.stringify('There is missing field(s) in the PackageData or it is formed improperly (e.g. Content and URL ar both set)'));
   });
 
-  xit('should return 409 for existing package', async () => {
+  it('should return 409 for existing package', async () => {
 
     // alter package writing path
     const originalTmpPath = handler.TMP_PATH;
@@ -154,7 +154,7 @@ describe('Lambda Function Handler', () => {
 
 
   //add expects to this test
-  xit('should return 201 for approved package through "Content"', async () => {
+  it('should return 201 for approved package through "Content"', async () => {
  
     // alter package writing path
     const originalTmpPath = handler.TMP_PATH;
@@ -414,4 +414,283 @@ describe('Lambda Function Handler', () => {
 
   }, 60000);
 
+
+  test("End to End test with metricCaller", async () => {
+    // alter package writing path
+    const originalTmpPath = handler.TMP_PATH;
+    Object.defineProperty(handler, 'TMP_PATH', {
+      value: `${process.cwd()}/__test__/tmp`,
+      writable: true, // Allows modification in the test
+    });
+
+    // mock axios calls based on what gets passed (allows me to handle multiple axios.get calls)
+    (axios.get as jest.Mock).mockImplementation((url: string) => {
+
+      // axios mock for BusFactor.ts
+      if (url.endsWith("/stats/contributors")) {
+        const response = {data: [
+          {
+            "author": {
+              "login": "user1",
+              "id": 1,
+              "node_id": "MDQ6VXNlcjE=",
+              "avatar_url": "https://github.com/images/error/octocat_happy.gif",
+              "gravatar_id": "",
+              "url": "https://api.github.com/users/octocat",
+              "html_url": "https://github.com/octocat",
+              "followers_url": "https://api.github.com/users/octocat/followers",
+              "following_url": "https://api.github.com/users/octocat/following{/other_user}",
+              "gists_url": "https://api.github.com/users/octocat/gists{/gist_id}",
+              "starred_url": "https://api.github.com/users/octocat/starred{/owner}{/repo}",
+              "subscriptions_url": "https://api.github.com/users/octocat/subscriptions",
+              "organizations_url": "https://api.github.com/users/octocat/orgs",
+              "repos_url": "https://api.github.com/users/octocat/repos",
+              "events_url": "https://api.github.com/users/octocat/events{/privacy}",
+              "received_events_url": "https://api.github.com/users/octocat/received_events",
+              "type": "User",
+              "site_admin": false
+            },
+            "total": 5,
+            "weeks": [
+              {
+                "w": 1367712000,
+                "a": 0,
+                "d": 0,
+                "c": 5
+              }
+            ]
+          },
+          {
+            "author": {
+              "login": "user2",
+              "id": 2,
+              "node_id": "MDQ6VXNlcjI=",
+              "avatar_url": "https://github.com/images/error/anotherUser_happy.gif",
+              "gravatar_id": "",
+              "url": "https://api.github.com/users/anotherUser",
+              "html_url": "https://github.com/anotherUser",
+              "followers_url": "https://api.github.com/users/anotherUser/followers",
+              "following_url": "https://api.github.com/users/anotherUser/following{/other_user}",
+              "gists_url": "https://api.github.com/users/anotherUser/gists{/gist_id}",
+              "starred_url": "https://api.github.com/users/anotherUser/starred{/owner}{/repo}",
+              "subscriptions_url": "https://api.github.com/users/anotherUser/subscriptions",
+              "organizations_url": "https://api.github.com/users/anotherUser/orgs",
+              "repos_url": "https://api.github.com/users/anotherUser/repos",
+              "events_url": "https://api.github.com/users/anotherUser/events{/privacy}",
+              "received_events_url": "https://api.github.com/users/anotherUser/received_events",
+              "type": "User",
+              "site_admin": false
+            },
+            "total": 3,
+            "weeks": [
+              {
+                "w": 1367712000,
+                "a": 0,
+                "d": 0,
+                "c": 3
+              }
+            ]
+          }
+        ]};
+        return Promise.resolve(response);
+      }
+
+      // axios mock for Correctness.ts
+      if (url.includes("+is:issue+state:closed")) {
+        const mockedResponse = {data: {
+          total_count: 2, // Two closed issues
+          items: [
+            {
+              id: 102,
+              title: 'Issue 2',
+              state: 'closed' // Closed issue
+            },
+            {
+              id: 103,
+              title: 'Issue 3',
+              state: 'closed' // Closed issue
+            }
+          ]
+          },
+          headers: { 'x-ratelimit-remaining': 1000 } // Example rate limit header
+        };
+        return Promise.resolve(mockedResponse);
+      }
+      if (url.includes("+is:issue+state:open")) {
+        const mockOpenIssuesResponse = {
+          data: {
+              total_count: 1, // One open issue
+              items: [
+                  {
+                      id: 101,
+                      title: 'Issue 1',
+                      state: 'open' // Open issue
+                  }
+              ]
+          },
+          headers: { 'x-ratelimit-remaining': 1000 } // Example rate limit header
+        };
+        return Promise.resolve(mockOpenIssuesResponse);
+      }
+
+
+      // axios mock for EngineeringProcess.ts
+      if (url.endsWith("graphql")) {
+        const mockResponse = {
+          data: {
+            data: {
+              repository: {
+                pullRequests: {
+                  nodes: [
+                    {reviewDecision: 'APPROVED',    additions: 10},
+                    {reviewDecision: 'APPROVED',    additions: 10},
+                    {reviewDecision: null,          additions: 10},
+                    {reviewDecision: null,          additions: 10},
+                  ],
+                  pageInfo: {
+                    hasNextPage: false,
+                    endCursor: null
+                  }
+                }
+              }
+            }
+          }
+        };
+        return Promise.resolve(mockResponse);
+      }
+
+      // axios mock for License.ts
+      if (url.includes("/license")) {
+        const mockResponse = {
+          data: {
+            license: { spdx_id: 'MIT' }, // License file exists with a compatible license
+          },
+        };
+        return Promise.resolve(mockResponse);
+      }
+
+      // axios mock for RampUp.ts
+      if (url.includes("/contents")) {
+        const mockedResponse = {
+          data: [
+              { type: 'file', name: 'index.js', path: 'index.js', size: 100 },
+              { type: 'file', name: 'README.md', path: 'README.md', size: 10 },
+              { type: 'file', name: 'app.ts', path: 'app.ts', size: 100},
+              { type: 'file', name: 'style.css', path: 'style.css', size: 50 },
+          ],
+        };
+        return Promise.resolve(mockedResponse);
+      }
+
+      // axios mock for ResponsiveMetric.ts
+      if (url.includes('/issues')) {
+        const twoMonthsAgo = new Date();
+        twoMonthsAgo.setMonth(twoMonthsAgo.getMonth() - 2);
+        const closedAtDate = new Date(twoMonthsAgo);
+        closedAtDate.setDate(closedAtDate.getDate() + 2);
+        
+        const mockResponse = {
+          data: [
+              {
+                  id: 2,
+                  title: 'Issue 2',
+                  created_at: twoMonthsAgo.toISOString(), // Created three months ago
+                  closed_at: closedAtDate.toISOString(), // Closed now
+                  state: 'closed',
+                  comments: 3
+              }
+          ],
+          headers: { 'x-ratelimit-remaining': 1000 } // Setting a positive rate limit
+        };
+        return Promise.resolve(mockResponse);
+      }
+      if (url.includes('/pulls')) {
+        const twoMonthsAgo = new Date();
+        twoMonthsAgo.setMonth(twoMonthsAgo.getMonth() - 2);
+        const closedAtDate = new Date(twoMonthsAgo);
+        closedAtDate.setDate(closedAtDate.getDate() + 2);
+        const mockResponse2 = {
+          data: [
+              {
+                  id: 1,
+                  title: 'Pull Request 2',
+                  created_at: twoMonthsAgo.toISOString(), // Created three months ago
+                  closed_at: closedAtDate.toISOString(), // Closed now
+                  state: 'closed',
+                  comments: 3
+              }
+          ],
+          headers: {'x-ratelimit-remaining': 1000}
+        };
+        return Promise.resolve(mockResponse2);
+      }
+
+      // axios mock for VerionMetric.ts
+      if (url.includes('/contents/package.json')) {
+        const response = { data: { content: Buffer.from(JSON.stringify({ 
+          dependencies: { 'dep1': '1.0.0', 'dep2': '0.9.2', 'dep3': '0.0.2' } })).toString('base64') } };
+        return Promise.resolve(response);
+      }
+    });
+
+
+    const event: APIGatewayProxyEvent = {
+      headers: {
+        'X-authorization': 'your-auth-token', // Add your X-authorization header here
+      },
+      body: JSON.stringify({
+        Content: fs.readFileSync('__test__/braces.zip'),
+        debloat: false,
+        Name: 'name'
+      })
+    } as any;
+
+    // mock dynamoDBMock for no duplicate package (doesn't contain item)
+    dynamoDBMock.on(GetCommand).resolves({
+    });
+
+
+    // mocking of DynamoDB put
+    dynamoDBMock.on(PutCommand).resolves({
+      $metadata:{
+        httpStatusCode: 200
+      }
+    });
+
+    // mocking of S3 upload
+    s3Mock.on(PutObjectCommand).resolves({
+      $metadata:{
+        httpStatusCode: 200
+      }
+    });
+
+    const result = (await handler.handler(event, {} as any, () => {})) as APIGatewayProxyResult;
+
+/*     const contentCompare = fs.readFileSync('__test__/braces.zip');
+    const expectedBody = JSON.stringify({
+      metadata: {
+        Name: "braces",
+        Version: "3.0.3",
+        ID: "braces3.0.3"
+      },
+      data: {
+        Content: contentCompare,
+        URL: "https://www.npmjs.com/package/braces",
+      }
+    }) */
+    const eventbody = JSON.parse(result.body);
+    expect(eventbody.metadata.Name).toBe("braces");
+    expect(eventbody.metadata.Version).toBe("3.0.3");
+    expect(eventbody.metadata.ID).toBe("braces3.0.3");
+    //expect(eventbody.data.Content).toBe(contentCompare);
+    //expect(eventbody.data.URL).toBe("https://www.npmjs.com/package/braces");
+    expect(result.statusCode).toBe(201);
+
+    Object.defineProperty(handler, 'TMP_PATH', {
+      value: originalTmpPath,
+    });
+
+  }, 60000);
+
+  
 });

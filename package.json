@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "jest"
+    "test": "jest --coverage"
   },
   "dependencies": {
     "@aws-amplify/ui-react": "^6.5.5",
@@ -29,6 +29,7 @@
     "react-dom": "^18",
     "semver": "^7.6.3",
     "tar": "^7.4.3",
+    "terser": "^5.37.0",
     "unzipper": "^0.12.3"
   },
   "devDependencies": {

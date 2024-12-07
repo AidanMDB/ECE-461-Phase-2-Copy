@@ -13,37 +13,14 @@ const functionWithDataAccess = defineFunction({
 
 const schema = a.schema({
   Package: a.model({
-    ID: a.string().required(),           // will just be {Name}{Version} concatenated
     Name: a.string().required(),
-    ReadME: a.string().required(),
     Version: a.string().required(),
-    Dependencies: a.string().required(),
-    Rating: a.string().required(),
-  }).authorization((allow) => [allow.publicApiKey()]),
-
-  // .authorization((allow) => [allow.owner()])
-
-/*   PackageRating: a.model({
-    package: a.belongsTo("Package", "ID"),
-    ID: a.string().required(),
-    BusFactor: a.float().required(),
-    BusFactorLatency: a.float().required(),
-    Correctness: a.float().required(),
-    CorrectnessLatency: a.float().required(),
-    RampUp: a.float().required(),
-    RampUpLatency: a.float().required(),
-    ResponsiveMaintainer: a.float().required(),
-    ResponsiveMaintainerLatency: a.float().required(),
-    LicenseScore: a.float().required(),
-    LicenseScoreLatency: a.float().required(),
-    GoodPinningPractice: a.float().required(),
-    GoodPinningPracticeLatency: a.float().required(),
-    PullRequest: a.float().required(),
-    PullRequestLatency: a.float().required(),
-    NetScore: a.float().required(),
-    NetScoreLatency: a.float().required()
-  }).authorization((allow) => [allow.publicApiKey()]),
- */
+    ReadME: a.string(),
+    Dependencies: a.string(),
+    Rating: a.string(),
+  })
+  .identifier(["Name", "Version"])
+  .authorization((allow) => [allow.owner()]),
 });
 
 

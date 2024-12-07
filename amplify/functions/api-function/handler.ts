@@ -10,7 +10,9 @@ import path from "path";
 import archiver from "archiver";
 import * as tar from "tar";
 import unzipper from "unzipper";
-import esbuild from "esbuild";
+import AdmZip from "adm-zip";
+import terser from "terser";
+//import esbuild from "esbuild";
 
 const s3 = new S3Client();
 const db = new DynamoDBClient({});
@@ -111,20 +113,36 @@ async function extractZip(extractPath: string, filePath: string) {
   });
 }
 
+
 /**
- * @param entryPath - path to the file to debloat
- * @param outputFile - path to the output file 
+ * searches through a directory for all .js/.ts files and minifies them
+ * @param directory - path to the directory containing the file(s) to debloat
  */
-function debloatFile(entryPath: string, outputFile: string) {
-  esbuild.build({
-    entryPoints: [entryPath],
-    bundle: true,
-    minify: true,
-    outfile: outputFile,
-    treeShaking: true,
-    platform: 'node',
-    target: 'es2015'
-  });
+async function minifyZipInPlace(zipFilePath: string) {
+  const zip = new AdmZip(zipFilePath);
+
+  for (const entry of zip.getEntries()) {
+      if (
+          !entry.isDirectory &&
+          (entry.entryName.endsWith('.js') || entry.entryName.endsWith('.ts'))
+      ) {
+          try {
+              const originalCode = zip.readAsText(entry);
+              const result = await terser.minify(originalCode);
+
+              if (result.code !== undefined) {
+                  zip.updateFile(entry.entryName, Buffer.from(result.code, 'utf8'));
+                  console.log(`Minified and updated: ${entry.entryName}`);
+              }
+          } catch (err) {
+              console.error(`Error minifying ${entry.entryName}:`, err);
+          }
+      }
+  }
+
+  // Write the updated zip back to disk
+  zip.writeZip(zipFilePath);
+  console.log('ZIP file updated successfully.');
 }
 
 
@@ -134,14 +152,14 @@ function debloatFile(entryPath: string, outputFile: string) {
  * @param packageJsonPath - path to the package.json file
  * @returns - object containing the package name, version, repository URL, and dependencies
  */
-function extractPackageJSON(packageJsonPath: string) {
+/* function extractPackageJSON(packageJsonPath: string) {
   const packageJSON = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
   let packageVersion = packageJSON.version? packageJSON.version : '1.0.0';
   let packageName = packageJSON.name
   let repositoryURL = packageJSON.repository.url ? packageJSON.repository.url : packageJSON.repository;
   let packageDep = {...packageJSON.dependencies, ...packageJSON.devDependencies}; 
   return {packageName, packageVersion, repositoryURL, packageDep};
-}
+} */
 
 /**
  * Converts the .tgz file from NPM to a .zip file
@@ -318,9 +336,7 @@ async function isContent(Content:string, Name:string, debloat:boolean): Promise<
 
     // perform debloat if requested
     if (debloat) {
-      if (entryPoint) {
-        extractZip(`${TMP_PATH}`, zipPath);
-      }
+      await minifyZipInPlace(`${TMP_PATH}/${Name}.zip`);
     }
 
     return {
@@ -406,9 +422,7 @@ async function isNPM(packageName:string, packageVersion: string, Name:string, de
 
     // perform debloat if requested  TODO
     if (debloat) {
-      if (entryPoint) {
-        extractZip(`${TMP_PATH}`, `${TMP_PATH}/${Name}.zip`);
-      }
+      minifyZipInPlace(`${TMP_PATH}/${Name}.zip`);
     }
 
     return {
@@ -477,9 +491,7 @@ async function isGitHub(packageOwner:string, packageName:string, packageTree:str
 
     // perform debloat if requested  TODO
     if (debloat) {
-      if (entryPoint) {
-        extractZip(`${TMP_PATH}`, filePath);
-      }
+      minifyZipInPlace(filePath);
     }
 
     return {packageName, packageVersion, repositoryURL, packageDep, entryPoint, readMeData};
