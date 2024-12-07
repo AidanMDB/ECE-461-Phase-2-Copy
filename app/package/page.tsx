@@ -25,16 +25,6 @@ const Package = async (data:any) => {
         </div>
         <h1>{((await data.searchParams).name)} by package author</h1>
       </header>
-
-      {/* <div className="package-content">
-        <div className="button-container">
-          <Link href="/homepage">
-            <button className="package-button download">Download Package</button>
-          </Link>
-          <button className="package-button update">Update Package</button>
-        </div>
-      </div> */}
-
       <div className="package-info-block">
         <div className="package-info">
           <p><strong>Version:</strong> v1.0.1</p>
