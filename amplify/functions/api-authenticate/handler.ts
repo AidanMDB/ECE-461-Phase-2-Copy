@@ -56,6 +56,12 @@ export const handler: APIGatewayProxyHandler = async (event) => {
             };
         }
     } catch (error) {
+        if ((error as any).name === "NotAuthorizedException") {
+            return {
+                statusCode: 401,
+                body: JSON.stringify("The user or password is invalid."),
+            };
+        }
         console.error("Error during authentication:", error);
         return {
             statusCode: 501,
