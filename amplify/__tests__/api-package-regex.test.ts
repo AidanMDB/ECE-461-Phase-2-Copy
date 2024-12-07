@@ -173,7 +173,10 @@ describe("POST /package/byRegEx", () => {
     } as any;
 
     dynamoDbMock.on(ScanCommand).resolves({
-      Items: [],
+      Items: [
+        // No match due to case sensitivity
+        { Version: { S: "1.2.3" }, Name: { S: "ECE461rules" }, ID: { S: "ECE461rules1.2.3" }, ReadME: { S: "ReadME" }, JSProgram: { S: "someProgram" }, S3Location: { S: "s3" } },
+      ],
     });
 
     const result = await handler(event, {} as any, () => {}) as APIGatewayProxyResult;

@@ -25,6 +25,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     }
 
     // Check if the user has permission to reset the registry
+    // Still need to implement this function
     const userHasPermission = checkUserPermission(authHeader);
     if (!userHasPermission) {
         return {
@@ -67,7 +68,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
 
     // 3. Clean Cognito Users
     //console.log('Cleaning Cognito Users...');
-    const userPoolId = process.env.USER_POOL_ID!; // Ensure the user pool ID is available in env
+    const userPoolId = process.env.USER_POOL_ID;
             
     const { Users } = await cognito.send(new ListUsersCommand({ UserPoolId: userPoolId }));
     

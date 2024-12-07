@@ -17,14 +17,13 @@ const schema = a.schema({
     Name: a.string().required(),
     ReadME: a.string().required(),
     Version: a.string().required(),
-    JSProgram: a.string(),                // not a baseline requirment
-    S3Location: a.string(),    
-    Rating: a.hasOne("PackageRating", "ID"),
+    Dependencies: a.string().required(),
+    Rating: a.string().required(),
   }).authorization((allow) => [allow.publicApiKey()]),
 
   // .authorization((allow) => [allow.owner()])
 
-  PackageRating: a.model({
+/*   PackageRating: a.model({
     package: a.belongsTo("Package", "ID"),
     ID: a.string().required(),
     BusFactor: a.float().required(),
@@ -44,8 +43,8 @@ const schema = a.schema({
     NetScore: a.float().required(),
     NetScoreLatency: a.float().required()
   }).authorization((allow) => [allow.publicApiKey()]),
+ */
 });
-
 
 
 export type Schema = ClientSchema<typeof schema>;
