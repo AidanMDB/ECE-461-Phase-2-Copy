@@ -26,9 +26,21 @@ export const handler: APIGatewayProxyHandler = async (event) => {
 
   // Parse the JSON body to see if it exists
   let requestBody;
+  let version_body;
+  let name;
+  let version;
   try {
     requestBody = JSON.parse(event.body || "{}"); 
     console.log("request body:",requestBody);
+    version_body = requestBody.Version;
+
+    // parse version
+    const regex = /\(([^)]+)\)/;
+    const match = version_body.match(regex);
+    version = match ? match[1] : null;
+
+    console.log("version:", version);
+    name = requestBody.Name;
   } catch (error) {
     return {
       statusCode: 400,
@@ -41,10 +53,10 @@ export const handler: APIGatewayProxyHandler = async (event) => {
   let list: string | any[] = []
   const params = {
     TableName: TABLE_NAME,
-    FilterExpression: 'contains(#name, :regex) OR contains(#readme, :regex)',
+    FilterExpression: 'contains(#name, :regex) AND contains(#version, :regex)',
     ExpressionAttributeNames: {
-      '#name': 'Name',
-      '#readme': 'ReadME',
+      '#name': name,
+      '#version': version,
     },
     Limit: parseInt(offset),
     // Might need to add this later if we want to implement pagination
