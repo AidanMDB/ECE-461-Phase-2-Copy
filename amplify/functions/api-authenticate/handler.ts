@@ -1,11 +1,11 @@
 import { CognitoIdentityProviderClient, AdminInitiateAuthCommand, AuthFlowType } from "@aws-sdk/client-cognito-identity-provider";
 import type { APIGatewayProxyHandler, APIGatewayProxyResult } from "aws-lambda";
-
+import { auth } from "../../auth/resource";
 // Initialize AWS Cognito client
 const cognito = new CognitoIdentityProviderClient();
 
-const USER_POOL_ID = process.env.USER_POOL_ID!;
-const CLIENT_ID = process.env.CLIENT_ID!;
+const USER_POOL_ID = process.env.USER_POOL_ID;
+const USER_POOL_CLIENT_ID = process.env.USER_POOL_CLIENT_ID;
 
 export const handler: APIGatewayProxyHandler = async (event) => {
     // Parse the JSON body to get the user's credentials
@@ -32,7 +32,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
         const authParams = {
             AuthFlow: AuthFlowType.ADMIN_NO_SRP_AUTH,
             UserPoolId: USER_POOL_ID,
-            ClientId: CLIENT_ID,
+            ClientId: USER_POOL_CLIENT_ID,
             AuthParameters: {
                 USERNAME: User.name,
                 PASSWORD: Secret.password,
@@ -58,7 +58,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     } catch (error) {
         console.error("Error during authentication:", error);
         return {
-            statusCode: 500,
+            statusCode: 501,
             body: JSON.stringify({ message: "Error during authentication.", error: (error as any).message }),
         };
     }

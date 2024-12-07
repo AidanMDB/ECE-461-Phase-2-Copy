@@ -1,11 +1,11 @@
 import { CognitoIdentityProviderClient, AdminCreateUserCommand, AdminAddUserToGroupCommand } from "@aws-sdk/client-cognito-identity-provider";
 import type { APIGatewayProxyHandler, APIGatewayProxyResult } from "aws-lambda";
-import jwtDecode from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode';
 
 // Initialize AWS Cognito client
 const cognito = new CognitoIdentityProviderClient();
 
-const USER_POOL_ID = process.env.USER_POOL_ID!;
+const USER_POOL_ID = process.env.USER_POOL_ID;
 
 export const handler: APIGatewayProxyHandler = async (event) => {
     // Check for 'X-authorization' header

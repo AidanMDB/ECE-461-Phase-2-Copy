@@ -6,10 +6,14 @@ import { referenceAuth } from "@aws-amplify/backend";
  * @see https://docs.amplify.aws/gen2/build-a-backend/auth
  */
 
-const region = process.env.AWS_REGION!;
-const accountId = process.env.AWS_ACCOUNT_ID!;
-const apiId = process.env.API_ID!;
-const bucketName = process.env.BUCKET_NAME!;
+// Define the AuthConfig interface
+interface AuthConfig {
+  userPoolId: string;
+  identityPoolId: string;
+  authRoleArn: string;
+  unauthRoleArn: string;
+  userPoolClientId: string;
+}
 
 export const auth = referenceAuth({
   userPoolId: 'us-east-1_cwR5jLfKp',
