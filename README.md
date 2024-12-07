@@ -1,9 +1,19 @@
 # Package Repository Web Application  
 
-https://main.dec29zvcbtyi8.amplifyapp.com/ 
+[Package Manager](https://main.dec29zvcbtyi8.amplifyapp.com/)
+
+## Table of Contents
+- [Overview](#overview)
+- [Features](#features)
+- [Getting Started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Configuration](#configuration)
+  - [Deployment](#deployment)
+- [Interaction](#interacting-with-the-application)
+- [License](#license)
 
 ## Overview  
-This web application serves as a **package repository**, enabling users to:  
+This web application serves as a **package manager**, enabling users to:  
 - Input a link from **NPM**, **GitHub**, or a **zip file** to upload packages.  
 - Search for detailed information about uploaded packages.  
 - Update or re-upload existing packages.  
@@ -49,17 +59,15 @@ Once deployed, your application will be live and accessible via the provided AWS
 
 ---
 
-
 ### Interacting with the Application
-    1. **Access the Web Application**: Navigate to the deployed URL.
-    2. **Upload a Package**: Use the intuitive upload form to add packages via npm/GitHub links or by uploading a zip file.
-    3. **Search Packages**: Use the search bar to locate detailed package information.
-    4. **Manage Packages**: Update existing packages or re-upload files.
-    5. **Download Packages**: Click the download button next to a package entry.
+1. **Access the Web Application**: Navigate to the deployed URL.
+2. **Upload a Package**: Use the intuitive upload form to add packages via npm/GitHub links or by uploading a zip file.
+3. **Search Packages**: Use the search bar to locate detailed package information.
+4. **Manage Packages**: Update existing packages or re-upload files.
+5. **Download Packages**: Click the download button next to a package entry.
 
 
 ---
-
 
 ### License
 This project is licensed under the MIT License.
