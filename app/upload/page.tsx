@@ -7,7 +7,6 @@ import "./upload.css";
 import { post } from "@aws-amplify/api";
 
 export default function UploadPage() {
-  // const [uploadType, setUploadType] = useState<"url" | "zip">("zip"); // "zip" for ZIP file, "url" for URL
   const [uploadFileNotURL, setUploadFileNotURL] = useState<boolean>(true);
   const [file, setFile] = useState<File | null>(null);
   const [uploadStatus, setUploadStatus] = useState<string>("");

@@ -3,8 +3,6 @@ import { useState } from 'react';
 import './homepage.css';
 import '../globals.css';
 import Link from 'next/link';
-// import { packagelist } from 'src/app/packageList/page';
-// import Packagelist from '../packagelist/page';
 
 const HomePage = () => {
     const [search, setSearch] = useState('');
@@ -15,7 +13,6 @@ const HomePage = () => {
     }
 
     async function displayS3Files() {
-        // setFileNames(await listFiles()); // integrate frontend with backend here
         setFileNames(["file1", "file2", "file3"]);
         console.log(fileNames);
     }
@@ -31,7 +28,9 @@ const HomePage = () => {
         <h1>Package Manager</h1> 
         </div>
             <div className="search-container">
+            <label htmlFor="search" className="sr-only">Search for packages:</label>
               <input 
+                id="search"
                 type="text" 
                 value={search} 
                 onChange={handleSearch}
@@ -41,12 +40,9 @@ const HomePage = () => {
             <button onClick={displayS3Files} className="search-button">Search</button>
           </div>
       </header>
-      {/* <body> */}
         <br />
         {fileNames.map((item, index) => (
           <div key={index}>
-            {/* <Link href='/package'>{item}</Link> */}
-            {/* <Packagelist data={item} /> */}
             <div className="Package">
               <header>
                 <h1>{item} by Package Author</h1>
@@ -65,7 +61,6 @@ const HomePage = () => {
             </div>
           </div>
         ))}
-      {/* </body> */}
     </div>
   );
 }

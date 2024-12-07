@@ -67,8 +67,6 @@ export default function UpdatePage() {
     }
   };
 
-//   if (loading) return <p>Loading package details...</p>;
-
   return (
     <div>
       <title>Package Manager</title>
