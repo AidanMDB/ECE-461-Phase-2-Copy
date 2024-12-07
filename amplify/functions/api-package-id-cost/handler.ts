@@ -78,9 +78,11 @@ export const handler: APIGatewayProxyHandler = async (event) => {
         }
     }
 
+    // make some recursion function that downloads the tarball from registry.npmjs gets its size and then searches for dependencies and gets their size
 
     const dependencyJSON = JSON.parse(packageDep);
     
+    Object.
 
 
 
