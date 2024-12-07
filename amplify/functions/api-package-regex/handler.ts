@@ -37,6 +37,17 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     };
   }
 
+  // Validate the regex
+  let regex;
+  try {
+    regex = new RegExp(RegEx);
+  } catch (error) {
+    return {
+      statusCode: 400,
+      body: JSON.stringify("Invalid regex pattern")
+    };
+  }
+
   /*
   *   This is a simple search function that searches for a package based on the regex provided
   *   Example requestBody: { "RegEx": "regex" }
@@ -75,11 +86,18 @@ export const handler: APIGatewayProxyHandler = async (event) => {
         Name: item.Name.S,
         ID: item.ID.S,
       }));
+      if (formattedItems.length != 0) {
         return {
-            statusCode: 200,
-            //body: JSON.stringify(result.Items),
-            body: JSON.stringify(formattedItems),
+          statusCode: 200,
+          //body: JSON.stringify(result.Items),
+          body: JSON.stringify(formattedItems),
         };
+      } else {
+        return {
+          statusCode: 404,
+          body: JSON.stringify({ error: 'No package found under this regex' }),
+        };
+      }
     } else {
         return {
             statusCode: 404,
@@ -87,7 +105,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
         };
     }
   } catch (error) {
-    //console.error("Error scanning DynamoDB:", error);
+    console.error("Error scanning DynamoDB:", error);
     return {
       statusCode: 500,
       body: JSON.stringify({ error: 'Could not search packages' }),
