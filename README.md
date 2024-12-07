@@ -1,6 +1,6 @@
 # Package Repository Web Application  
 
-[Package Manager](https://main.dec29zvcbtyi8.amplifyapp.com/)
+[Team 4 Package Manager](https://main.dec29zvcbtyi8.amplifyapp.com/)
 
 ## Table of Contents
 - [Overview](#overview)
@@ -27,6 +27,7 @@ The application is hosted on **AWS Amplify**, ensuring scalability and reliabili
 - **Package Upload**: Users can submit links (npm, GitHub) or upload zip files to add packages to the repository.  
 - **Package Management**: Search, update, or replace existing package entries.  
 - **Package Downloads**: Access and download stored packages conveniently.  
+- **Package Rating**: Rate packages based on key metrics such as; bus factor, correctness, licenses, engineering process, ramp up, size cost, responsiveness, and version pinning.
 
 ---
 
@@ -49,11 +50,11 @@ Ensure you have the following before starting:
 
 ### Deployment
 The project is designed to be deployed through AWS Amplify. Follow these steps:
-    1. Log into AWS Console
-    2. Navigate to AWS Amplify.
-    3. Connect your GitHub repository to Amplify.
-    4. Configure build settings (automatically detected or manually adjust amplify.yml).
-    5. Deploy your application.
+1. Log into AWS Console
+2. Navigate to AWS Amplify.
+3. Connect your GitHub repository to Amplify.
+4. Configure build settings (automatically detected or manually adjust amplify.yml).
+5. Deploy your application.
 
 Once deployed, your application will be live and accessible via the provided AWS Amplify URL.
 
