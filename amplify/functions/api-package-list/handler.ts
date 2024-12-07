@@ -53,7 +53,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
   let list: string | any[] = []
   const params = {
     TableName: TABLE_NAME,
-    FilterExpression: 'contains(#name, :regex) AND contains(#version, :regex)',
+    FilterExpression: 'contains(#name, :nameSubstring) AND contains(#version, :versionSubstring)',
     ExpressionAttributeNames: {
       '#name': name,
       '#version': version,
