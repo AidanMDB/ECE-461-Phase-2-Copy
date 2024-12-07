@@ -28,6 +28,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
   }
 
   const { RegEx } = requestBody;
+  const { LastEvaluatedKey } = event.queryStringParameters || {};
 
   if (!RegEx) {
     return {
@@ -56,7 +57,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     },
     Limit: 100,
     // Might need to add this later if we want to implement pagination
-    //ExclusiveStartkey: event.queryStringParameters.LastEvaluatedKey ? JSON.parse(event.queryStringParameters.LastEvaluatedKey) : undefined,
+    ExclusiveStartkey: LastEvaluatedKey ? JSON.parse(LastEvaluatedKey) : undefined,
   };
 
   try {
