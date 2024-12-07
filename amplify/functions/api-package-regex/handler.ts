@@ -1,5 +1,6 @@
 import type { APIGatewayProxyHandler, APIGatewayProxyResult } from "aws-lambda";
 import { DynamoDBClient, ScanCommand } from "@aws-sdk/client-dynamodb";
+import safeRegex from "safe-regex";
 
 const dynamoDb = new DynamoDBClient();
 const TABLE_NAME = process.env.PACKAGES_TABLE || "packageTable";
@@ -23,7 +24,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
   } catch (error) {
     return {
       statusCode: 400,
-      body: JSON.stringify("Invalid request body")
+      body: JSON.stringify("There is missing field(s) in the PackageRegEx or it is formed improperly, or is invalid")
     };
   }
 
@@ -33,7 +34,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
   if (!RegEx) {
     return {
       statusCode: 400,
-      body: JSON.stringify("Missing required field: RegEx")
+      body: JSON.stringify("There is missing field(s) in the PackageRegEx or it is formed improperly, or is invalid")
     };
   }
 
@@ -41,10 +42,13 @@ export const handler: APIGatewayProxyHandler = async (event) => {
   let regex;
   try {
     regex = new RegExp(RegEx);
+    if (!safeRegex(regex)) {
+      throw new Error("Unsafe regex pattern");
+    }
   } catch (error) {
     return {
       statusCode: 400,
-      body: JSON.stringify("Invalid regex pattern")
+      body: JSON.stringify("There is missing field(s) in the PackageRegEx or it is formed improperly, or is invalid")
     };
   }
 
@@ -77,15 +81,15 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     //console.log("Scan result:", result);
 
     if (result.Items && result.Items.length > 0) {
-      const regex = new RegExp(RegEx);
+      //const regex = new RegExp(RegEx);
       const filteredItems = result.Items.filter(item => (item.Name.S && regex.test(item.Name.S)) || (item.ReadME.S && regex.test(item.ReadME.S)));
       //console.log("Filtered items:", filteredItems);
-
-      const formattedItems = filteredItems.map(item => ({
+      const formattedItems = filteredItems.filter(Boolean).map(item => ({
         Version: item.Version.S,
         Name: item.Name.S,
         ID: item.ID.S,
       }));
+
       if (formattedItems.length != 0) {
         return {
           statusCode: 200,
