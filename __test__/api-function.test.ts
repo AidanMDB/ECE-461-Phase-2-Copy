@@ -60,7 +60,7 @@ describe('Lambda Function Handler', () => {
     s3Mock.reset();
   });
 
-  xit('should return 403 error for missing X-authorization header', async () => {
+  it('should return 403 error for missing X-authorization header', async () => {
 
     const event: APIGatewayProxyEvent = {
       body: JSON.stringify({
@@ -79,7 +79,7 @@ describe('Lambda Function Handler', () => {
   });
 
 
-  xit('should return 400 error for having URL and Content', async () => {
+  it('should return 400 error for having URL and Content', async () => {
     const event: APIGatewayProxyEvent = {
       headers: {
         'X-authorization': 'your-auth-token', // Add your X-authorization header here
@@ -99,7 +99,7 @@ describe('Lambda Function Handler', () => {
   });
 
 
-  xit ('should return 400 error for missing fields', async () => {
+  it ('should return 400 error for missing fields', async () => {
 
     const event: APIGatewayProxyEvent = {
       headers: {
@@ -116,7 +116,7 @@ describe('Lambda Function Handler', () => {
     expect(result.body).toBe(JSON.stringify('There is missing field(s) in the PackageData or it is formed improperly (e.g. Content and URL ar both set)'));
   });
 
-  xit('should return 409 for existing package', async () => {
+  it('should return 409 for existing package', async () => {
 
     // alter package writing path
     const originalTmpPath = handler.TMP_PATH;
@@ -154,7 +154,7 @@ describe('Lambda Function Handler', () => {
 
 
   //add expects to this test
-  xit('should return 201 for approved package through "Content"', async () => {
+  it('should return 201 for approved package through "Content"', async () => {
  
     // alter package writing path
     const originalTmpPath = handler.TMP_PATH;
@@ -232,7 +232,7 @@ describe('Lambda Function Handler', () => {
   });
 
 
-  xit('should return 201 for approved package through "URL" github', async () => {
+  it('should return 201 for approved package through "URL" github', async () => {
     // alter package writing path
     const originalTmpPath = handler.TMP_PATH;
     Object.defineProperty(handler, 'TMP_PATH', {
@@ -317,7 +317,7 @@ describe('Lambda Function Handler', () => {
 
 
   // like 90% certain this one works fine but b/c windows uses compression level 5 and I'm using level 9, the compared file is different
-  xit('should return 201 for approved package through "URL" npm', async () => {
+  it('should return 201 for approved package through "URL" npm', async () => {
     // alter package writing path
     const originalTmpPath = handler.TMP_PATH;
     Object.defineProperty(handler, 'TMP_PATH', {
@@ -482,7 +482,7 @@ describe('Lambda Function Handler', () => {
   });
 
 
-  xtest("End to End test with metricCaller", async () => {
+  test("End to End test with metricCaller", async () => {
     // alter package writing path
     const originalTmpPath = handler.TMP_PATH;
     Object.defineProperty(handler, 'TMP_PATH', {
