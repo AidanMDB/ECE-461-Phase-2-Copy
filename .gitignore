@@ -9,7 +9,7 @@
 
 # testing
 /coverage
-/test
+__tests__/tmp/*
 
 # next.js
 /.next/
