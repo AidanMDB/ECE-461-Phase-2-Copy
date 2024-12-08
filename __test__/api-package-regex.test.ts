@@ -1,5 +1,5 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import { handler } from "../functions/api-package-regex/handler";
+import { handler } from "../amplify/functions/api-package-regex/handler";
 import { DynamoDBClient, ScanCommand } from "@aws-sdk/client-dynamodb";
 import { mockClient } from "aws-sdk-client-mock";
 
@@ -32,7 +32,7 @@ describe("POST /package/byRegEx", () => {
     const result = await handler(event, {} as any, () => {}) as APIGatewayProxyResult;
 
     expect(result.statusCode).toBe(400);
-    expect(result.body).toBe(JSON.stringify("Invalid request body"));
+    expect(result.body).toBe(JSON.stringify("There is missing field(s) in the PackageRegEx or it is formed improperly, or is invalid"));
   });
 
   it("should return 400 if the RegEx field is missing", async () => {
@@ -44,7 +44,7 @@ describe("POST /package/byRegEx", () => {
     const result = await handler(event, {} as any, () => {}) as APIGatewayProxyResult;
 
     expect(result.statusCode).toBe(400);
-    expect(result.body).toBe(JSON.stringify("Missing required field: RegEx"));
+    expect(result.body).toBe(JSON.stringify("There is missing field(s) in the PackageRegEx or it is formed improperly, or is invalid"));
   });
 
   it("should return 200 with matching packages", async () => {
@@ -185,7 +185,7 @@ describe("POST /package/byRegEx", () => {
     expect(result.body).toBe(JSON.stringify({ error: "No package found under this regex" }));
   });
 
-  it("should return 404 if no packages match the regex '(a{1,99999}){1,99999}$'", async () => {
+  it("should return 400 if for invalid regex (ReDoS) '(a{1,99999}){1,99999}$'", async () => {
     const event: APIGatewayProxyEvent = {
       headers: { "X-authorization": "Bearer token" },
       body: JSON.stringify({ RegEx: "(a{1,99999}){1,99999}$" }),
@@ -197,8 +197,8 @@ describe("POST /package/byRegEx", () => {
 
     const result = await handler(event, {} as any, () => {}) as APIGatewayProxyResult;
 
-    expect(result.statusCode).toBe(404);
-    expect(result.body).toBe(JSON.stringify({ error: "No package found under this regex" }));
+    expect(result.statusCode).toBe(400);
+    expect(result.body).toBe(JSON.stringify("There is missing field(s) in the PackageRegEx or it is formed improperly, or is invalid"));
   });
 
   it("should return 400 for invalid regex '(a{1,99999}){(1,99999$'", async () => {
@@ -215,8 +215,9 @@ describe("POST /package/byRegEx", () => {
     const result = await handler(event, {} as any, () => {}) as APIGatewayProxyResult;
 
     expect(result.statusCode).toBe(400);
-    expect(result.body).toBe(JSON.stringify("Invalid regex pattern"));
+    expect(result.body).toBe(JSON.stringify("There is missing field(s) in the PackageRegEx or it is formed improperly, or is invalid"));
   });
+
 
   it("should return 404 if no packages match the regex '(a|aa)*$'", async () => {
     const event: APIGatewayProxyEvent = {

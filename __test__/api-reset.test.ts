@@ -1,4 +1,4 @@
-import { handler } from "../functions/api-reset/handler";
+import { handler } from "../amplify/functions/api-reset/handler";
 import { S3Client, ListBucketsCommand, DeleteObjectsCommand, ListObjectsV2Command } from "@aws-sdk/client-s3";
 import { DynamoDBClient, ListTablesCommand, DeleteTableCommand } from "@aws-sdk/client-dynamodb";
 import { CognitoIdentityProviderClient, ListUsersCommand, AdminDeleteUserCommand, AdminDisableUserCommand } from "@aws-sdk/client-cognito-identity-provider";

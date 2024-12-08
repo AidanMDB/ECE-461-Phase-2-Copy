@@ -27,6 +27,7 @@
     "node-stream-zip": "^1.15.0",
     "react": "^18",
     "react-dom": "^18",
+    "safe-regex": "^2.1.1",
     "semver": "^7.6.3",
     "tar": "^7.4.3",
     "terser": "^5.37.0",
@@ -41,6 +42,7 @@
     "@types/node": "^20.17.9",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "@types/safe-regex": "^1.1.6",
     "@types/semver": "^7.5.8",
     "aws-cdk": "^2",
     "aws-cdk-lib": "^2",
@@ -51,7 +53,7 @@
     "eslint-config-next": "15.0.4",
     "jest": "^29.7.0",
     "ts-jest": "^29.2.5",
-    "tsx": "^4.19.0",
-    "typescript": "^5.6.2"
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
   }
 }
