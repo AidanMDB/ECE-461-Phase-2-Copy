@@ -10,7 +10,7 @@ const BUCKET_NAME = "packageStorage";
 
 export const handler: APIGatewayProxyHandler = async (event) => {
   // check for 'X-authorization' header
-  const authHeader = event.headers["X-authorization"];
+  const authHeader = event.headers["X-Authorization"];
   if (!authHeader) {
     return {
       statusCode: 403,
@@ -23,7 +23,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
   if(!offset) {
     offset = "100";
   }
-
+  // lol
   // Parse the JSON body to see if it exists
   let requestBody;
   let version_body;

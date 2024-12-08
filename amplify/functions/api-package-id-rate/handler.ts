@@ -12,7 +12,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
   console.log("event", event);
 
   // check for 'X-authorization' header
-  const authHeader = event.headers["X-authorization"] || event.headers["x-authorization"]; 
+  const authHeader = event.headers["X-Authorization"] || event.headers["x-authorization"]; 
   if (!authHeader) {
     return {
       statusCode: 403,
