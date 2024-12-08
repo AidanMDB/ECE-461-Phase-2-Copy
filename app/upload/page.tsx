@@ -6,6 +6,9 @@ import "../globals.css";
 import "./upload.css";
 import { post } from "@aws-amplify/api";
 
+import { handler } from '../../amplify/functions/api-function/handler';
+import { APIGatewayProxyHandler } from 'aws-lambda';
+
 export default function UploadPage() {
   // const [uploadType, setUploadType] = useState<"url" | "zip">("zip"); // "zip" for ZIP file, "url" for URL
   const [uploadFileNotURL, setUploadFileNotURL] = useState<boolean>(true);

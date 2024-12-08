@@ -4,6 +4,7 @@ import { useState } from 'react';
 import './homepage.css';
 import '../globals.css';
 import Link from 'next/link';
+import { handler } from '../../amplify/functions/api-package-list/handler';
 
 const HomePage = () => {
   const [search, setSearch] = useState('');
