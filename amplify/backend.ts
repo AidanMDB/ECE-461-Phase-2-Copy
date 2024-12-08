@@ -1,3 +1,9 @@
+/**
+ * This file is for handling all of the backend resources.
+ * This includes the REST API, the lambda functions, the cognito user pool, the dynamoDB table, and the s3 bucket.
+**/
+
+
 import { defineBackend } from '@aws-amplify/backend';
 import { auth } from './auth/resource.js';
 import { data } from './data/resource.js';

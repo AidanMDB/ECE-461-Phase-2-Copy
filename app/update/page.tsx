@@ -1,3 +1,7 @@
+/**
+ * This file handles the update page of the Package Manager.
+**/
+
 "use client";
 
 import React, { useState, useEffect } from "react";

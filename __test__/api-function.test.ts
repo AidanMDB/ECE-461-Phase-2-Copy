@@ -1,9 +1,12 @@
+/**
+ * File to test all the functions in the api-function folder 
+ **/
+
 import { handler } from '../amplify/functions/api-function/handler';
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import { S3Client, HeadObjectCommand} from '@aws-sdk/client-s3';
-//import axios from 'axios';
 import { calcMetrics } from '../amplify/functions/api-function/metrics_src/api-metric-caller';
 import { mock } from 'node:test';
 import { read } from 'node:fs';

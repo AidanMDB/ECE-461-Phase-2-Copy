@@ -1,3 +1,7 @@
+/**
+ * This file handles the login page of the Package Manager.
+**/
+
 "use client";
 import './login.css';
 // import React from 'react';

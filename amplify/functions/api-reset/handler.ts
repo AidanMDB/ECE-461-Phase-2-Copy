@@ -1,3 +1,7 @@
+/**
+ * This file is for handling the api-reset REST API track.
+**/
+
 import { defineFunction } from '@aws-amplify/backend';
 import { S3Client, ListBucketsCommand, DeleteObjectsCommand, 
     ListObjectsV2Command } from '@aws-sdk/client-s3';

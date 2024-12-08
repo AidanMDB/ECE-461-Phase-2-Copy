@@ -1,3 +1,9 @@
+/**
+ * This file was created by running 'amplify mock function api-reset'
+ * and then modifying the generated test file. 
+ * It tests the handler function in the api-reset function.
+ **/ 
+
 import { handler } from "../functions/api-reset/handler";
 import { S3Client, ListBucketsCommand, DeleteObjectsCommand, ListObjectsV2Command } from "@aws-sdk/client-s3";
 import { DynamoDBClient, ListTablesCommand, DeleteTableCommand } from "@aws-sdk/client-dynamodb";

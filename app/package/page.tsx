@@ -1,3 +1,7 @@
+/**
+ * This file handles the packages in the Package Manager.
+**/
+
 import Link from 'next/link';
 import './package.css';
 import '../globals.css';

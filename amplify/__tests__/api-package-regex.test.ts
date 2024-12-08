@@ -1,3 +1,9 @@
+/**
+ * This file was created by running 'amplify mock function api-package-regex'
+ * and then modifying the generated test file.
+ * It tests the function in the api-package-regex function. 
+ **/ 
+
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { handler } from "../functions/api-package-regex/handler";
 import { DynamoDBClient, ScanCommand } from "@aws-sdk/client-dynamodb";

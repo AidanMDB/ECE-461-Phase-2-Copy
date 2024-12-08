@@ -1,3 +1,7 @@
+/**
+ * This file handles the upload page of the Package Manager.
+**/
+
 "use client";
 
 import React, { useState } from "react";
