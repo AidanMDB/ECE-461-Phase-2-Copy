@@ -31,7 +31,7 @@ describe("POST /reset", () => {
 /*
   it("should return 400 if the request body is invalid", async () => {
     const event: APIGatewayProxyEvent = {
-      headers: { "X-authorization": "Bearer token" },
+      headers: { "X-Authorization": "Bearer token" },
       body: "invalid-json",
     } as any;
 
@@ -62,7 +62,7 @@ describe("POST /reset", () => {
     cognitoMock.on(AdminDisableUserCommand).resolves({});
 
     const event: APIGatewayProxyEvent = {
-      headers: { "X-authorization": "Bearer token" },
+      headers: { "X-Authorization": "Bearer token" },
       body: JSON.stringify({}),
     } as any;
 
@@ -77,7 +77,7 @@ describe("POST /reset", () => {
     s3Mock.on(ListBucketsCommand).rejects(new Error("S3 error"));
 
     const event: APIGatewayProxyEvent = {
-      headers: { "X-authorization": "Bearer token" },
+      headers: { "X-Authorization": "Bearer token" },
       body: JSON.stringify({}),
     } as any;
 
@@ -92,7 +92,7 @@ describe("POST /reset", () => {
     dynamoDbMock.on(ListTablesCommand).rejects(new Error("DynamoDB error"));
 
     const event: APIGatewayProxyEvent = {
-      headers: { "X-authorization": "Bearer token" },
+      headers: { "X-Authorization": "Bearer token" },
       body: JSON.stringify({}),
     } as any;
 
@@ -107,7 +107,7 @@ describe("POST /reset", () => {
     cognitoMock.on(ListUsersCommand).rejects(new Error("Cognito error"));
 
     const event: APIGatewayProxyEvent = {
-      headers: { "X-authorization": "Bearer token" },
+      headers: { "X-Authorization": "Bearer token" },
       body: JSON.stringify({}),
     } as any;
 

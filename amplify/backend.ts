@@ -129,49 +129,49 @@ const lambdaIntegrationRegex = new LambdaIntegration(
 
 // Create Lambda functions and associate them with the IAM role
 const myApiFunctionLambda = new Function(apiStack, 'MyApiFunctionLambda', {
-  runtime: Runtime.NODEJS_18_X,
+  runtime: Runtime.NODEJS_20_X,
   handler: 'handler.handler', // Ensure this matches the entry point of your Lambda function
   code: Code.fromAsset('amplify/functions/api-function'), // Update the path to your function
   role: lambdaRole,
 });
 
 const myApiPackagesLambda = new Function(apiStack, 'MyApiPackagesLambda', {
-  runtime: Runtime.NODEJS_18_X,
+  runtime: Runtime.NODEJS_20_X,
   handler: 'handler.handler', // Ensure this matches the entry point of your Lambda function
   code: Code.fromAsset('amplify/functions/api-package-list'), // Update the path to your function
   role: lambdaRole,
 });
 
 const myApiFunctionRegexLambda = new Function(apiStack, 'MyApiFunctionRegexLambda', {
-  runtime: Runtime.NODEJS_18_X,
+  runtime: Runtime.NODEJS_20_X,
   handler: 'handler.handler', // Ensure this matches the entry point of your Lambda function
   code: Code.fromAsset('amplify/functions/api-package-regex'), // Update the path to your function
   role: lambdaRole,
 });
 
 const myApiFunctionRegisterLambda = new Function(apiStack, 'MyApiFunctionRegisterLambda', {
-  runtime: Runtime.NODEJS_18_X,
+  runtime: Runtime.NODEJS_20_X,
   handler: 'handler.handler', // Ensure this matches the entry point of your Lambda function
   code: Code.fromAsset('amplify/functions/api-register'), // Update the path to your function
   role: lambdaRole,
 });
 
 const myApiFunctionAuthenticateLambda = new Function(apiStack, 'MyApiFunctionAuthenticateLambda', {
-  runtime: Runtime.NODEJS_18_X,
+  runtime: Runtime.NODEJS_20_X,
   handler: 'handler.handler', // Ensure this matches the entry point of your Lambda function
   code: Code.fromAsset('amplify/functions/api-authenticate'), // Update the path to your function
   role: lambdaRole,
 });
 
 const apiResetLambda = new Function(apiStack, 'ApiResetLambda', {
-  runtime: Runtime.NODEJS_18_X,
+  runtime: Runtime.NODEJS_20_X,
   handler: 'handler.handler', // Ensure this matches the entry point of your Lambda function
   code: Code.fromAsset('amplify/functions/api-reset'), // Update the path to your function
   role: lambdaRole,
 });
 
 const apiPackageRateLambda = new Function(apiStack, 'ApiPackageRateLambda', {
-  runtime: Runtime.NODEJS_18_X,
+  runtime: Runtime.NODEJS_20_X,
   handler: 'handler.handler', // Ensure this matches the entry point of your Lambda function
   code: Code.fromAsset('amplify/functions/api-package-id-rate'), // Update the path to your function
   role: lambdaRole,
