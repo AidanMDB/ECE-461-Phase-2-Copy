@@ -12,6 +12,7 @@ import {
   JsonSchemaType
 } from 'aws-cdk-lib/aws-apigateway';
 import { myApiFunction } from './functions/api-function/resource.js';
+import { myApiPackages } from './functions/api-package-list/resource.js';
 import { ApiGateway } from 'aws-cdk-lib/aws-events-targets';
 import { Stack } from 'aws-cdk-lib';
 import { Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
@@ -23,6 +24,7 @@ const backend = defineBackend({
   data,           // creates dynamodb
   storage,        // creates s3
   myApiFunction,  // creates lambda
+  myApiPackages   // creates lambda
 });
 
 //const {} = backend.auth.resources.cfnResources;
@@ -58,6 +60,10 @@ const myRestApi = new RestApi(apiStack, "RestApi", {
 const lambdaIntegration = new LambdaIntegration(
   backend.myApiFunction.resources.lambda
 );
+
+const apiPackages = new LambdaIntegration(
+  backend.myApiPackages.resources.lambda
+)
 
 // create new API path
 const packagePath = myRestApi.root.addResource('package');
