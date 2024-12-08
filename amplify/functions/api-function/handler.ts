@@ -99,7 +99,7 @@ async function downloadFile(url: string, packageName: string) {
  * @param filePath - path to the zip file
  * 
  */
-async function extractZip(extractPath: string, filePath: string) {
+/* async function extractZip(extractPath: string, filePath: string) {
   fs.mkdirSync(extractPath, { recursive: true });
 
   await new Promise<void>((resolve, reject) => {
@@ -114,7 +114,7 @@ async function extractZip(extractPath: string, filePath: string) {
               reject(err);
           });
   });
-}
+} */
 
 
 /**
@@ -279,7 +279,24 @@ async function extractPackageInfo(zipPath: string) {
     const packageVersion = packageJSON.version? packageJSON.version : '1.0.0';
     const packageName = packageJSON.name
     const entryPoint = packageJSON.main ? packageJSON.main : null;
-    const repositoryURL = packageJSON.repository.url ? packageJSON.repository.url : packageJSON.repository;
+    let repositoryURL = packageJSON.repository.url ? packageJSON.repository.url : packageJSON.repository;
+    // change the URL to a valid github URL if it is not already
+    if (repositoryURL !== undefined) {
+      if (repositoryURL.includes("git+")) {
+        repositoryURL = repositoryURL.replace(".git", "");
+        repositoryURL = repositoryURL.replace("git+", "");
+      }
+      else {
+        repositoryURL = `https://github.com/${repositoryURL}`;
+      }
+    }
+    else {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ error: "Repository not found in package.json" }),
+      };
+    }
+
     const packageDep = {...packageJSON.dependencies, ...packageJSON.devDependencies}; 
     console.log("packageVersion: ", packageVersion);
 
