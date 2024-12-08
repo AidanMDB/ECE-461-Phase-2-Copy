@@ -11,7 +11,8 @@ import { VersionPinning } from './metrics/VersionPinning';
 import { EngineeringProcess } from './metrics/EngineeringProcess';
 
 export async function calcMetrics(URL:string) {
-
+  
+    console.log("Calculating metrics for: " + URL);
     const url = new URLHandler(URL);
     
     const netScore = new NetScore()
