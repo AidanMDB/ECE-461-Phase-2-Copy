@@ -23,7 +23,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
   if(!offset) {
     offset = "100";
   }
-
+  // lol
   // Parse the JSON body to see if it exists
   let requestBody;
   let version_body;
