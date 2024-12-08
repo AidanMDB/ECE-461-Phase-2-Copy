@@ -13,6 +13,7 @@ import {
 } from 'aws-cdk-lib/aws-apigateway';
 
 import { myApiFunction } from './functions/api-function/resource.js';
+import { myApiPackages } from './functions/api-package-list/resource.js';
 import { myApiFunctionRegex } from './functions/api-package-regex/resource.js';
 import { myApiFunctionRegister } from './functions/api-register/resource.js';
 import { myApiFunctionAuthenticate } from './functions/api-authenticate/resource.js';
@@ -28,7 +29,8 @@ const backend = defineBackend({
   auth,           // creates cognito
   data,           // creates dynamodb
   storage,        // creates s3
-  myApiFunction,  // creates lambda 
+  myApiFunction,  // creates lambda
+  myApiPackages,   // creates lambda
   myApiFunctionRegex, // creates lambda for regex search
   myApiFunctionRegister, // creates lambda for register
   myApiFunctionAuthenticate, // creates lambda for authenticate
@@ -83,6 +85,10 @@ const lambdaIntegrationAuthenticate = new LambdaIntegration(
   backend.myApiFunctionAuthenticate.resources.lambda
 );
 
+
+const apiPackages = new LambdaIntegration(
+  backend.myApiPackages.resources.lambda
+)
 
 // create new API path
 const packagePath = myRestApi.root.addResource('package');

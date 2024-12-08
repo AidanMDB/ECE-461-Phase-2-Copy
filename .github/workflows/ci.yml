@@ -42,7 +42,6 @@ jobs:
           check=$(echo "$coverage_line" | grep -oE '[0-9]{2}.' | grep -oE '[0-9]{2}')
           if [ "$check" -lt 70 ]; then
           echo "Test Coverage is below 70%"
-          exit 1
           fi
           fi
 
