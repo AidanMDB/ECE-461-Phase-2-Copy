@@ -1,4 +1,5 @@
-import { type ClientSchema, a, defineData } from "@aws-amplify/backend";
+import { type ClientSchema, a, defineData, defineFunction } from "@aws-amplify/backend";
+import { PartitionKey } from "aws-cdk-lib/aws-appsync";
 
 /*== STEP 1 ===============================================================
 The section below creates a Todo database table with a "content" field. Try
@@ -6,45 +7,28 @@ adding a new "isDone" field as a boolean. The authorization rule below
 specifies that any user authenticated via an API key can "create", "read",
 "update", and "delete" any "Todo" records.
 =========================================================================*/
+const functionWithDataAccess = defineFunction({
+  name: 'api-function',
+  entry: '../functions/api-function/handler.ts',
+})
+
 const schema = a.schema({
   Package: a.model({
-      metadata: a.relation("PackageMetaData"),
-      data: a.relation("PackageData"),
-      rating: a.relation("PackageRating"),
-  }) .authorization((allow) => [allow.owner()]),
-  
-  PackageMetaData: a.model({
-    Name: a.string(),
-    Version: a.string(),
-    ID: a.string()
-  }),
+    ID: a.id().required(),
+    Name: a.string().required(),
+    Version: a.string().required(),
+    ReadME: a.string(),
+    Dependencies: a.string(),
+    Rating: a.string(),
 
-  PackageData: a.model({
-    Name: a.string(),
-    S3Location: a.string(),
-    JSProgram: a.string()
-  }),
-
-  PackageRating: a.model({
-    BusFactor: a.float(),
-    BusFactorLatency: a.float(),
-    Correctness: a.float(),
-    CorrectnessLatency: a.float(),
-    RampUp: a.float(),
-    RampUpLatency: a.float(),
-    ResponsiveMaintainer: a.float(),
-    ResponsiveMaintainerLatency: a.float(),
-    LicenseScore: a.float(),
-    LicenseScoreLatency: a.float(),
-    GoodPinningPractice: a.float(),
-    GoodPinningPracticeLatency: a.float(),
-    PullRequest: a.float(),
-    PullRequestLatency: a.float(),
-    NetScore: a.float(),
-    NetScoreLatency: a.float()
   })
+  .identifier(["ID"]) // Primary Key
+  .secondaryIndexes((index) => [  // Secondary Search Indexes
+    index("Name")
+    .sortKeys(["Version"])
+  ])
+  .authorization((allow) => [allow.owner()]),
 });
-
 
 
 export type Schema = ClientSchema<typeof schema>;
@@ -52,10 +36,10 @@ export type Schema = ClientSchema<typeof schema>;
 export const data = defineData({
   schema,
   authorizationModes: {
-    defaultAuthorizationMode: "userPool",
-    //apiKeyAuthorizationMode: {
-    //  expiresInDays: 30,
-    //},
+    defaultAuthorizationMode: "apiKey",
+    apiKeyAuthorizationMode: {
+      expiresInDays: 30,
+    },
   },
 });
 

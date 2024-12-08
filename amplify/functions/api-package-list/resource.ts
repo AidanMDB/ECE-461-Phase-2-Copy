@@ -1,6 +1,6 @@
 import { defineFunction } from '@aws-amplify/backend';
 
-export const myApiFunction = defineFunction({ 
+export const myApiPackages = defineFunction({ 
     name: 'api-package-list',
-    timeoutSeconds: 30,
+    timeoutSeconds: 120,
 });

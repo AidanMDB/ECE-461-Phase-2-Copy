@@ -11,18 +11,36 @@ import {
   Model,
   JsonSchemaType
 } from 'aws-cdk-lib/aws-apigateway';
+
 import { myApiFunction } from './functions/api-function/resource.js';
+import { myApiPackages } from './functions/api-package-list/resource.js';
+import { myApiFunctionRegex } from './functions/api-package-regex/resource.js';
+import { myApiFunctionRegister } from './functions/api-register/resource.js';
+import { myApiFunctionAuthenticate } from './functions/api-authenticate/resource.js';
+import { apiReset } from './functions/api-reset/resource.js';
+
 import { ApiGateway } from 'aws-cdk-lib/aws-events-targets';
 import { apiPackageRate } from './functions/api-package-id-rate/resource.js';
 import { Stack } from 'aws-cdk-lib';
+import { Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
+import { UserPool } from 'aws-cdk-lib/aws-cognito';
+import * as iam from 'aws-cdk-lib/aws-iam';
 
 const backend = defineBackend({
   auth,           // creates cognito
   data,           // creates dynamodb
   storage,        // creates s3
   myApiFunction,  // creates lambda
+  myApiPackages,   // creates lambda
+  myApiFunctionRegex, // creates lambda for regex search
+  myApiFunctionRegister, // creates lambda for register
+  myApiFunctionAuthenticate, // creates lambda for authenticate
+  apiReset,        // creates lambda
   apiPackageRate, // creates lambda
 });
+
+//const {} = backend.auth.resources.cfnResources;
+
 
 // create API stack
 const apiStack = backend.createStack('api-stack');
@@ -35,9 +53,9 @@ const myRestApi = new RestApi(apiStack, "RestApi", {
     stageName: "dev",
   },
   defaultCorsPreflightOptions: {
-    allowOrigins: Cors.ALL_ORIGINS, // Restrict this to domains you trust
-    allowMethods: Cors.ALL_METHODS, // Specify only the methods you need to allow
-    allowHeaders: Cors.DEFAULT_HEADERS, // Specify only the headers you need to allow
+    allowOrigins: ["https://main.dec29zvcbtyi8.amplifyapp.com/", "https://wdyoiqbu66.execute-api.us-east-1.amazonaws.com/dev/"], // Restrict this to domains you trust
+    allowMethods: ["GET", "POST", "DELETE", "PUT"],
+    //allowHeaders: ["X-authorization"], // Specify only the headers you need to allow
   },
 });
 
@@ -69,7 +87,14 @@ const packageData: Model = myRestApi.addModel('PackageData', {
 });
 
 
-// create lambda integration
+// cognito user pools authorizer
+//const userPool = new UserPool(apiStack, "UserPool", "us-east-1_cwR5jLfKp");
+//const cognitoAuth = new CognitoUserPoolsAuthorizer(apiStack, "CognitoAuth", {
+//  cognitoUserPools: [backend.auth.resources.userPool],
+//});
+
+
+// create lambda integration for api package
 const lambdaIntegration = new LambdaIntegration(
   backend.myApiFunction.resources.lambda
 );
@@ -78,6 +103,26 @@ const lambdaIntegration = new LambdaIntegration(
 const lambdaIntegrationPackageRate = new LambdaIntegration(
   backend.apiPackageRate.resources.lambda
 );
+
+// create lambda for api reset
+const apiResetLambda = new LambdaIntegration(
+  backend.apiReset.resources.lambda
+);
+
+// create lambda integration for user register
+const lambdaIntegrationRegister = new LambdaIntegration(
+  backend.myApiFunctionRegister.resources.lambda
+);
+
+// create lambda integration for user authenticate
+const lambdaIntegrationAuthenticate = new LambdaIntegration(
+  backend.myApiFunctionAuthenticate.resources.lambda
+);
+
+
+const apiPackages = new LambdaIntegration(
+  backend.myApiPackages.resources.lambda
+)
 
 // create new API path
 const packagePath = myRestApi.root.addResource('package');
@@ -107,6 +152,41 @@ packagePath.addProxy({
 })
 
 
+// create new API path for api reset
+const resetPath = myRestApi.root.addResource('reset');
+
+resetPath.addMethod('DELETE', apiResetLambda, {
+
+});
+
+// create new API path for user register
+const registerPath = myRestApi.root.addResource('register');
+
+registerPath.addMethod('POST', lambdaIntegrationRegister, {
+
+});
+
+// create new API path for user authenticate
+const authenticatePath = myRestApi.root.addResource('authenticate');
+
+authenticatePath.addMethod('POST', lambdaIntegrationAuthenticate, {
+
+});
+
+
+// add lambda integration for regex search api
+const lambdaIntegrationRegex = new LambdaIntegration(
+  backend.myApiFunctionRegex.resources.lambda
+);
+
+// create new API path for regex search
+const regexPath = myRestApi.root.addResource('package').addResource('byRegEx');
+
+regexPath.addMethod('POST', lambdaIntegrationRegex, {
+
+});
+
+
 // add outputs to the configuration files (should allow for the frontend and backend to call the API)
 backend.addOutput({
   custom: {
@@ -118,4 +198,4 @@ backend.addOutput({
       }
     }
   }
-})
+});
