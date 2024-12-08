@@ -53,7 +53,8 @@ const myRestApi = new RestApi(apiStack, "RestApi", {
     stageName: "dev",
   },
   defaultCorsPreflightOptions: {
-    allowOrigins: ["https://main.dec29zvcbtyi8.amplifyapp.com/", "https://wdyoiqbu66.execute-api.us-east-1.amazonaws.com/dev/"], // Restrict this to domains you trust
+    //allowOrigins: ["https://main.dec29zvcbtyi8.amplifyapp.com/", "https://wdyoiqbu66.execute-api.us-east-1.amazonaws.com/dev/"], // Restrict this to domains you trust
+    allowOrigins: Cors.ALL_ORIGINS,
     allowMethods: ["GET", "POST", "DELETE", "PUT"],
     //allowHeaders: ["X-authorization"], // Specify only the headers you need to allow
   },
