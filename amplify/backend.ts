@@ -149,7 +149,7 @@ authenticatePath.addMethod('PUT', lambdaIntegrationAuthenticate, {
 
 
 // create new API path for regex search
-const regexPath = myRestApi.root.addResource('package').addResource('byRegEx');
+const regexPath = packagePath.addResource('byRegEx');
 
 regexPath.addMethod('POST', lambdaIntegrationRegex, {
 
