@@ -88,14 +88,7 @@ const lambdaIntegrationAuthenticate = new LambdaIntegration(
 const packagePath = myRestApi.root.addResource('package');
 
 packagePath.addMethod('POST', lambdaIntegration, {
-  requestParameters: {
-    "method.request.header.X-authorization": true,  // Requires 'X-authorization' header
-  },
-  requestModels: {'application/json': packageData},
-  requestValidatorOptions: {
-    validateRequestBody: true,
-    validateRequestParameters: true
-  }
+
 });
 
 // create new API path for api reset
