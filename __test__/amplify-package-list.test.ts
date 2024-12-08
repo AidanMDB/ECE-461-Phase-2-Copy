@@ -57,6 +57,29 @@ describe('Package API Handler', () => {
         );
     });
 
+    test('GET /packages - Success (200) All Packages *', async () => {
+      const event: APIGatewayProxyEvent = {
+          headers: { 'X-authorization': 'Bearer token' },
+          body: JSON.stringify({ "Version": "Bounded (1.2.3-3.0.1)", "Name": '*' }),
+        } as any;
+
+      dynamoDBMock.on(ScanCommand).resolves({
+          Items: [
+            { Version: { S: "1.2.3" }, Name: { S: "Underscore" }, ID: { S: "underscore" }, ReadME: { S: "ReadME" }, JSProgram: { S: "someProgram" }, S3Location: { S: "s3" } },
+            { Version: { S: "2.1.0" }, Name: { S: "Lodash" }, ID: { S: "lodash" }, ReadME: { S: "ReadME" }, JSProgram: { S: "someProgram" }, S3Location: { S: "s3" } },
+          ],
+      });
+      const result = (await handler(event, {} as any, () => {})) as APIGatewayProxyResult;
+
+      expect(result.statusCode).toBe(200);
+      expect(result.body).toBe(
+          JSON.stringify([
+              { Version: "1.2.3", Name: "Underscore", ID: "underscore" },
+              { Version: "2.1.0", Name: "Lodash", ID: "lodash" }
+          ])
+      );
+    });
+
     test('GET /packages - Success (200) Bounded Version', async () => {
       const event: APIGatewayProxyEvent = {
           headers: { 'X-authorization': 'Bearer token' },

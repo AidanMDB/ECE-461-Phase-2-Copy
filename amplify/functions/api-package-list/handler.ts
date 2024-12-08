@@ -61,18 +61,29 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     };
   }
 
-  // get list of packages from dynamoDB
-  const params = {
-    TableName: TABLE_NAME,
-    FilterExpression: 'contains(#name, :nameSubstring)', // AND contains(#version, :versionSubstring)',
-    ExpressionAttributeNames: {
-      '#name': name,
-      // '#version': version,
-    },
-    Limit: parseInt(offset),
-    // Might need to add this later if we want to implement pagination
-    //ExclusiveStartkey: event.queryStringParameters.LastEvaluatedKey ? JSON.parse(event.queryStringParameters.LastEvaluatedKey) : undefined,
-  };
+  let params;
+  // check if name = * (should get all packages) 
+  if(name === "*") {
+    params = {
+      TableName: TABLE_NAME,
+      Limit: parseInt(offset),
+      // Might need to add this later if we want to implement pagination
+      //ExclusiveStartkey: event.queryStringParameters.LastEvaluatedKey ? JSON.parse(event.queryStringParameters.LastEvaluatedKey) : undefined,
+    };
+  }
+  else {
+    params = {
+      TableName: TABLE_NAME,
+      FilterExpression: 'contains(#name, :nameSubstring)', // AND contains(#version, :versionSubstring)',
+      ExpressionAttributeNames: {
+        '#name': name,
+        // '#version': version,
+      },
+      Limit: parseInt(offset),
+      // Might need to add this later if we want to implement pagination
+      //ExclusiveStartkey: event.queryStringParameters.LastEvaluatedKey ? JSON.parse(event.queryStringParameters.LastEvaluatedKey) : undefined,
+    };
+  }
 
   let list: string | any[] = []
   try {
