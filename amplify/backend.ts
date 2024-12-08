@@ -60,33 +60,6 @@ const myRestApi = new RestApi(apiStack, "RestApi", {
 });
 
 
-// creates PackageData model from the API reference
-const packageData: Model = myRestApi.addModel('PackageData', {
-  schema: {
-    type: JsonSchemaType.OBJECT,
-    properties: {
-      Name: {
-        type: JsonSchemaType.STRING
-      },
-      Content: {
-        type: JsonSchemaType.STRING
-      },
-      URL: {
-        type: JsonSchemaType.STRING
-      },
-      Debloat: {
-        type: JsonSchemaType.BOOLEAN
-      },
-      JSProgram: {
-        type: JsonSchemaType.STRING
-      }
-    },
-    required: ["JSProgram", "Debloat", "Name"],
-    oneOf: [{required: ["Content"]}, {required: ["URL"]}]
-  }
-});
-
-
 // cognito user pools authorizer
 //const userPool = new UserPool(apiStack, "UserPool", "us-east-1_cwR5jLfKp");
 //const cognitoAuth = new CognitoUserPoolsAuthorizer(apiStack, "CognitoAuth", {
@@ -128,28 +101,14 @@ const apiPackages = new LambdaIntegration(
 const packagePath = myRestApi.root.addResource('package');
 
 packagePath.addMethod('POST', lambdaIntegration, {
-  requestParameters: {
-    "method.request.header.X-authorization": true,  // Requires 'X-authorization' header
-  },
-  requestModels: {'application/json': packageData},
-  requestValidatorOptions: {
-    validateRequestBody: true,
-    validateRequestParameters: true
-  }
+
 });
 
 // create new API path for package rate
-const packageRatePath = packagePath.addResource('{id}');
+const packageRatePath = packagePath.addResource('{id}').addResource('rate');
 packageRatePath.addMethod('GET', lambdaIntegrationPackageRate, {
-  requestParameters: {
-    "method.request.header.X-authorization": true,  // Requires 'X-authorization' header
-  }
-});
 
-packagePath.addProxy({
-  anyMethod: false,
-  defaultIntegration: lambdaIntegration
-})
+});
 
 
 // create new API path for api reset
