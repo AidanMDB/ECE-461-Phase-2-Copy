@@ -168,7 +168,7 @@ describe('Lambda Function Handler', () => {
         'X-authorization': 'your-auth-token', // Add your X-authorization header here
       },
       body: JSON.stringify({
-        Content: fs.readFileSync('__test__/braces.zip'),
+        Content: fs.readFileSync(`${process.cwd()}/__test__/braces.zip`),
         debloat: false,
         Name: 'name'
       })
@@ -212,7 +212,7 @@ describe('Lambda Function Handler', () => {
 
     const result = (await handler.handler(event, {} as any, () => {})) as APIGatewayProxyResult;
 
-    const contentCompare = fs.readFileSync('__test__/braces.zip');
+    const contentCompare = fs.readFileSync(`${process.cwd()}/__test__/braces.zip`);
     expect(result.body).toBe(JSON.stringify({
       metadata: {
         Name: "braces",
