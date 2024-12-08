@@ -26,6 +26,11 @@ jobs:
       - name: Install dependencies
         run: npm install --silent
 
+      - name: Enter the project directory
+        run: |
+          mkdir /__test__/tmp
+          cd /__test__/tmp
+
       - name: Runs end-to-end tests
         run: |
           output=$(npm test __test__/**.test.ts --coverage)
@@ -38,7 +43,7 @@ jobs:
           exit 1
           fi
           fi
-          
+
       - name: Linting
         run: |
           lint_output=$(npm run lint)
