@@ -19,28 +19,31 @@ describe('Package API Handler', () => {
       s3Mock.reset();
     });
   
-    // test('GET /package/{id}/cost - Success (200) w/out dependency', async () => {
-        // const event: APIGatewayProxyEvent = {
-        //     headers: { 'X-Authorization': 'Bearer token' },
-        //     body: JSON.stringify({ "Version": "Exact (1.2.3)", "Name": 'name' }),
-        //   } as any;
+    test('GET /package/{id}/cost - Success (200) w/out dependency (dependency = false)', async () => {
+        const event: APIGatewayProxyEvent = {
+            headers: { 'X-Authorization': 'Bearer token' },
+            body: JSON.stringify({ id: 'underscore' }),
+        } as any;
 
-        // dynamoDBMock.on(ScanCommand).resolves({
-        //     Items: [
-        //       { Version: { S: "1.2.3" }, Name: { S: "Underscore" }, ID: { S: "underscore" }, ReadME: { S: "ReadME" }, JSProgram: { S: "someProgram" }, S3Location: { S: "s3" } },
-        //       { Version: { S: "2.1.0" }, Name: { S: "Lodash" }, ID: { S: "lodash" }, ReadME: { S: "ReadME" }, JSProgram: { S: "someProgram" }, S3Location: { S: "s3" } },
-        //     ],
-        // });
-        // const result = (await handler(event, {} as any, () => {})) as APIGatewayProxyResult;
+        s3Mock.on(HeadObjectCommand, { Bucket: BUCKET_NAME, Key: "123" }).resolves({});
 
-        // expect(result.statusCode).toBe(200);
-        // expect(result.body).toBe(
-        //     JSON.stringify([
-        //         { Version: "1.2.3", Name: "Underscore", ID: "underscore" }
-        //         // { Version: "2.1.0", Name: "Lodash", ID: "lodash" }
-        //     ])
-        // );
-    // });
+        dynamoDBMock.on(GetCommand).resolves({
+            Item: {
+                id: { S: '123' },
+                name: { S: 'underscore' },
+                version: { S: '1.0.0' },
+                size: { N: '1000' },
+                cost: { N: '100' },
+                packageDep: { L: [] }
+            }
+        });
+        const result = (await handler(event, {} as any, () => {})) as APIGatewayProxyResult;
+
+        expect(result.statusCode).toBe(200);
+        expect(result.body).toBe(
+            JSON.stringify([])
+        );
+    });
 
     // test('GET /package/{id}/cost - Success (200) w dependency', async () => {
         

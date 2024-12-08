@@ -56,18 +56,18 @@ export const handler: APIGatewayProxyHandler = async (event) => {
         };
     }
 
-    const command = new HeadObjectCommand({
-        Bucket: BUCKET_NAME,
-        Key: `${id}`
-    });
-    
-
     let dependency = false; // default to false
     dependency = Boolean(event.queryStringParameters?.dependency);
 
     // check if the package exists in S3
     try {
+        const command = new HeadObjectCommand({
+            Bucket: BUCKET_NAME,
+            Key: `${id}`
+        });
         const response = await s3.send(command);
+
+        // get package size !!!!!!!!!!!!!!!!!!
     } catch (error) {
         return {
             statusCode: 404,
@@ -84,9 +84,10 @@ export const handler: APIGatewayProxyHandler = async (event) => {
                 id: id
             }
         };
-        console.log(params);
         const command = new GetCommand(params);
         const response = await dynamoDB.send(command);
+
+        // get a list of dependencies
         packageDep = response.Item?.packageDep;
     } catch (error:any) {
         return {
@@ -95,16 +96,44 @@ export const handler: APIGatewayProxyHandler = async (event) => {
         }
     }
 
-    let packageCosts = {};
+    // parse dependencies into JSON
+    const dependencyJSON = JSON.parse(packageDep);
+    for (const dep in dependencyJSON) {
+        let dependency_name = dep;
+        let dependency_version = dependencyJSON[dep];
+
+        // get the package information from npm registry
+        const response = await axios.get(`https://registry.npmjs.org/${dependency_name}/${dependency_version}`);
+
+        // get the tarball url
+
+        // download the tarball and write it to '/tmp' directory in lambda
+
+        // get the size of the tarball
+
+        // extract the package.json file from the tarball
+
+        // get the dependencies from the package.json file
+
+        // check if dependency is already in dependencyJSON
+    }
+
+    // get the cost of the dependencies ???????????????
+    let packageCosts;
+    if (dependency) {
+        const dependencyList = await getFirstLevelDependencies(id);
+        packageCosts = await dependencyCost(dependencyList);
+    } else {
+        packageCosts = await dependencyCost([id]);
+    }
 
     // make some recursion function that downloads the tarball from registry.npmjs gets its size and then searches for dependencies and gets their size
 
-    const dependencyJSON = JSON.parse(packageDep);
-
+    // go into dependency, add to packagejson, send package json to next function which calls that and gets tarbal, then finds tarball size
 
 
     return {
         statusCode: 200,
-        body: JSON.stringify("Hello from Lambda!")
+        body: JSON.stringify(packageCosts)
     };
 }
