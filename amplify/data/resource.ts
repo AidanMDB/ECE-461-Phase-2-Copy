@@ -26,7 +26,7 @@ const schema = a.schema({
   .secondaryIndexes((index) => [  // Secondary Search Indexes
     index("Name")
     .sortKeys(["Version"])
-  ]),
+  ])
   .authorization((allow) => [allow.owner()]),
 });
 
