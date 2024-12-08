@@ -37,23 +37,6 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     };
   }
 
-  try {
-    // Check if the package exists in S3
-    const command = new HeadObjectCommand({
-      Bucket: BUCKET_NAME,
-      Key: packageID,
-    });
-    await s3.send(command);
-  } catch (error: any) {
-    // Handle specific error scenarios
-    if (error.name === "NotFound") {
-      return {
-        statusCode: 404,
-        body: JSON.stringify({ error: "Package does not exist." }),
-      };
-    }
-  }
-
   // retrieve rating from dynamoDB
   let packageRating;
   try {
@@ -66,7 +49,13 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     const data = await dynamoDB.send(getItemCommand);
     packageRating = data.Item?.rating?.N;
     console.log("packageRating", packageRating);
-  } catch (error) { // check this error !!!!!!
+  } catch (error:any) { // check this error !!!!!!
+    if (error.name === "NotFound") {
+      return {
+        statusCode: 404,
+        body: JSON.stringify({ error: "Package does not exist." }),
+      };
+    }
     return {
       statusCode: 500,
       body: JSON.stringify({ error: "The package rating system choked on at least one of the metrics." }),
