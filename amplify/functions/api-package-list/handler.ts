@@ -28,18 +28,31 @@ export const handler: APIGatewayProxyHandler = async (event) => {
   let requestBody;
   let version_body;
   let name;
+  let versionType;
   let version;
   try {
     requestBody = JSON.parse(event.body || "{}"); 
     console.log("request body:",requestBody);
     version_body = requestBody.Version;
 
-    // parse version
+    // get version type
+    if(version_body.includes("Tilde")) {
+      versionType = "Tilde";
+    }
+    else if(version_body.includes("Bounded")) {
+      versionType = "Bounded";
+    }
+    else if(version_body.includes("Carat")) {
+      versionType = "Carat";
+    }
+    else {
+      versionType = "Exact";
+    }
+
+    // parse version for version number(s)
     const regex = /\(([^)]+)\)/;
     const match = version_body.match(regex);
     version = match ? match[1] : null;
-
-    console.log("version:", version);
     name = requestBody.Name;
   } catch (error) {
     return {
@@ -49,20 +62,19 @@ export const handler: APIGatewayProxyHandler = async (event) => {
   }
 
   // get list of packages from dynamoDB
-  // need to add version and name !!!
-  let list: string | any[] = []
   const params = {
     TableName: TABLE_NAME,
-    FilterExpression: 'contains(#name, :nameSubstring) AND contains(#version, :versionSubstring)',
+    FilterExpression: 'contains(#name, :nameSubstring)', // AND contains(#version, :versionSubstring)',
     ExpressionAttributeNames: {
       '#name': name,
-      '#version': version,
+      // '#version': version,
     },
     Limit: parseInt(offset),
     // Might need to add this later if we want to implement pagination
     //ExclusiveStartkey: event.queryStringParameters.LastEvaluatedKey ? JSON.parse(event.queryStringParameters.LastEvaluatedKey) : undefined,
   };
 
+  let list: string | any[] = []
   try {
     const result = await dynamoDb.send(new ScanCommand(params));
 
@@ -80,6 +92,53 @@ export const handler: APIGatewayProxyHandler = async (event) => {
         statusCode: 500,
         body: JSON.stringify({ error: error }),
     };
+  }
+
+  // check versions in list
+  for(let i = 0; i < list.length; i++) {
+    if(versionType === "Exact") {
+      if(list[i].Version !== version) {
+        list.splice(i, 1);
+        i--;
+      }
+    }
+    else if(versionType === "Tilde") {
+      const versionArr = version.split("~");
+      const lowerBound = versionArr[1];
+
+      // parse lower bound version
+      let lower_bound_arr = lowerBound.split(".");
+      let lower_bound_ver_1 = parseInt(lower_bound_arr[0]);
+      let lower_bound_ver_2 = parseInt(lower_bound_arr[1]);
+
+      // parse packages version
+      const package_version = list[i].Version;
+      let package_version_arr = package_version.split(".");
+      let package_ver_1 = parseInt(package_version_arr[0]);
+      let package_ver_2 = parseInt(package_version_arr[1]);
+
+      if(!(package_ver_1 == lower_bound_ver_1 && package_ver_2 == lower_bound_ver_2)) {
+        list.splice(i, 1);
+        i--;
+      }
+    }
+    else if(versionType === "Bounded") {
+      const versionArr = version.split("-");
+      const lowerBound = versionArr[0];
+      const upperBound = versionArr[1];
+      if(!(list[i].Version >= lowerBound && list[i].Version <= upperBound)) {
+        list.splice(i, 1);
+        i--;
+      }
+    }
+    else if(versionType === "Carat") {
+      const versionArr = version.split("^");
+      const lowerBound = versionArr[0];
+      if(!(list[i].Version >= lowerBound)) {
+        list.splice(i, 1);
+        i--;
+      }
+    }
   }
 
   if((parseInt(offset) < list.length)) {
