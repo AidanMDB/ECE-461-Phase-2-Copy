@@ -1,11 +1,13 @@
 import type { APIGatewayProxyHandler } from "aws-lambda";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, GetCommand } from "@aws-sdk/lib-dynamodb";
+import { S3Client, HeadObjectCommand } from "@aws-sdk/client-s3";
 import axios from "axios";
 
 const db = new DynamoDBClient({});
 const dynamoClient = DynamoDBDocumentClient.from(db);
-
+const s3 = new DynamoDBClient({});
+const BUCKET_NAME = "packageStorage";
 
 /**
  * given a list of dependencies, calculate the total cost of the dependencies
@@ -53,7 +55,13 @@ export const handler: APIGatewayProxyHandler = async (event) => {
         };
     }
 
+    const command = new HeadObjectCommand({
+        Bucket: BUCKET_NAME,
+        Key: `${id}`
+    });
     
+    const response = await s3.send(command);
+
     const dependency = event.queryStringParameters?.dependency;
     if (dependency) {
         return {
