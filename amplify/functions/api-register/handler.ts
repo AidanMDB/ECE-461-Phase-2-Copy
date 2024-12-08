@@ -21,7 +21,7 @@ const USER_POOL_ID = process.env.USER_POOL_ID;
 
 export const handler: APIGatewayProxyHandler = async (event) => {
     // Check for 'X-authorization' header
-    const authHeader = event.headers["X-authorization"];
+    const authHeader = event.headers["X-Authorization"];
     if (!authHeader) {
         return {
             statusCode: 404,

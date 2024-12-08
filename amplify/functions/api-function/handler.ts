@@ -539,7 +539,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
 
   // check for 'X-authorization' header           
   try {
-    const authHeader = event.headers["X-authorization"];
+    const authHeader = event.headers["X-Authorization"];
     console.log("authHeader", authHeader);
   } catch (error) {
     return {
