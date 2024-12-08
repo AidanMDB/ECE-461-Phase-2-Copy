@@ -91,9 +91,10 @@ describe("Handler Tests", () => {
       pathParameters: { id: "nonexistent-package" },
     } as any;
 
-    s3Mock.on(HeadObjectCommand, { Bucket: BUCKET_NAME, Key: "nonexistent-package" }).rejects({
-      name: "NotFound",
-    });
+    // s3Mock.on(HeadObjectCommand, { Bucket: BUCKET_NAME, Key: "nonexistent-package" }).rejects({
+    //   name: "NotFound",
+    // });
+    dynamoDBMock.on(GetItemCommand).rejects({ name: "NotFound", });
 
     const result = (await handler(event, {} as any, () => {})) as APIGatewayProxyResult;
 
