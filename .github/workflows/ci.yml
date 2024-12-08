@@ -24,7 +24,30 @@ jobs:
           node-version: '20.18.0'
 
       - name: Install dependencies
-        run: npm install
+        run: npm install --silent
+
+      - name: Enter the project directory
+        run: |
+          pwd
+          ls
+          cd __test__
+          ls
 
       - name: Runs end-to-end tests
-        run: npm test __test__/end-to-end.test.ts 
+        run: |
+          output=$(npm test __test__/**.test.ts --coverage)
+          coverage_line=$(echo "$output" | grep -E '^All files\s+\|\s+[0-9.]+' | grep -oE '[0-9.]+' | tail -n 1)
+          echo "Test Coverage: $coverage_line"
+          if [ "$coverage_line" != "100" ]; then
+          check=$(echo "$coverage_line" | grep -oE '[0-9]{2}.' | grep -oE '[0-9]{2}')
+          if [ "$check" -lt 70 ]; then
+          echo "Test Coverage is below 70%"
+          exit 1
+          fi
+          fi
+
+      - name: Linting
+        run: |
+          lint_output=$(npm run lint)
+          echo "$lint_output"
+          
