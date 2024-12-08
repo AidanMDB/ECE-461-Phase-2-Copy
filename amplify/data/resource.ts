@@ -1,4 +1,5 @@
 import { type ClientSchema, a, defineData, defineFunction } from "@aws-amplify/backend";
+import { PartitionKey } from "aws-cdk-lib/aws-appsync";
 
 /*== STEP 1 ===============================================================
 The section below creates a Todo database table with a "content" field. Try
@@ -13,13 +14,19 @@ const functionWithDataAccess = defineFunction({
 
 const schema = a.schema({
   Package: a.model({
+    ID: a.id().required(),
     Name: a.string().required(),
     Version: a.string().required(),
     ReadME: a.string(),
     Dependencies: a.string(),
     Rating: a.string(),
+
   })
-  .identifier(["Name", "Version"])
+  .identifier(["ID"]) // Primary Key
+  .secondaryIndexes((index) => [  // Secondary Search Indexes
+    index("Name")
+    .sortKeys(["Version"])
+  ]),
   .authorization((allow) => [allow.owner()]),
 });
 

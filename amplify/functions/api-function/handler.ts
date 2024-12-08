@@ -11,7 +11,7 @@ import archiver from "archiver";
 import * as tar from "tar";
 import unzipper from "unzipper";
 import AdmZip from "adm-zip";
-import terser from "terser";
+import * as terser from "terser";
 //import esbuild from "esbuild";
 
 const s3 = new S3Client();
@@ -52,8 +52,7 @@ async function checkKeyExists(tableName: string, packageName:string, packageVers
     const params = {
       TableName: tableName,
       Key: {
-        Name: packageName,
-        Version: packageVersion
+        ID: {S:`${packageName}${packageVersion}`},
       }
     };
 
@@ -721,11 +720,12 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     const putCommand = new PutCommand({
       TableName: packageTable,
       Item: {
-        Name: packageName,
-        Version: packageVersion,
-        ReadME: readMeData,
-        Dependencies: packageDep,
-        Rating: JSON.stringify(metrics)
+        ID: {S: `${packageName}${packageVersion}`},
+        Name: {S: packageName},
+        Version: {S: packageVersion},
+        ReadME: {S: readMeData},
+        Dependencies: {S: packageDep},
+        Rating: {S: JSON.stringify(metrics)}
       }
     });
 
