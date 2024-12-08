@@ -47,11 +47,14 @@ function isErrorResult(result: ExtractPackageInfoResult): result is ErrorResult 
  * @param key - key to check if it exists in the table
  * @returns True if the key exists in the table, false otherwise
  */
-async function checkKeyExists(tableName: string, key: { [key: string]: any }): Promise<boolean> {
+async function checkKeyExists(tableName: string, packageName:string, packageVersion:string): Promise<boolean> {
   try {
     const params = {
       TableName: tableName,
-      Key: key,
+      Key: {
+        Name: packageName,
+        Version: packageVersion
+      }
     };
 
     const command = new GetCommand(params);
@@ -307,6 +310,7 @@ async function extractPackageInfo(zipPath: string) {
 async function isContent(Content:string, Name:string, debloat:boolean): Promise<ExtractPackageInfoResult> {
   try {
     // write content to zip file
+    console.log("entered content function", Content);
     const contentBuffer = Buffer.from(Content, 'base64');
     const zipPath = `${TMP_PATH}/${Name}.zip`;
     fs.writeFileSync(zipPath, contentBuffer);
@@ -314,7 +318,7 @@ async function isContent(Content:string, Name:string, debloat:boolean): Promise<
 
     // extract package info from zip file
     const result = await extractPackageInfo(zipPath);
-    console.log("isContent result:", result);
+    console.log("isContent result:", result.jsonData);
     if (!result) {
       return {
         statusCode: 400,
@@ -350,8 +354,8 @@ async function isContent(Content:string, Name:string, debloat:boolean): Promise<
   } catch (error) {
     return {
       statusCode: 400,
-      body: JSON.stringify({ error: "Error in isContent" }),
-    }
+      body: JSON.stringify(`Error in isContent ${error}`),
+    };
   }
 }
 
@@ -494,8 +498,14 @@ async function isGitHub(packageOwner:string, packageName:string, packageTree:str
       minifyZipInPlace(filePath);
     }
 
-    return {packageName, packageVersion, repositoryURL, packageDep, entryPoint, readMeData};
-  
+    return {
+      packageName, 
+      packageVersion, 
+      repositoryURL, 
+      packageDep, 
+      entryPoint, 
+      readMeData
+    };
   
   } catch (error) {
     return {
@@ -644,35 +654,20 @@ export const handler: APIGatewayProxyHandler = async (event) => {
 
   // Check if package exists already (uses dynamoDB)
   const packageTable = "Package";
-  const packageID = `${packageName}${packageVersion}`;
-  const existence = await checkKeyExists(packageTable, {ID: packageID});
+  if (packageVersion === undefined) {
+    return {
+      statusCode: 400,
+      body: JSON.stringify("Package version is undefined")
+    }
+  }
+
+  const existence = await checkKeyExists(packageTable, packageName, packageVersion);
   if (existence) {
     return {
       statusCode: 409,
       body: JSON.stringify('Package exists already.')
     }
   }
-
-/*   try {
-    const command = new HeadObjectCommand({
-      Bucket: BUCKET_NAME,
-      Key: `package/${packageName}${packageVersion}`,
-    });
-
-    const response = await s3.send(command);
-
-    if (response.$metadata.httpStatusCode === 200) {
-      return {
-          statusCode: 409,
-          body: JSON.stringify('Package exists already.'),
-      }
-    }
-  } catch (error) {
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: "Error checking if package exists in S3" })
-    }
-  } */
 
 
   // Calculate metric's for the package
@@ -686,6 +681,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     };
     const metricsResult = await calcMetrics(repositoryURL);
     metrics = JSON.parse(metricsResult);
+    console.log(`Metrics: ${metrics}`);
   } catch (error) {
     return {
       statusCode: 400,
@@ -703,17 +699,14 @@ export const handler: APIGatewayProxyHandler = async (event) => {
 
 
   // add metadata to bynamoDB
-  const rateTable = "PackageRating";
-
   try {
     // create and send Package table for package
     const putCommand = new PutCommand({
       TableName: packageTable,
       Item: {
-        ID: `${packageName}${packageVersion}`,
         Name: packageName,
-        ReadME: readMeData,
         Version: packageVersion,
+        ReadME: readMeData,
         Dependencies: packageDep,
         Rating: JSON.stringify(metrics)
       }
@@ -727,32 +720,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
       }
     }
     console.log("Package added to DynamoDB");
-    // create and send Rating table for package
-    /* const putCommandRate = new PutCommand({
-      TableName: rateTable,
-      Item: {
-      package: `${packageName}${packageVersion}`,
-      ID: `${packageName}${packageVersion}`,
-      BusFactor: metrics.BusFactor,
-      BusFactorLatency: metrics.BusFactorLatency,
-      Correctness: metrics.Correctness,
-      CorrectnessLatency: metrics.CorrectnessLatency,
-      RampUp: metrics.RampUp,
-      RampUpLatency: metrics.RampUpLatency,
-      ResponsiveMaintainer: metrics.ResponsiveMaintainer,
-      ResponsiveMaintainerLatency: metrics.ResponsiveMaintainerLatency,
-      LicenseScore: metrics.LicenseScore,
-      LicenseScoreLatency: metrics.LicenseScoreLatency,
-      GoodPinningPractice: metrics.VersionPinning,
-      GoodPinningPracticeLatency: metrics.VersionPinningLatency,
-      PullRequest: metrics.EngineeringProcess,
-      PullRequestLatency: metrics.EngineeringProcessLatency,
-      NetScore: metrics.NetScore,
-      NetScoreLatency: metrics.NetScoreLatency
-      }
-    });
-
-    await dynamoClient.send(putCommandRate); */
+    
   } catch (error) {
     console.log("error type: ", typeof error);
     return {
@@ -804,6 +772,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     responseBody.data.URL = URL;
   }
 
+  console.log("MetaData being Returned:", responseBody.metadata);
   return {
     statusCode: 201,
     body: JSON.stringify(responseBody)
