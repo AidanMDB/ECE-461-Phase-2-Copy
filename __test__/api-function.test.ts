@@ -82,7 +82,7 @@ describe('Lambda Function Handler', () => {
   it('should return 400 error for having URL and Content', async () => {
     const event: APIGatewayProxyEvent = {
       headers: {
-        'X-authorization': 'your-auth-token', // Add your X-authorization header here
+        'X-Authorization': 'your-auth-token', // Add your X-authorization header here
       },
       body: JSON.stringify({
         Content: 'content',
@@ -103,7 +103,7 @@ describe('Lambda Function Handler', () => {
 
     const event: APIGatewayProxyEvent = {
       headers: {
-        'X-authorization': 'your-auth-token', // Add your X-authorization header here
+        'X-Authorization': 'your-auth-token', // Add your X-authorization header here
       },
       body: JSON.stringify({
         Content: 'content',
@@ -127,7 +127,7 @@ describe('Lambda Function Handler', () => {
 
     const event: APIGatewayProxyEvent = {
       headers: {
-        'X-authorization': 'your-auth-token', // Add your X-authorization header here
+        'X-Authorization': 'your-auth-token', // Add your X-authorization header here
       },
       body: JSON.stringify({
         Content: fs.readFileSync('__test__/braces.zip'),
@@ -165,7 +165,7 @@ describe('Lambda Function Handler', () => {
 
     const event: APIGatewayProxyEvent = {
       headers: {
-        'X-authorization': 'your-auth-token', // Add your X-authorization header here
+        'X-Authorization': 'your-auth-token', // Add your X-authorization header here
       },
       body: JSON.stringify({
         Content: fs.readFileSync(`${process.cwd()}/__test__/braces.zip`),
@@ -246,7 +246,7 @@ describe('Lambda Function Handler', () => {
 
     const event: APIGatewayProxyEvent = {
       headers: {
-        'X-authorization': 'your-auth-token', // Add your X-authorization header here
+        'X-Authorization': 'your-auth-token', // Add your X-authorization header here
       },
       body: JSON.stringify({
         URL: "https://github.com/micromatch/braces",
@@ -339,7 +339,7 @@ describe('Lambda Function Handler', () => {
 
     const event: APIGatewayProxyEvent = {
       headers: {
-        'X-authorization': 'your-auth-token', // Add your X-authorization header here
+        'X-Authorization': 'your-auth-token', // Add your X-authorization header here
       },
       body: JSON.stringify({
         URL: "https://www.npmjs.com/package/braces",
@@ -413,7 +413,7 @@ describe('Lambda Function Handler', () => {
     const contentCompare = fs.readFileSync('__test__/braces.zip');
     const event: APIGatewayProxyEvent = {
       headers: {
-        'X-authorization': 'your-auth-token', // Add your X-authorization header here
+        'X-Authorization': 'your-auth-token', // Add your X-authorization header here
       },
       body: JSON.stringify({
         Content: contentCompare,
@@ -703,7 +703,7 @@ describe('Lambda Function Handler', () => {
 
     const event: APIGatewayProxyEvent = {
       headers: {
-        'X-authorization': 'your-auth-token', // Add your X-authorization header here
+        'X-Authorization': 'your-auth-token', // Add your X-authorization header here
       },
       body: JSON.stringify({
         Content: fs.readFileSync('__test__/braces.zip'),

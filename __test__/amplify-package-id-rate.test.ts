@@ -22,7 +22,7 @@ describe("Handler Tests", () => {
 
   test("GET Request - Success (200)", async () => {
     const event: APIGatewayProxyEvent = {
-      headers: { "X-authorization": "Bearer token" },
+      headers: { "X-Authorization": "Bearer token" },
       httpMethod: "GET",
       pathParameters: { id: "123" },
     } as any;
@@ -72,7 +72,7 @@ describe("Handler Tests", () => {
 
   test("GET Request - Missing Package ID (400)", async () => {
     const event: APIGatewayProxyEvent = {
-      headers: { "X-authorization": "Bearer token" },
+      headers: { "X-Authorization": "Bearer token" },
       httpMethod: "GET",
       pathParameters: {}, // Missing 'id'
     } as any;
@@ -86,7 +86,7 @@ describe("Handler Tests", () => {
 
   test("GET Request - Package Not Found (404)", async () => {
     const event: APIGatewayProxyEvent = {
-      headers: { "X-authorization": "Bearer token" },
+      headers: { "X-Authorization": "Bearer token" },
       httpMethod: "GET",
       pathParameters: { id: "nonexistent-package" },
     } as any;
@@ -105,7 +105,7 @@ describe("Handler Tests", () => {
 
   test("GET Request - Internal Server Error (500)", async () => {
     const event: APIGatewayProxyEvent = {
-      headers: { "X-authorization": "Bearer token" },
+      headers: { "X-Authorization": "Bearer token" },
       httpMethod: "GET",
       pathParameters: { id: "123" },
     } as any;
@@ -121,7 +121,7 @@ describe("Handler Tests", () => {
 
   test("GET Request - Unsupported HTTP Method (400)", async () => {
     const event: APIGatewayProxyEvent = {
-      headers: { "X-authorization": "Bearer token" },
+      headers: { "X-Authorization": "Bearer token" },
       httpMethod: "POST", // Unsupported method
       pathParameters: { id: "123" },
     } as any;
@@ -136,7 +136,7 @@ describe("Handler Tests", () => {
   test("GET Request - Large Package ID (200)", async () => {
     const largePackageID = "a".repeat(1024); // Very long package ID
     const event: APIGatewayProxyEvent = {
-      headers: { "X-authorization": "Bearer token" },
+      headers: { "X-Authorization": "Bearer token" },
       httpMethod: "GET",
       pathParameters: { id: largePackageID },
     } as any;
@@ -151,7 +151,7 @@ describe("Handler Tests", () => {
 
   test("GET Request - S3 Throttling (500)", async () => {
     const event: APIGatewayProxyEvent = {
-      headers: { "X-authorization": "Bearer token" },
+      headers: { "X-Authorization": "Bearer token" },
       httpMethod: "GET",
       pathParameters: { id: "123" },
     } as any;
