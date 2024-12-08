@@ -228,6 +228,27 @@ const regexPath = packagePath.addResource('byRegEx');
 regexPath.addMethod('POST', lambdaIntegrationRegex, {
 });
 
+
+const apiRestPolicy = new Policy(apiStack, "RestApiPolicy", {
+  statements: [
+    new PolicyStatement({
+      actions: ["execute-api:Invoke"],
+      resources: [
+        `${myRestApi.arnForExecuteApi("*", "/package", "dev")}`,
+        `${myRestApi.arnForExecuteApi("*", "/packages", "dev")}`,
+        `${myRestApi.arnForExecuteApi("*", "/package/{id}/rate", "dev")}`,
+        `${myRestApi.arnForExecuteApi("*", "/reset", "dev")}`,
+        `${myRestApi.arnForExecuteApi("*", "/register", "dev")}`,
+        `${myRestApi.arnForExecuteApi("*", "/authenticate", "dev")}`,
+        `${myRestApi.arnForExecuteApi("*", "/package/byRegEx", "dev")}`,
+      ],
+    })
+  ]
+});
+
+backend.auth.resources.unauthenticatedUserIamRole.attachInlinePolicy(apiRestPolicy);
+
+
 // add outputs to the configuration files (should allow for the frontend and backend to call the API)
 backend.addOutput({
   custom: {
