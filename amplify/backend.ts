@@ -20,6 +20,7 @@ import { myApiFunctionAuthenticate } from './functions/api-authenticate/resource
 import { apiReset } from './functions/api-reset/resource.js';
 
 import { ApiGateway } from 'aws-cdk-lib/aws-events-targets';
+import { apiPackageRate } from './functions/api-package-id-rate/resource.js';
 import { Stack } from 'aws-cdk-lib';
 import { Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { UserPool } from 'aws-cdk-lib/aws-cognito';
@@ -34,7 +35,8 @@ const backend = defineBackend({
   myApiFunctionRegex, // creates lambda for regex search
   myApiFunctionRegister, // creates lambda for register
   myApiFunctionAuthenticate, // creates lambda for authenticate
-  apiReset        // creates lambda
+  apiReset,        // creates lambda
+  apiPackageRate, // creates lambda
 });
 
 //const {} = backend.auth.resources.cfnResources;
@@ -58,6 +60,33 @@ const myRestApi = new RestApi(apiStack, "RestApi", {
 });
 
 
+// creates PackageData model from the API reference
+const packageData: Model = myRestApi.addModel('PackageData', {
+  schema: {
+    type: JsonSchemaType.OBJECT,
+    properties: {
+      Name: {
+        type: JsonSchemaType.STRING
+      },
+      Content: {
+        type: JsonSchemaType.STRING
+      },
+      URL: {
+        type: JsonSchemaType.STRING
+      },
+      Debloat: {
+        type: JsonSchemaType.BOOLEAN
+      },
+      JSProgram: {
+        type: JsonSchemaType.STRING
+      }
+    },
+    required: ["JSProgram", "Debloat", "Name"],
+    oneOf: [{required: ["Content"]}, {required: ["URL"]}]
+  }
+});
+
+
 // cognito user pools authorizer
 //const userPool = new UserPool(apiStack, "UserPool", "us-east-1_cwR5jLfKp");
 //const cognitoAuth = new CognitoUserPoolsAuthorizer(apiStack, "CognitoAuth", {
@@ -68,6 +97,11 @@ const myRestApi = new RestApi(apiStack, "RestApi", {
 // create lambda integration for api package
 const lambdaIntegration = new LambdaIntegration(
   backend.myApiFunction.resources.lambda
+);
+
+// create lambda integration for package rate
+const lambdaIntegrationPackageRate = new LambdaIntegration(
+  backend.apiPackageRate.resources.lambda
 );
 
 // create lambda for api reset
@@ -94,8 +128,29 @@ const apiPackages = new LambdaIntegration(
 const packagePath = myRestApi.root.addResource('package');
 
 packagePath.addMethod('POST', lambdaIntegration, {
-
+  requestParameters: {
+    "method.request.header.X-authorization": true,  // Requires 'X-authorization' header
+  },
+  requestModels: {'application/json': packageData},
+  requestValidatorOptions: {
+    validateRequestBody: true,
+    validateRequestParameters: true
+  }
 });
+
+// create new API path for package rate
+const packageRatePath = packagePath.addResource('{id}');
+packageRatePath.addMethod('GET', lambdaIntegrationPackageRate, {
+  requestParameters: {
+    "method.request.header.X-authorization": true,  // Requires 'X-authorization' header
+  }
+});
+
+packagePath.addProxy({
+  anyMethod: false,
+  defaultIntegration: lambdaIntegration
+})
+
 
 // create new API path for api reset
 const resetPath = myRestApi.root.addResource('reset');
