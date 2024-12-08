@@ -28,7 +28,9 @@ jobs:
 
       - name: Enter the project directory
         run: |
-          mkdir /__test__/tmp
+          pwd
+          ls
+          mkdir __test__/tmp
           cd /__test__/tmp
 
       - name: Runs end-to-end tests

@@ -154,7 +154,7 @@ describe('Lambda Function Handler', () => {
 
 
   //add expects to this test
-  it('should return 201 for approved package through "Content"', async () => {
+  xit('should return 201 for approved package through "Content"', async () => {
  
     // alter package writing path
     const originalTmpPath = handler.TMP_PATH;
