@@ -130,21 +130,21 @@ const lambdaIntegrationRegex = new LambdaIntegration(
 // Create Lambda functions and associate them with the IAM role
 const myApiFunctionLambda = new Function(apiStack, 'MyApiFunctionLambda', {
   runtime: Runtime.NODEJS_20_X,
-  handler: 'handler.ts', // Ensure this matches the entry point of your Lambda function
+  handler: 'handler.handler', // Ensure this matches the entry point of your Lambda function
   code: Code.fromAsset('amplify/functions/api-function'), // Update the path to your function
   role: lambdaRole,
 });
 
 const myApiPackagesLambda = new Function(apiStack, 'MyApiPackagesLambda', {
   runtime: Runtime.NODEJS_20_X,
-  handler: 'handler.ts', // Ensure this matches the entry point of your Lambda function
+  handler: 'handler.handler', // Ensure this matches the entry point of your Lambda function
   code: Code.fromAsset('amplify/functions/api-package-list'), // Update the path to your function
   role: lambdaRole,
 });
 
 const myApiFunctionRegexLambda = new Function(apiStack, 'MyApiFunctionRegexLambda', {
   runtime: Runtime.NODEJS_20_X,
-  handler: 'handler.ts', // Ensure this matches the entry point of your Lambda function
+  handler: 'handler.handler', // Ensure this matches the entry point of your Lambda function
   code: Code.fromAsset('amplify/functions/api-package-regex'), // Update the path to your function
   role: lambdaRole,
 });
