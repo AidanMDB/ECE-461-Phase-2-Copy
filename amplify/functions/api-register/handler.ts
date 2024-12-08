@@ -1,6 +1,6 @@
 import { CognitoIdentityProviderClient, AdminCreateUserCommand, AdminDeleteUserCommand, AdminAddUserToGroupCommand } from "@aws-sdk/client-cognito-identity-provider";
 import type { APIGatewayProxyHandler, APIGatewayProxyResult } from "aws-lambda";
-import jwtDecode from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode';
 import { auth } from "../../auth/resource";
 /*
 Here are all the status codes and their body messages:

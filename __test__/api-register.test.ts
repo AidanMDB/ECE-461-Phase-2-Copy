@@ -3,7 +3,7 @@ import { AdminCreateUserCommand, AdminDeleteUserCommand, AdminAddUserToGroupComm
 import { handler } from "../amplify/functions/api-register/handler"; 
 import { mockClient } from "aws-sdk-client-mock";
 import { CognitoIdentityProviderClient } from "@aws-sdk/client-cognito-identity-provider";
-import  jwtDecode  from 'jwt-decode';
+import { jwtDecode }  from 'jwt-decode';
 import jwt from 'jsonwebtoken';
 
 // Create a mock for the CognitoIdentityProviderClient
