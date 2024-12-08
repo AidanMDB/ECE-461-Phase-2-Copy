@@ -28,7 +28,7 @@ jobs:
 
       - name: Runs end-to-end tests
         run: |
-          output = $(npm test __test__/**.test.ts --coverage)
+          output=$(npm test __test__/**.test.ts --coverage)
 
           coverage_line=$(echo "$output" | grep -E '^All files\s+\|\s+[0-9.]+' | grep -oE '[0-9.]+' | tail -n 1)
 
@@ -43,6 +43,6 @@ jobs:
           fi
           fi
 
-          lint_output = $(npm run lint)
-          echo "$output_lint"
+          lint_output=$(npm run lint)
+          echo "$lint_output"
           
