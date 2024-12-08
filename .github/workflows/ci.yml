@@ -30,8 +30,8 @@ jobs:
         run: |
           pwd
           ls
-          mkdir __test__/tmp
-          cd /__test__/tmp
+          cd __test__
+          ls
 
       - name: Runs end-to-end tests
         run: |
