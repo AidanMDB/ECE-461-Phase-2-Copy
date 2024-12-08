@@ -4,10 +4,10 @@ import { DynamoDBDocumentClient, GetCommand } from "@aws-sdk/lib-dynamodb";
 import { S3Client, HeadObjectCommand } from "@aws-sdk/client-s3";
 import axios from "axios";
 
-const db = new DynamoDBClient({});
-const dynamoClient = DynamoDBDocumentClient.from(db);
-const s3 = new DynamoDBClient({});
+const s3 = new S3Client();
+const dynamoDB = new DynamoDBClient();
 const BUCKET_NAME = "packageStorage";
+const TABLE_NAME = process.env.PACKAGES_TABLE || "packageTable";
 
 /**
  * given a list of dependencies, calculate the total cost of the dependencies
@@ -17,8 +17,10 @@ const BUCKET_NAME = "packageStorage";
 async function dependencyCost(dependencyList: string[]) {
     let totalCost = 0;
     // create a for loop that gets each dependency in the list get the size of the package
-    const response = await axios.get(`https://registry.npmjs.org/${}/${}`);
-    totalCost += response.data?.dist.unpackedSize;
+    for (const dependency of dependencyList) {
+        const response = await axios.get(`https://registry.npmjs.org/${dependency}/latest`);
+        totalCost += response.data?.dist.unpackedSize;
+    }
 }
 
 /**
@@ -36,10 +38,8 @@ async function getFirstLevelDependencies(packageName: string) {
 
 export const handler: APIGatewayProxyHandler = async (event) => {
     // check for auth header
-    try {
-        const authHeader = event.headers["X-authorization"];
-        console.log("authHeader", authHeader);
-        } catch (error) {
+    const authHeader = event.headers["X-Authorization"];
+    if(!authHeader) {
         return {
             statusCode: 403,
             body: JSON.stringify("Authentication failed due to invalid or missing AuthenticationToken.")
@@ -62,12 +62,9 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     
     const response = await s3.send(command);
 
-    const dependency = event.queryStringParameters?.dependency;
-    if (dependency) {
-        return {
-            statusCode: 400,
-            body: JSON.stringify("There is missing fields in the Dependency.")
-        };
+    let dependency = Boolean(event.queryStringParameters?.dependency);
+    if (dependency == undefined) {
+        dependency = false; // default to false for dependency
     }
 
     // retrieve package dependencies from DynamoDB
@@ -79,8 +76,9 @@ export const handler: APIGatewayProxyHandler = async (event) => {
                 id: id
             }
         };
+        console.log(params);
         const command = new GetCommand(params);
-        const response = await dynamoClient.send(command);
+        const response = await dynamoDB.send(command);
         if (response.$metadata.httpStatusCode !== 200) {
             return {
                 statusCode: 404,
@@ -88,11 +86,10 @@ export const handler: APIGatewayProxyHandler = async (event) => {
             }
         }
         packageDep = response.Item?.packageDep;
-
     } catch (error) {
         return {
             statusCode: 500,
-            body: JSON.stringify("Error fetching data from DynamoDB.")
+            body: JSON.stringify("The package rating system choked on at least one of the metrics.")
         }
     }
 
@@ -103,12 +100,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
 
     const dependencyJSON = JSON.parse(packageDep);
     
-    Object.
-
-
-
-
-
+    // Object.
 
     return {
         statusCode: 200,
