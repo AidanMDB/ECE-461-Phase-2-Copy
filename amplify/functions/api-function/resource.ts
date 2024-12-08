@@ -6,6 +6,6 @@ export const myApiFunction = defineFunction({
     memoryMB: 512,
     runtime: 20,
     bundling: {
-        minify: false,
+        minify: true,
     }
 });

@@ -21,7 +21,7 @@ import { apiReset } from './functions/api-reset/resource.js';
 
 import { ApiGateway } from 'aws-cdk-lib/aws-events-targets';
 import { apiPackageRate } from './functions/api-package-id-rate/resource.js';
-import { Stack } from 'aws-cdk-lib';
+import { aws_iam, Stack } from 'aws-cdk-lib';
 import { Policy, PolicyStatement, Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { UserPool } from 'aws-cdk-lib/aws-cognito';
 import * as iam from 'aws-cdk-lib/aws-iam';
@@ -57,7 +57,7 @@ const myRestApi = new RestApi(apiStack, "RestApi", {
   defaultCorsPreflightOptions: {
     allowOrigins: Cors.ALL_ORIGINS,
     allowMethods: ["GET", "POST", "DELETE", "PUT"],
-    //allowHeaders: ["X-authorization"], // Specify only the headers you need to allow
+    allowHeaders: Cors.DEFAULT_HEADERS, // Specify only the headers you need to allow
   },
 });
 
@@ -130,21 +130,21 @@ const lambdaIntegrationRegex = new LambdaIntegration(
 // Create Lambda functions and associate them with the IAM role
 const myApiFunctionLambda = new Function(apiStack, 'MyApiFunctionLambda', {
   runtime: Runtime.NODEJS_20_X,
-  handler: 'handler.handler', // Ensure this matches the entry point of your Lambda function
+  handler: 'handler.ts', // Ensure this matches the entry point of your Lambda function
   code: Code.fromAsset('amplify/functions/api-function'), // Update the path to your function
   role: lambdaRole,
 });
 
 const myApiPackagesLambda = new Function(apiStack, 'MyApiPackagesLambda', {
   runtime: Runtime.NODEJS_20_X,
-  handler: 'handler.handler', // Ensure this matches the entry point of your Lambda function
+  handler: 'handler.ts', // Ensure this matches the entry point of your Lambda function
   code: Code.fromAsset('amplify/functions/api-package-list'), // Update the path to your function
   role: lambdaRole,
 });
 
 const myApiFunctionRegexLambda = new Function(apiStack, 'MyApiFunctionRegexLambda', {
   runtime: Runtime.NODEJS_20_X,
-  handler: 'handler.handler', // Ensure this matches the entry point of your Lambda function
+  handler: 'handler.ts', // Ensure this matches the entry point of your Lambda function
   code: Code.fromAsset('amplify/functions/api-package-regex'), // Update the path to your function
   role: lambdaRole,
 });
@@ -196,58 +196,45 @@ const lambdaIntegrationRegex = new LambdaIntegration(myApiFunctionRegexLambda);
 // create new API path for /packages
 const packagesPath = myRestApi.root.addResource('packages');
 packagesPath.addMethod('POST', apiPackagesIntegration, {
+  authorizationType: AuthorizationType.NONE,
+
 });
 
 // create new API path
 const packagePath = myRestApi.root.addResource('package');
 packagePath.addMethod('POST', lambdaIntegration, {
+  authorizationType: AuthorizationType.NONE,
 });
 
 // create new API path for package rate
 const packageRatePath = packagePath.addResource('{id}').addResource('rate');
 packageRatePath.addMethod('GET', lambdaIntegrationPackageRate, {
+  authorizationType: AuthorizationType.NONE,
 });
 
 // create new API path for api reset
 const resetPath = myRestApi.root.addResource('reset');
 resetPath.addMethod('DELETE', apiResetLambdaIntegration, {
+  authorizationType: AuthorizationType.NONE,
 });
 
 // create new API path for user register
 const registerPath = myRestApi.root.addResource('register');
 registerPath.addMethod('POST', lambdaIntegrationRegister, {
+  authorizationType: AuthorizationType.NONE,
 });
 
 // create new API path for user authenticate
 const authenticatePath = myRestApi.root.addResource('authenticate');
 authenticatePath.addMethod('PUT', lambdaIntegrationAuthenticate, {
+  authorizationType: AuthorizationType.NONE,
 });
 
 // create new API path for regex search
 const regexPath = packagePath.addResource('byRegEx');
 regexPath.addMethod('POST', lambdaIntegrationRegex, {
+  authorizationType: AuthorizationType.NONE,
 });
-
-
-const apiRestPolicy = new Policy(apiStack, "RestApiPolicy", {
-  statements: [
-    new PolicyStatement({
-      actions: ["execute-api:Invoke"],
-      resources: [
-        `${myRestApi.arnForExecuteApi("*", "/package", "dev")}`,
-        `${myRestApi.arnForExecuteApi("*", "/packages", "dev")}`,
-        `${myRestApi.arnForExecuteApi("*", "/package/{id}/rate", "dev")}`,
-        `${myRestApi.arnForExecuteApi("*", "/reset", "dev")}`,
-        `${myRestApi.arnForExecuteApi("*", "/register", "dev")}`,
-        `${myRestApi.arnForExecuteApi("*", "/authenticate", "dev")}`,
-        `${myRestApi.arnForExecuteApi("*", "/package/byRegEx", "dev")}`,
-      ],
-    })
-  ]
-});
-
-backend.auth.resources.unauthenticatedUserIamRole.attachInlinePolicy(apiRestPolicy);
-
 
 // add outputs to the configuration files (should allow for the frontend and backend to call the API)
 backend.addOutput({
