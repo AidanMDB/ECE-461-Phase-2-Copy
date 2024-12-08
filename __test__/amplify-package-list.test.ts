@@ -13,7 +13,7 @@ describe('Package API Handler', () => {
   
     test('GET /packages - Success (200) No offset', async () => {
         const event: APIGatewayProxyEvent = {
-            headers: { 'X-authorization': 'Bearer token' },
+            headers: { 'X-Authorization': 'Bearer token' },
             body: JSON.stringify({ "Version": "Exact (1.2.3)", "Name": 'name' }),
           } as any;
 
@@ -36,7 +36,7 @@ describe('Package API Handler', () => {
 
     test('GET /packages - Success (200) With Offset', async () => {
         const event: APIGatewayProxyEvent = {
-            headers: { 'X-authorization': 'Bearer token', 'offset': '3' },
+            headers: { 'X-Authorization': 'Bearer token', 'offset': '3' },
             body: JSON.stringify({ "Version": "Exact (1.2.3)", "Name": 'name' }),
           } as any;
 
@@ -59,7 +59,7 @@ describe('Package API Handler', () => {
 
     test('GET /packages - Success (200) All Packages *', async () => {
       const event: APIGatewayProxyEvent = {
-          headers: { 'X-authorization': 'Bearer token' },
+          headers: { 'X-Authorization': 'Bearer token' },
           body: JSON.stringify({ "Version": "Bounded (1.2.3-3.0.1)", "Name": '*' }),
         } as any;
 
@@ -82,7 +82,7 @@ describe('Package API Handler', () => {
 
     test('GET /packages - Success (200) Bounded Version', async () => {
       const event: APIGatewayProxyEvent = {
-          headers: { 'X-authorization': 'Bearer token' },
+          headers: { 'X-Authorization': 'Bearer token' },
           body: JSON.stringify({ "Version": "Bounded (1.2.3-2.3.4)", "Name": 'name' }),
         } as any;
 
@@ -105,7 +105,7 @@ describe('Package API Handler', () => {
 
     test('GET /packages - Success (200) Carat Version', async () => {
       const event: APIGatewayProxyEvent = {
-          headers: { 'X-authorization': 'Bearer token' },
+          headers: { 'X-Authorization': 'Bearer token' },
           body: JSON.stringify({ "Version": "Carat (^1.2.3)", "Name": 'name' }),
         } as any;
 
@@ -128,7 +128,7 @@ describe('Package API Handler', () => {
 
     test('GET /packages - Success (200) Tilde Version', async () => {
       const event: APIGatewayProxyEvent = {
-          headers: { 'X-authorization': 'Bearer token' },
+          headers: { 'X-Authorization': 'Bearer token' },
           body: JSON.stringify({ "Version": "Tilde (~1.2.3)", "Name": 'name' }),
         } as any;
 
@@ -164,7 +164,7 @@ describe('Package API Handler', () => {
 
     test('GET /packages - Too many packages returned (413)', async () => {
         const event: APIGatewayProxyEvent = {
-            headers: { 'X-authorization': 'Bearer token', 'offset': '2' },
+            headers: { 'X-Authorization': 'Bearer token', 'offset': '2' },
             body: JSON.stringify({ "Version": "Carat (^1.2.3)", "Name": 'name' }),
           } as any;
   

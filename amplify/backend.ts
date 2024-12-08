@@ -22,9 +22,11 @@ import { apiReset } from './functions/api-reset/resource.js';
 import { ApiGateway } from 'aws-cdk-lib/aws-events-targets';
 import { apiPackageRate } from './functions/api-package-id-rate/resource.js';
 import { Stack } from 'aws-cdk-lib';
-import { Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
+import { Policy, PolicyStatement, Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { UserPool } from 'aws-cdk-lib/aws-cognito';
 import * as iam from 'aws-cdk-lib/aws-iam';
+import { Function, Runtime, Code } from 'aws-cdk-lib/aws-lambda';
+import { r } from 'tar';
 
 const backend = defineBackend({
   auth,           // creates cognito
@@ -53,7 +55,6 @@ const myRestApi = new RestApi(apiStack, "RestApi", {
     stageName: "dev",
   },
   defaultCorsPreflightOptions: {
-    //allowOrigins: ["https://main.dec29zvcbtyi8.amplifyapp.com/", "https://wdyoiqbu66.execute-api.us-east-1.amazonaws.com/dev/"], // Restrict this to domains you trust
     allowOrigins: Cors.ALL_ORIGINS,
     allowMethods: ["GET", "POST", "DELETE", "PUT"],
     //allowHeaders: ["X-authorization"], // Specify only the headers you need to allow
@@ -66,8 +67,30 @@ const myRestApi = new RestApi(apiStack, "RestApi", {
 //const cognitoAuth = new CognitoUserPoolsAuthorizer(apiStack, "CognitoAuth", {
 //  cognitoUserPools: [backend.auth.resources.userPool],
 //});
+const lambdaRole = new Role(apiStack, "LambdaExecutionRole", {
+  assumedBy: new ServicePrincipal("lambda.amazonaws.com"),
+  managedPolicies: [
+    iam.ManagedPolicy.fromAwsManagedPolicyName("service-role/AWSLambdaBasicExecutionRole"),
+    iam.ManagedPolicy.fromAwsManagedPolicyName("service-role/AWSLambdaVPCAccessExecutionRole"),
+  ],
+});
 
+// create custom policy statement
+lambdaRole.addToPolicy(new PolicyStatement({
+  actions: [
+    'dynamodb:*',     // allow all dynamodb actions
+    's3:*',           // allow all s3 actions
+    'cognito-idp:*',  // allow all cognito actions
+    'logs:*',         // allow all logs actions
+    'events:*',       // allow all events actions
+    'sns:*',          // allow all sns actions (Publish, Subscribe, Unsubscribe)
+    'sqs:*',          // allow all sqs actions (SendMessage, ReceiveMessage, DeleteMessage)
+  ],
+  resources: ['*'],   // allow all resources
+}));
 
+// PREVIOUS VERSION FOR LAMBDA INTEGRATION
+/* 
 // create lambda integration for api package
 const lambdaIntegration = new LambdaIntegration(
   backend.myApiFunction.resources.lambda
@@ -102,60 +125,108 @@ const apiPackages = new LambdaIntegration(
 const lambdaIntegrationRegex = new LambdaIntegration(
   backend.myApiFunctionRegex.resources.lambda
 );
+*/
+
+// Create Lambda functions and associate them with the IAM role
+const myApiFunctionLambda = new Function(apiStack, 'MyApiFunctionLambda', {
+  runtime: Runtime.NODEJS_20_X,
+  handler: 'handler.handler', // Ensure this matches the entry point of your Lambda function
+  code: Code.fromAsset('amplify/functions/api-function'), // Update the path to your function
+  role: lambdaRole,
+});
+
+const myApiPackagesLambda = new Function(apiStack, 'MyApiPackagesLambda', {
+  runtime: Runtime.NODEJS_20_X,
+  handler: 'handler.handler', // Ensure this matches the entry point of your Lambda function
+  code: Code.fromAsset('amplify/functions/api-package-list'), // Update the path to your function
+  role: lambdaRole,
+});
+
+const myApiFunctionRegexLambda = new Function(apiStack, 'MyApiFunctionRegexLambda', {
+  runtime: Runtime.NODEJS_20_X,
+  handler: 'handler.handler', // Ensure this matches the entry point of your Lambda function
+  code: Code.fromAsset('amplify/functions/api-package-regex'), // Update the path to your function
+  role: lambdaRole,
+});
+
+const myApiFunctionRegisterLambda = new Function(apiStack, 'MyApiFunctionRegisterLambda', {
+  runtime: Runtime.NODEJS_20_X,
+  handler: 'handler.handler', // Ensure this matches the entry point of your Lambda function
+  code: Code.fromAsset('amplify/functions/api-register'), // Update the path to your function
+  role: lambdaRole,
+});
+
+const myApiFunctionAuthenticateLambda = new Function(apiStack, 'MyApiFunctionAuthenticateLambda', {
+  runtime: Runtime.NODEJS_20_X,
+  handler: 'handler.handler', // Ensure this matches the entry point of your Lambda function
+  code: Code.fromAsset('amplify/functions/api-authenticate'), // Update the path to your function
+  role: lambdaRole,
+});
+
+const apiResetLambda = new Function(apiStack, 'ApiResetLambda', {
+  runtime: Runtime.NODEJS_20_X,
+  handler: 'handler.handler', // Ensure this matches the entry point of your Lambda function
+  code: Code.fromAsset('amplify/functions/api-reset'), // Update the path to your function
+  role: lambdaRole,
+});
+
+const apiPackageRateLambda = new Function(apiStack, 'ApiPackageRateLambda', {
+  runtime: Runtime.NODEJS_20_X,
+  handler: 'handler.handler', // Ensure this matches the entry point of your Lambda function
+  code: Code.fromAsset('amplify/functions/api-package-id-rate'), // Update the path to your function
+  role: lambdaRole,
+});
+
+// Create Lambda integrations
+const lambdaIntegration = new LambdaIntegration(myApiFunctionLambda);
+
+const lambdaIntegrationPackageRate = new LambdaIntegration(apiPackageRateLambda);
+
+const apiResetLambdaIntegration = new LambdaIntegration(apiResetLambda);
+
+const lambdaIntegrationRegister = new LambdaIntegration(myApiFunctionRegisterLambda);
+
+const lambdaIntegrationAuthenticate = new LambdaIntegration(myApiFunctionAuthenticateLambda);
+
+const apiPackagesIntegration = new LambdaIntegration(myApiPackagesLambda);
+
+const lambdaIntegrationRegex = new LambdaIntegration(myApiFunctionRegexLambda);
 
 
 // create new API path for /packages
 const packagesPath = myRestApi.root.addResource('packages');
-
-packagesPath.addMethod('POST', apiPackages, {
-
+packagesPath.addMethod('POST', apiPackagesIntegration, {
 });
-
 
 // create new API path
 const packagePath = myRestApi.root.addResource('package');
-
 packagePath.addMethod('POST', lambdaIntegration, {
-
 });
 
 // create new API path for package rate
 const packageRatePath = packagePath.addResource('{id}').addResource('rate');
 packageRatePath.addMethod('GET', lambdaIntegrationPackageRate, {
-
 });
-
 
 // create new API path for api reset
 const resetPath = myRestApi.root.addResource('reset');
-
-resetPath.addMethod('DELETE', apiResetLambda, {
-
+resetPath.addMethod('DELETE', apiResetLambdaIntegration, {
 });
 
 // create new API path for user register
 const registerPath = myRestApi.root.addResource('register');
-
 registerPath.addMethod('POST', lambdaIntegrationRegister, {
-
 });
 
 // create new API path for user authenticate
 const authenticatePath = myRestApi.root.addResource('authenticate');
-
 authenticatePath.addMethod('PUT', lambdaIntegrationAuthenticate, {
-
 });
-
-
 
 // create new API path for regex search
 const regexPath = packagePath.addResource('byRegEx');
-
 regexPath.addMethod('POST', lambdaIntegrationRegex, {
-
 });
-
 
 // add outputs to the configuration files (should allow for the frontend and backend to call the API)
 backend.addOutput({

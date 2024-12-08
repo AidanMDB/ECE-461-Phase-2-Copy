@@ -55,7 +55,7 @@ describe("User Management Endpoint", () => {
     const token = jwt.sign(tokenPayload, 'dummy-secret');
 
     const event: APIGatewayProxyEvent = {
-      headers: { "X-authorization": `Bearer ${token}` },
+      headers: { "X-Authorization": `Bearer ${token}` },
       body: JSON.stringify({
         User: {
           name: "newuser",
@@ -84,7 +84,7 @@ describe("User Management Endpoint", () => {
     const token = jwt.sign(tokenPayload, "dummy-secret");
 
     const event: APIGatewayProxyEvent = {
-      headers: { "X-authorization": `Bearer ${token}` },
+      headers: { "X-Authorization": `Bearer ${token}` },
       body: JSON.stringify({
         User: {
           name: "newuser",
@@ -116,7 +116,7 @@ describe("User Management Endpoint", () => {
     const token = jwt.sign(tokenPayload, "dummy-secret");
 
     const event: APIGatewayProxyEvent = {
-      headers: { "X-authorization": `Bearer ${token}` },
+      headers: { "X-Authorization": `Bearer ${token}` },
       body: JSON.stringify({
         User: {
           name: "otheruser",
@@ -144,7 +144,7 @@ describe("User Management Endpoint", () => {
     const token = jwt.sign(tokenPayload, "dummy-secret");
 
     const event: APIGatewayProxyEvent = {
-      headers: { "X-authorization": `Bearer ${token}` },
+      headers: { "X-Authorization": `Bearer ${token}` },
       body: JSON.stringify({
         User: {
           name: "userToDelete",
