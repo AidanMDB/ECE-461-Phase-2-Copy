@@ -10,7 +10,9 @@ import path from "path";
 import archiver from "archiver";
 import * as tar from "tar";
 import unzipper from "unzipper";
-import esbuild from "esbuild";
+import AdmZip from "adm-zip";
+import * as terser from "terser";
+//import esbuild from "esbuild";
 
 const s3 = new S3Client();
 const db = new DynamoDBClient({});
@@ -45,11 +47,13 @@ function isErrorResult(result: ExtractPackageInfoResult): result is ErrorResult 
  * @param key - key to check if it exists in the table
  * @returns True if the key exists in the table, false otherwise
  */
-async function checkKeyExists(tableName: string, key: { [key: string]: any }): Promise<boolean> {
+async function checkKeyExists(tableName: string, packageName:string, packageVersion:string): Promise<boolean> {
   try {
     const params = {
       TableName: tableName,
-      Key: key,
+      Key: {
+        ID: {S:`${packageName}${packageVersion}`},
+      }
     };
 
     const command = new GetCommand(params);
@@ -94,7 +98,7 @@ async function downloadFile(url: string, packageName: string) {
  * @param filePath - path to the zip file
  * 
  */
-async function extractZip(extractPath: string, filePath: string) {
+/* async function extractZip(extractPath: string, filePath: string) {
   fs.mkdirSync(extractPath, { recursive: true });
 
   await new Promise<void>((resolve, reject) => {
@@ -109,22 +113,38 @@ async function extractZip(extractPath: string, filePath: string) {
               reject(err);
           });
   });
-}
+} */
+
 
 /**
- * @param entryPath - path to the file to debloat
- * @param outputFile - path to the output file 
+ * searches through a directory for all .js/.ts files and minifies them
+ * @param directory - path to the directory containing the file(s) to debloat
  */
-function debloatFile(entryPath: string, outputFile: string) {
-  esbuild.build({
-    entryPoints: [entryPath],
-    bundle: true,
-    minify: true,
-    outfile: outputFile,
-    treeShaking: true,
-    platform: 'node',
-    target: 'es2015'
-  });
+async function minifyZipInPlace(zipFilePath: string) {
+  const zip = new AdmZip(zipFilePath);
+
+  for (const entry of zip.getEntries()) {
+      if (
+          !entry.isDirectory &&
+          (entry.entryName.endsWith('.js') || entry.entryName.endsWith('.ts'))
+      ) {
+          try {
+              const originalCode = zip.readAsText(entry);
+              const result = await terser.minify(originalCode);
+
+              if (result.code !== undefined) {
+                  zip.updateFile(entry.entryName, Buffer.from(result.code, 'utf8'));
+                  console.log(`Minified and updated: ${entry.entryName}`);
+              }
+          } catch (err) {
+              console.error(`Error minifying ${entry.entryName}:`, err);
+          }
+      }
+  }
+
+  // Write the updated zip back to disk
+  zip.writeZip(zipFilePath);
+  console.log('ZIP file updated successfully.');
 }
 
 
@@ -134,14 +154,14 @@ function debloatFile(entryPath: string, outputFile: string) {
  * @param packageJsonPath - path to the package.json file
  * @returns - object containing the package name, version, repository URL, and dependencies
  */
-function extractPackageJSON(packageJsonPath: string) {
+/* function extractPackageJSON(packageJsonPath: string) {
   const packageJSON = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
   let packageVersion = packageJSON.version? packageJSON.version : '1.0.0';
   let packageName = packageJSON.name
   let repositoryURL = packageJSON.repository.url ? packageJSON.repository.url : packageJSON.repository;
   let packageDep = {...packageJSON.dependencies, ...packageJSON.devDependencies}; 
   return {packageName, packageVersion, repositoryURL, packageDep};
-}
+} */
 
 /**
  * Converts the .tgz file from NPM to a .zip file
@@ -258,7 +278,24 @@ async function extractPackageInfo(zipPath: string) {
     const packageVersion = packageJSON.version? packageJSON.version : '1.0.0';
     const packageName = packageJSON.name
     const entryPoint = packageJSON.main ? packageJSON.main : null;
-    const repositoryURL = packageJSON.repository.url ? packageJSON.repository.url : packageJSON.repository;
+    let repositoryURL = packageJSON.repository.url ? packageJSON.repository.url : packageJSON.repository;
+    // change the URL to a valid github URL if it is not already
+    if (repositoryURL !== undefined) {
+      if (repositoryURL.includes("git+")) {
+        repositoryURL = repositoryURL.replace(".git", "");
+        repositoryURL = repositoryURL.replace("git+", "");
+      }
+      else {
+        repositoryURL = `https://github.com/${repositoryURL}`;
+      }
+    }
+    else {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ error: "Repository not found in package.json" }),
+      };
+    }
+
     const packageDep = {...packageJSON.dependencies, ...packageJSON.devDependencies}; 
     console.log("packageVersion: ", packageVersion);
 
@@ -289,6 +326,7 @@ async function extractPackageInfo(zipPath: string) {
 async function isContent(Content:string, Name:string, debloat:boolean): Promise<ExtractPackageInfoResult> {
   try {
     // write content to zip file
+    console.log("entered content function", Content);
     const contentBuffer = Buffer.from(Content, 'base64');
     const zipPath = `${TMP_PATH}/${Name}.zip`;
     fs.writeFileSync(zipPath, contentBuffer);
@@ -296,7 +334,7 @@ async function isContent(Content:string, Name:string, debloat:boolean): Promise<
 
     // extract package info from zip file
     const result = await extractPackageInfo(zipPath);
-    console.log("isContent result:", result);
+    console.log("isContent result:", result.jsonData);
     if (!result) {
       return {
         statusCode: 400,
@@ -318,9 +356,7 @@ async function isContent(Content:string, Name:string, debloat:boolean): Promise<
 
     // perform debloat if requested
     if (debloat) {
-      if (entryPoint) {
-        extractZip(`${TMP_PATH}`, zipPath);
-      }
+      await minifyZipInPlace(`${TMP_PATH}/${Name}.zip`);
     }
 
     return {
@@ -334,8 +370,8 @@ async function isContent(Content:string, Name:string, debloat:boolean): Promise<
   } catch (error) {
     return {
       statusCode: 400,
-      body: JSON.stringify({ error: "Error in isContent" }),
-    }
+      body: JSON.stringify(`Error in isContent ${error}`),
+    };
   }
 }
 
@@ -406,9 +442,7 @@ async function isNPM(packageName:string, packageVersion: string, Name:string, de
 
     // perform debloat if requested  TODO
     if (debloat) {
-      if (entryPoint) {
-        extractZip(`${TMP_PATH}`, `${TMP_PATH}/${Name}.zip`);
-      }
+      minifyZipInPlace(`${TMP_PATH}/${Name}.zip`);
     }
 
     return {
@@ -477,13 +511,17 @@ async function isGitHub(packageOwner:string, packageName:string, packageTree:str
 
     // perform debloat if requested  TODO
     if (debloat) {
-      if (entryPoint) {
-        extractZip(`${TMP_PATH}`, filePath);
-      }
+      minifyZipInPlace(filePath);
     }
 
-    return {packageName, packageVersion, repositoryURL, packageDep, entryPoint, readMeData};
-  
+    return {
+      packageName, 
+      packageVersion, 
+      repositoryURL, 
+      packageDep, 
+      entryPoint, 
+      readMeData
+    };
   
   } catch (error) {
     return {
@@ -632,35 +670,20 @@ export const handler: APIGatewayProxyHandler = async (event) => {
 
   // Check if package exists already (uses dynamoDB)
   const packageTable = "Package";
-  const packageID = `${packageName}${packageVersion}`;
-  const existence = await checkKeyExists(packageTable, {ID: packageID});
+  if (packageVersion === undefined) {
+    return {
+      statusCode: 400,
+      body: JSON.stringify("Package version is undefined")
+    }
+  }
+
+  const existence = await checkKeyExists(packageTable, packageName, packageVersion);
   if (existence) {
     return {
       statusCode: 409,
       body: JSON.stringify('Package exists already.')
     }
   }
-
-/*   try {
-    const command = new HeadObjectCommand({
-      Bucket: BUCKET_NAME,
-      Key: `package/${packageName}${packageVersion}`,
-    });
-
-    const response = await s3.send(command);
-
-    if (response.$metadata.httpStatusCode === 200) {
-      return {
-          statusCode: 409,
-          body: JSON.stringify('Package exists already.'),
-      }
-    }
-  } catch (error) {
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: "Error checking if package exists in S3" })
-    }
-  } */
 
 
   // Calculate metric's for the package
@@ -674,6 +697,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     };
     const metricsResult = await calcMetrics(repositoryURL);
     metrics = JSON.parse(metricsResult);
+    console.log(`Metrics: ${metrics}`);
   } catch (error) {
     return {
       statusCode: 400,
@@ -691,19 +715,17 @@ export const handler: APIGatewayProxyHandler = async (event) => {
 
 
   // add metadata to bynamoDB
-  const rateTable = "PackageRating";
-
   try {
     // create and send Package table for package
     const putCommand = new PutCommand({
       TableName: packageTable,
       Item: {
-        ID: `${packageName}${packageVersion}`,
-        Name: packageName,
-        ReadME: readMeData,
-        Version: packageVersion,
-        Dependencies: packageDep,
-        Rating: JSON.stringify(metrics)
+        ID: {S: `${packageName}${packageVersion}`},
+        Name: {S: packageName},
+        Version: {S: packageVersion},
+        ReadME: {S: readMeData},
+        Dependencies: {S: packageDep},
+        Rating: {S: JSON.stringify(metrics)}
       }
     });
 
@@ -715,32 +737,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
       }
     }
     console.log("Package added to DynamoDB");
-    // create and send Rating table for package
-    /* const putCommandRate = new PutCommand({
-      TableName: rateTable,
-      Item: {
-      package: `${packageName}${packageVersion}`,
-      ID: `${packageName}${packageVersion}`,
-      BusFactor: metrics.BusFactor,
-      BusFactorLatency: metrics.BusFactorLatency,
-      Correctness: metrics.Correctness,
-      CorrectnessLatency: metrics.CorrectnessLatency,
-      RampUp: metrics.RampUp,
-      RampUpLatency: metrics.RampUpLatency,
-      ResponsiveMaintainer: metrics.ResponsiveMaintainer,
-      ResponsiveMaintainerLatency: metrics.ResponsiveMaintainerLatency,
-      LicenseScore: metrics.LicenseScore,
-      LicenseScoreLatency: metrics.LicenseScoreLatency,
-      GoodPinningPractice: metrics.VersionPinning,
-      GoodPinningPracticeLatency: metrics.VersionPinningLatency,
-      PullRequest: metrics.EngineeringProcess,
-      PullRequestLatency: metrics.EngineeringProcessLatency,
-      NetScore: metrics.NetScore,
-      NetScoreLatency: metrics.NetScoreLatency
-      }
-    });
-
-    await dynamoClient.send(putCommandRate); */
+    
   } catch (error) {
     console.log("error type: ", typeof error);
     return {
@@ -792,8 +789,13 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     responseBody.data.URL = URL;
   }
 
+  console.log("MetaData being Returned:", responseBody.metadata);
   return {
     statusCode: 201,
     body: JSON.stringify(responseBody)
   }
 };
+
+
+
+
