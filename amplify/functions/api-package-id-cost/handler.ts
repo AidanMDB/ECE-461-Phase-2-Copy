@@ -51,7 +51,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     if (!id) {
         return {
             statusCode: 400,
-            body: JSON.stringify("There is missing fields in the PackageID.")
+            body: JSON.stringify("There is missing field(s) in the PackageID")
         };
     }
 
@@ -60,11 +60,15 @@ export const handler: APIGatewayProxyHandler = async (event) => {
         Key: `${id}`
     });
     
-    const response = await s3.send(command);
-
-    let dependency = Boolean(event.queryStringParameters?.dependency);
-    if (dependency == undefined) {
-        dependency = false; // default to false for dependency
+    let dependency = false; // default to false
+    try {
+        const response = await s3.send(command);
+        dependency = Boolean(event.queryStringParameters?.dependency);
+    } catch (error) {
+        return {
+            statusCode: 404,
+            body: JSON.stringify("Package does not exist.")
+        }
     }
 
     // retrieve package dependencies from DynamoDB
@@ -79,28 +83,21 @@ export const handler: APIGatewayProxyHandler = async (event) => {
         console.log(params);
         const command = new GetCommand(params);
         const response = await dynamoDB.send(command);
-        if (response.$metadata.httpStatusCode !== 200) {
-            return {
-                statusCode: 404,
-                body: JSON.stringify("Package does not exist.")
-            }
-        }
         packageDep = response.Item?.packageDep;
-    } catch (error) {
+    } catch (error:any) {
         return {
             statusCode: 500,
             body: JSON.stringify("The package rating system choked on at least one of the metrics.")
         }
     }
 
-
     let packageCosts = {};
 
     // make some recursion function that downloads the tarball from registry.npmjs gets its size and then searches for dependencies and gets their size
 
     const dependencyJSON = JSON.parse(packageDep);
+
     
-    // Object.
 
     return {
         statusCode: 200,
