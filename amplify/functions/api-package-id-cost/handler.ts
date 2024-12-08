@@ -21,6 +21,7 @@ async function dependencyCost(dependencyList: string[]) {
         const response = await axios.get(`https://registry.npmjs.org/${dependency}/latest`);
         totalCost += response.data?.dist.unpackedSize;
     }
+    return totalCost;
 }
 
 /**
@@ -60,10 +61,13 @@ export const handler: APIGatewayProxyHandler = async (event) => {
         Key: `${id}`
     });
     
+
     let dependency = false; // default to false
+    dependency = Boolean(event.queryStringParameters?.dependency);
+
+    // check if the package exists in S3
     try {
         const response = await s3.send(command);
-        dependency = Boolean(event.queryStringParameters?.dependency);
     } catch (error) {
         return {
             statusCode: 404,
@@ -97,7 +101,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
 
     const dependencyJSON = JSON.parse(packageDep);
 
-    
+
 
     return {
         statusCode: 200,
