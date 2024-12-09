@@ -59,7 +59,7 @@ const myRestApi = new RestApi(apiStack, "RestApi", {
   defaultCorsPreflightOptions: {
     allowOrigins: Cors.ALL_ORIGINS,
     allowMethods: ["GET", "POST", "DELETE", "PUT"],
-    allowHeaders: Cors.DEFAULT_HEADERS, // Specify only the headers you need to allow
+    allowHeaders: ["*"], // Specify only the headers you need to allow
   },
 });
 
