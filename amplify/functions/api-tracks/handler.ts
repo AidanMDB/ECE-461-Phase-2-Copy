@@ -6,7 +6,6 @@ export const handler: APIGatewayProxyHandler = async (event) => {
         statusCode: 200,
         body: JSON.stringify({ 
             plannedTracks: [
-                "" 
             ]
         }),
     };
