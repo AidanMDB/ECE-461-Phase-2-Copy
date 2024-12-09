@@ -1,3 +1,7 @@
+/**
+ * This file is for handling the api-authenticate REST API track.
+**/
+
 import { CognitoIdentityProviderClient, AdminInitiateAuthCommand, AuthFlowType } from "@aws-sdk/client-cognito-identity-provider";
 import type { APIGatewayProxyHandler, APIGatewayProxyResult } from "aws-lambda";
 import { auth } from "../../auth/resource";
