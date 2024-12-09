@@ -10,6 +10,9 @@ import "../globals.css";
 import "./upload.css";
 import { post } from "@aws-amplify/api";
 
+import { handler } from '../../amplify/functions/api-function/handler';
+import { APIGatewayProxyHandler } from 'aws-lambda';
+
 export default function UploadPage() {
   const [uploadFileNotURL, setUploadFileNotURL] = useState<boolean>(true);
   const [file, setFile] = useState<File | null>(null);

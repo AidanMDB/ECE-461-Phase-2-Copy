@@ -14,6 +14,7 @@ import AdmZip from "adm-zip";
 import * as terser from "terser";
 //import esbuild from "esbuild";
 
+
 const s3 = new S3Client();
 const db = new DynamoDBClient({});
 const dynamoClient = DynamoDBDocumentClient.from(db);

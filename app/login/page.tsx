@@ -9,6 +9,19 @@ import { useState } from 'react';
 const LoginPage = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!username || !password) {
+      setError('Please enter both username and password');
+    } else {
+      setError('');
+      window.location.href = '/homepage';
+        // return;
+      }
+    };
+  
     return (
       <div className='login'>
         <title>Package Manager</title>
@@ -17,7 +30,7 @@ const LoginPage = () => {
         </header>
 
         <main>
-          <form action="/homepage" className='input-section'>
+          <form onSubmit={handleSubmit} className='input-section'>
           <div className="form-group">
             <label htmlFor="username">Enter Username:</label>
             <input
@@ -47,6 +60,7 @@ const LoginPage = () => {
           <div className="button-group">
               <button className="search-button" type='submit'>Login</button>
           </div>
+          {error && <p className="error">{error}</p>}
           </form>
         <div className="sign-up-section">
           <p>Not already a member?</p>
