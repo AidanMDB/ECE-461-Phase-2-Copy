@@ -18,6 +18,7 @@ import { myApiFunctionRegex } from './functions/api-package-regex/resource.js';
 import { myApiFunctionRegister } from './functions/api-register/resource.js';
 import { myApiFunctionAuthenticate } from './functions/api-authenticate/resource.js';
 import { apiReset } from './functions/api-reset/resource.js';
+import { myApiFunctionTracks } from './functions/api-tracks/resource.js';
 
 import { ApiGateway } from 'aws-cdk-lib/aws-events-targets';
 import { apiPackageRate } from './functions/api-package-id-rate/resource.js';
@@ -39,6 +40,7 @@ const backend = defineBackend({
   myApiFunctionAuthenticate, // creates lambda for authenticate
   apiReset,        // creates lambda
   apiPackageRate, // creates lambda
+  myApiFunctionTracks, // creates lambda
 });
 
 //const {} = backend.auth.resources.cfnResources;
@@ -124,6 +126,11 @@ const myapiPackagesFunction = new LambdaIntegration(
 // add lambda integration for regex search api
 const myapiPackageByRegexFunction = new LambdaIntegration(
   backend.myApiFunctionRegex.resources.lambda
+);
+
+// add lambda integration for tracks api
+const myapiTracksFunction = new LambdaIntegration(
+  backend.myApiFunctionTracks.resources.lambda
 );
 
 
@@ -233,6 +240,12 @@ authenticatePath.addMethod('PUT', myapiAuthenticateFunction, {
 // create new API path for regex search
 const regexPath = packagePath.addResource('byRegEx');
 regexPath.addMethod('POST', myapiPackageByRegexFunction, {
+  authorizationType: AuthorizationType.NONE,
+});
+
+// create new API path for tracks
+const tracksPath = myRestApi.root.addResource('tracks');
+tracksPath.addMethod('GET', myapiTracksFunction, {
   authorizationType: AuthorizationType.NONE,
 });
 
