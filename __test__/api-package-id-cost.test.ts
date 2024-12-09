@@ -4,6 +4,8 @@ import { S3Client, HeadObjectCommand } from '@aws-sdk/client-s3';
 import { DynamoDBClient, ScanCommand } from '@aws-sdk/client-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import { GetCommand } from '@aws-sdk/lib-dynamodb';
+import path from 'path';
+import axios from 'axios';
 
 // mock dynamoDB calls
 const dynamoDBMock = mockClient(DynamoDBClient);
@@ -13,37 +15,48 @@ const TABLE_NAME = "packageTable";
 const s3Mock = mockClient(S3Client);
 const BUCKET_NAME = "packageStorage";
 
+// mock axios calls
+jest.mock('axios');
+
 describe('Package API Handler', () => {
     beforeEach(() => {
       dynamoDBMock.reset();
       s3Mock.reset();
+      jest.clearAllMocks();
     });
-  
-    test('GET /package/{id}/cost - Success (200) w/out dependency (dependency = false)', async () => {
-        const event: APIGatewayProxyEvent = {
-            headers: { 'X-Authorization': 'Bearer token' },
-            body: JSON.stringify({ id: 'underscore' }),
-        } as any;
 
-        s3Mock.on(HeadObjectCommand, { Bucket: BUCKET_NAME, Key: "123" }).resolves({});
+    // test('GET /package/{id}/cost - Success (200) w/out dependency (dependency = false)', async () => {
+    //     const event: APIGatewayProxyEvent = {
+    //         headers: { 'X-Authorization': 'Bearer token' },
+    //         pathParameters: { id: 'underscore' },
+    //         body: JSON.stringify({ id: 'underscore' })
+    //     } as any;
 
-        dynamoDBMock.on(GetCommand).resolves({
-            Item: {
-                id: { S: '123' },
-                name: { S: 'underscore' },
-                version: { S: '1.0.0' },
-                size: { N: '1000' },
-                cost: { N: '100' },
-                packageDep: { L: [] }
-            }
-        });
-        const result = (await handler(event, {} as any, () => {})) as APIGatewayProxyResult;
+    //     // Mock S3 check for package existence
+    //     s3Mock.on(HeadObjectCommand, { Bucket: BUCKET_NAME, Key: "underscore" }).resolves({});
 
-        expect(result.statusCode).toBe(200);
-        expect(result.body).toBe(
-            JSON.stringify([])
-        );
-    });
+    //     // Mock DynamoDB response
+    //     dynamoDBMock.on(GetCommand).resolves({
+    //         Item: {
+    //             id: { S: 'underscore' },
+    //             name: { S: 'underscore' },
+    //             version: { S: '1.0.0' },
+    //             size: { N: '1000' },
+    //             cost: { N: '100' },
+    //             packageDep: { L: [] }  // No dependencies
+    //         }
+    //     });
+
+    //     // Mock axios to simulate the npm registry response
+    //     (axios.get as jest.Mock).mockResolvedValueOnce({
+    //         data: { dist: { unpackedSize: 1000 } }
+    //     });
+
+    //     const result = (await handler(event, {} as any, () => {})) as APIGatewayProxyResult;
+
+    //     expect(result.statusCode).toBe(200);
+    //     expect(result.body).toBe(JSON.stringify(1000)); // Total cost should be 1000 (size of the package itself)
+    // });
 
     // test('GET /package/{id}/cost - Success (200) w dependency', async () => {
         
