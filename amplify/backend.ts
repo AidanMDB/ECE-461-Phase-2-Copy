@@ -57,7 +57,8 @@ const myRestApi = new RestApi(apiStack, "RestApi", {
     stageName: "dev",
   },
   defaultCorsPreflightOptions: {
-    allowOrigins: Cors.ALL_ORIGINS,
+    //allowOrigins: Cors.ALL_ORIGINS,
+    allowOrigins: ["*"],
     allowMethods: ["GET", "POST", "DELETE", "PUT"],
     allowHeaders: ["*"], // Specify only the headers you need to allow
   },
