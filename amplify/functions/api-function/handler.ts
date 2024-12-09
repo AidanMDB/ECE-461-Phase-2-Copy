@@ -388,7 +388,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
         console.log('Error:', error);
         return {
             statusCode: 400,
-            body: 'There is missing field(s) in the PackageData or it is formed improperly (e.g. Content and URL ar both set)',
+            body: 'There is missing field(s) in the PackageData or it is formed improperly (e.g. Content and URL are both set)',
         }
     }
 };
