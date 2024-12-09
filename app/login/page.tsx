@@ -1,8 +1,6 @@
 "use client";
 import './login.css';
-// import React from 'react';
 import { useState } from 'react';
-// import Form from 'next/form';
 
 const LoginPage = () => {
   const [username, setUsername] = useState('');
@@ -43,9 +41,6 @@ const LoginPage = () => {
           </div>
 
           <div className="button-group">
-            {/* <a href="/HomePage"> */}
-              {/* <button className="search-button" aria-label="Login Button">Login</button> */}
-            {/* </a> */}
               <button className="search-button" type='submit'>Login</button>
           </div>
           </form>
