@@ -4,9 +4,7 @@
 
 "use client";
 import './signup.css';
-// import React from 'react';
 import { useState } from 'react';
-// import Form from 'next/form';e
 import '../globals.css';
 
 const SignUp = () => {
@@ -25,7 +23,7 @@ const SignUp = () => {
         <main>
           <form action="/homepage" className='input-section'>
           <div className="form-group">
-            <label htmlFor="username">Enter Email:</label>
+            <label htmlFor="email">Enter Email:</label>
             <input
               id="email"
               type="email"
@@ -64,7 +62,7 @@ const SignUp = () => {
           </div>
 
           <div className="form-group">
-            <label htmlFor="password">Re-Enter Password:</label>
+            <label htmlFor="repassword">Re-Enter Password:</label>
             <input
               id="repassword"
               type="password"

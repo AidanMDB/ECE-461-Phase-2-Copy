@@ -1,5 +1,6 @@
 import { defineFunction } from '@aws-amplify/backend';
 
-export const myApiFunction = defineFunction({ 
+export const apiPackageRate = defineFunction({ 
     name: 'api-package-id-rate',
+    runtime: 20,
 });

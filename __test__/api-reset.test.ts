@@ -1,10 +1,4 @@
-/**
- * This file was created by running 'amplify mock function api-reset'
- * and then modifying the generated test file. 
- * It tests the handler function in the api-reset function.
- **/ 
-
-import { handler } from "../functions/api-reset/handler";
+import { handler } from "../amplify/functions/api-reset/handler";
 import { S3Client, ListBucketsCommand, DeleteObjectsCommand, ListObjectsV2Command } from "@aws-sdk/client-s3";
 import { DynamoDBClient, ListTablesCommand, DeleteTableCommand } from "@aws-sdk/client-dynamodb";
 import { CognitoIdentityProviderClient, ListUsersCommand, AdminDeleteUserCommand, AdminDisableUserCommand } from "@aws-sdk/client-cognito-identity-provider";
@@ -37,7 +31,7 @@ describe("POST /reset", () => {
 /*
   it("should return 400 if the request body is invalid", async () => {
     const event: APIGatewayProxyEvent = {
-      headers: { "X-authorization": "Bearer token" },
+      headers: { "X-Authorization": "Bearer token" },
       body: "invalid-json",
     } as any;
 
@@ -68,7 +62,7 @@ describe("POST /reset", () => {
     cognitoMock.on(AdminDisableUserCommand).resolves({});
 
     const event: APIGatewayProxyEvent = {
-      headers: { "X-authorization": "Bearer token" },
+      headers: { "X-Authorization": "Bearer token" },
       body: JSON.stringify({}),
     } as any;
 
@@ -83,7 +77,7 @@ describe("POST /reset", () => {
     s3Mock.on(ListBucketsCommand).rejects(new Error("S3 error"));
 
     const event: APIGatewayProxyEvent = {
-      headers: { "X-authorization": "Bearer token" },
+      headers: { "X-Authorization": "Bearer token" },
       body: JSON.stringify({}),
     } as any;
 
@@ -98,7 +92,7 @@ describe("POST /reset", () => {
     dynamoDbMock.on(ListTablesCommand).rejects(new Error("DynamoDB error"));
 
     const event: APIGatewayProxyEvent = {
-      headers: { "X-authorization": "Bearer token" },
+      headers: { "X-Authorization": "Bearer token" },
       body: JSON.stringify({}),
     } as any;
 
@@ -113,7 +107,7 @@ describe("POST /reset", () => {
     cognitoMock.on(ListUsersCommand).rejects(new Error("Cognito error"));
 
     const event: APIGatewayProxyEvent = {
-      headers: { "X-authorization": "Bearer token" },
+      headers: { "X-Authorization": "Bearer token" },
       body: JSON.stringify({}),
     } as any;
 

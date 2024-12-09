@@ -4,15 +4,13 @@
 
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import "../globals.css";
 import "./update.css";
 import { post } from "@aws-amplify/api";
 import Link from "next/link";
 
 export default function UpdatePage() {
-  const [packageData, setPackageData] = useState<any>(null);
-  const [loading, setLoading] = useState<boolean>(true);
   const [uploadFileNotURL, setUploadFileNotURL] = useState<boolean>(true);
   const [file, setFile] = useState<File | null>(null);
   const [url, setUrl] = useState<string>("");
@@ -27,15 +25,15 @@ export default function UpdatePage() {
     }
   };
 
-  const handleSubmit = () => {
-    if (uploadFileNotURL && !file) {
-      setStatusMessage("Please select a ZIP file.");
-    } else if (!uploadFileNotURL && !url) {
-      setStatusMessage("Please enter a URL.");
-    } else {
-      setStatusMessage("Update submitted!");
-    }
-  };
+  // const handleSubmit = () => {
+  //   if (uploadFileNotURL && !file) {
+  //     setStatusMessage("Please select a ZIP file.");
+  //   } else if (!uploadFileNotURL && !url) {
+  //     setStatusMessage("Please enter a URL.");
+  //   } else {
+  //     setStatusMessage("Update submitted!");
+  //   }
+  // };
 
   const handleUpdate = async () => {
     if (uploadFileNotURL && !file) {
@@ -70,8 +68,6 @@ export default function UpdatePage() {
         setStatusMessage(`Error during upload: ${error}`);
     }
   };
-
-//   if (loading) return <p>Loading package details...</p>;
 
   return (
     <div>

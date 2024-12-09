@@ -20,7 +20,7 @@ const bucketName = 'packageStorage';
 
 export const handler: APIGatewayProxyHandler = async (event) => {
     // Check for 'X-authorization' header
-    const authHeader = event.headers["X-authorization"];
+    const authHeader = event.headers["X-Authorization"];
     if (!authHeader) {
         return {
             statusCode: 403,

@@ -19,15 +19,15 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     } catch (error) {
         return {
             statusCode: 400,
-            body: JSON.stringify("Invalid request body")
+            body: JSON.stringify("There is missing field(s) in the AuthenticationRequest or it is formed improperly.")
         };
     }
 
     const { User, Secret } = requestBody;
-    if (!User || !Secret || !User.name || !Secret.password) {
+    if (!User || !Secret || !User.name || !Secret.password || typeof User.isAdmin !== "boolean") {
         return {
             statusCode: 400,
-            body: JSON.stringify("Missing required fields: User.name and Secret.password")
+            body: JSON.stringify("There is missing field(s) in the AuthenticationRequest or it is formed improperly.")
         };
     }
 
@@ -51,7 +51,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
         if (idToken) {
             return {
                 statusCode: 200,
-                body: JSON.stringify({ token: idToken }),
+                body: JSON.stringify(`bearer ${idToken}`),
             };
         } else {
             return {
