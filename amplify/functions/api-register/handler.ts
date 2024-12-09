@@ -1,4 +1,8 @@
-import { CognitoIdentityProviderClient, AdminCreateUserCommand, AdminDeleteUserCommand, AdminAddUserToGroupCommand } from "@aws-sdk/client-cognito-identity-provider";
+/**
+ * This file is for handling the api-register REST API track.
+**/
+
+import { CognitoIdentityProviderClient, AdminCreateUserCommand, AdminAddUserToGroupCommand, AdminDeleteUserCommand } from "@aws-sdk/client-cognito-identity-provider";
 import type { APIGatewayProxyHandler, APIGatewayProxyResult } from "aws-lambda";
 import { jwtDecode } from 'jwt-decode';
 import { auth } from "../../auth/resource";

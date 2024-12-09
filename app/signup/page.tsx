@@ -1,8 +1,10 @@
+/**
+ * This file handles the signup page of the Package Manager.
+**/
+
 "use client";
 import './signup.css';
-// import React from 'react';
 import { useState } from 'react';
-// import Form from 'next/form';e
 import '../globals.css';
 
 const SignUp = () => {
@@ -10,6 +12,26 @@ const SignUp = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [repassword, setRepassword] = useState('');
+  const [error, setError] = useState('');
+
+  const validateEmail = (email: string) => {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(String(email).toLowerCase());
+  };
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!email || !username || !password || !repassword) {
+      setError('Please enter all fields');
+    } else if (!validateEmail(email)) {
+      setError('Please enter a valid email');
+    } else if (password !== repassword) {
+      setError('Passwords do not match');
+    } else {
+      setError('');
+      window.location.href = '/homepage';
+    }
+  };
 
     return (
       <div className='login'>
@@ -19,16 +41,15 @@ const SignUp = () => {
         </header>
 
         <main>
-          <form action="/homepage" className='input-section'>
+          <form onSubmit={handleSubmit} className='input-section'>
           <div className="form-group">
-            <label htmlFor="username">Enter Email:</label>
+            <label htmlFor="email">Enter Email:</label>
             <input
               id="email"
               type="email"
               value={email}
               onChange={e => setEmail(e.target.value)}
               className="input"
-              aria-label="Email"
               placeholder="Email"
             />
           </div>
@@ -41,7 +62,6 @@ const SignUp = () => {
               value={username}
               onChange={e => setUsername(e.target.value)}
               className="input"
-              aria-label="Username"
               placeholder="Username"
             />
           </div>
@@ -54,24 +74,22 @@ const SignUp = () => {
               value={password}
               onChange={e => setPassword(e.target.value)}
               className="input"
-              aria-label="Password"
               placeholder="Password"
             />
           </div>
 
           <div className="form-group">
-            <label htmlFor="password">Re-Enter Password:</label>
+            <label htmlFor="repassword">Re-Enter Password:</label>
             <input
               id="repassword"
               type="password"
               value={repassword}
               onChange={e => setRepassword(e.target.value)}
               className="input"
-              aria-label="Password"
-              placeholder="Password"
+              placeholder="Re-enter Password"
             />
           </div>
-
+          {error && <p className="error">{error}</p>}
           <div className="button-group">
               <button className="search-button" type='submit'>Sign Up</button>
           </div>

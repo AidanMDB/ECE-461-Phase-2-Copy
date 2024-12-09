@@ -1,12 +1,27 @@
+/**
+ * This file handles the login page of the Package Manager.
+**/
+
 "use client";
 import './login.css';
-// import React from 'react';
 import { useState } from 'react';
-// import Form from 'next/form';
 
 const LoginPage = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!username || !password) {
+      setError('Please enter both username and password');
+    } else {
+      setError('');
+      window.location.href = '/homepage';
+        // return;
+      }
+    };
+  
     return (
       <div className='login'>
         <title>Package Manager</title>
@@ -15,7 +30,7 @@ const LoginPage = () => {
         </header>
 
         <main>
-          <form action="/homepage" className='input-section'>
+          <form onSubmit={handleSubmit} className='input-section'>
           <div className="form-group">
             <label htmlFor="username">Enter Username:</label>
             <input
@@ -43,11 +58,9 @@ const LoginPage = () => {
           </div>
 
           <div className="button-group">
-            {/* <a href="/HomePage"> */}
-              {/* <button className="search-button" aria-label="Login Button">Login</button> */}
-            {/* </a> */}
               <button className="search-button" type='submit'>Login</button>
           </div>
+          {error && <p className="error">{error}</p>}
           </form>
         <div className="sign-up-section">
           <p>Not already a member?</p>

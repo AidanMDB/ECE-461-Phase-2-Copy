@@ -1,3 +1,7 @@
+/**
+ * File to test all the functions in the api-function folder 
+ **/
+
 import * as handler from '../amplify/functions/api-function/handler';
 import { mockClient } from 'aws-sdk-client-mock';
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';

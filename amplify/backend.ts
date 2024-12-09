@@ -1,3 +1,9 @@
+/**
+ * This file is for handling all of the backend resources.
+ * This includes the REST API, the lambda functions, the cognito user pool, the dynamoDB table, and the s3 bucket.
+**/
+
+
 import { defineBackend } from '@aws-amplify/backend';
 import { auth } from './auth/resource.js';
 import { data } from './data/resource.js';
@@ -18,6 +24,7 @@ import { myApiFunctionRegex } from './functions/api-package-regex/resource.js';
 import { myApiFunctionRegister } from './functions/api-register/resource.js';
 import { myApiFunctionAuthenticate } from './functions/api-authenticate/resource.js';
 import { apiReset } from './functions/api-reset/resource.js';
+import { myApiFunctionTracks } from './functions/api-tracks/resource.js';
 
 import { ApiGateway } from 'aws-cdk-lib/aws-events-targets';
 import { apiPackageRate } from './functions/api-package-id-rate/resource.js';
@@ -39,6 +46,7 @@ const backend = defineBackend({
   myApiFunctionAuthenticate, // creates lambda for authenticate
   apiReset,        // creates lambda
   apiPackageRate, // creates lambda
+  myApiFunctionTracks, // creates lambda
 });
 
 //const {} = backend.auth.resources.cfnResources;
@@ -55,9 +63,10 @@ const myRestApi = new RestApi(apiStack, "RestApi", {
     stageName: "dev",
   },
   defaultCorsPreflightOptions: {
-    allowOrigins: Cors.ALL_ORIGINS,
+    //allowOrigins: Cors.ALL_ORIGINS,
+    allowOrigins: ["*"],
     allowMethods: ["GET", "POST", "DELETE", "PUT"],
-    allowHeaders: Cors.DEFAULT_HEADERS, // Specify only the headers you need to allow
+    allowHeaders: ["*"], // Specify only the headers you need to allow
   },
 });
 
@@ -124,6 +133,11 @@ const myapiPackagesFunction = new LambdaIntegration(
 // add lambda integration for regex search api
 const myapiPackageByRegexFunction = new LambdaIntegration(
   backend.myApiFunctionRegex.resources.lambda
+);
+
+// add lambda integration for tracks api
+const myapiTracksFunction = new LambdaIntegration(
+  backend.myApiFunctionTracks.resources.lambda
 );
 
 
@@ -233,6 +247,12 @@ authenticatePath.addMethod('PUT', myapiAuthenticateFunction, {
 // create new API path for regex search
 const regexPath = packagePath.addResource('byRegEx');
 regexPath.addMethod('POST', myapiPackageByRegexFunction, {
+  authorizationType: AuthorizationType.NONE,
+});
+
+// create new API path for tracks
+const tracksPath = myRestApi.root.addResource('tracks');
+tracksPath.addMethod('GET', myapiTracksFunction, {
   authorizationType: AuthorizationType.NONE,
 });
 

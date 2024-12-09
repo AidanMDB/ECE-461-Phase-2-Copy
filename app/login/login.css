@@ -98,3 +98,12 @@ body {
   input[aria-required="true"]:focus {
     border-left-color: #c9302c;
   }
+
+  .error-message {
+    color: red;
+    margin-top: 10px;
+    font-size: 14px;
+  }
+  
+
+  
