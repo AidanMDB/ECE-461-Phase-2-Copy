@@ -1,3 +1,7 @@
+/**
+ * This file handles the packages in the Package Manager.
+**/
+
 "use client";
 
 import { useEffect, useState } from 'react';

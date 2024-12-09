@@ -1,3 +1,7 @@
+/**
+ * This file handles the upload page of the Package Manager.
+**/
+
 "use client";
 
 import React, { useState } from "react";
@@ -10,7 +14,6 @@ import { handler } from '../../amplify/functions/api-function/handler';
 import { APIGatewayProxyHandler } from 'aws-lambda';
 
 export default function UploadPage() {
-  // const [uploadType, setUploadType] = useState<"url" | "zip">("zip"); // "zip" for ZIP file, "url" for URL
   const [uploadFileNotURL, setUploadFileNotURL] = useState<boolean>(true);
   const [file, setFile] = useState<File | null>(null);
   const [uploadStatus, setUploadStatus] = useState<string>("");

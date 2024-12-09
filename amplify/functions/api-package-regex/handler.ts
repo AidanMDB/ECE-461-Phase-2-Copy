@@ -1,3 +1,7 @@
+/**
+ * This file is for handling the api-package regex REST API track.
+**/
+
 import type { APIGatewayProxyHandler, APIGatewayProxyResult } from "aws-lambda";
 import { DynamoDBClient, ScanCommand } from "@aws-sdk/client-dynamodb";
 import safeRegex from "safe-regex";

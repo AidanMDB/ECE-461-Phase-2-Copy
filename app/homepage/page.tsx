@@ -1,4 +1,8 @@
-'use client';
+/**
+ * This file handles the homepage of the Package Manager.
+**/
+
+"use client";
 
 import { useState } from 'react';
 import './homepage.css';

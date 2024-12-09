@@ -1,3 +1,9 @@
+/**
+ * This file was created by running 'amplify mock function api-authenticate' 
+ * and then modifying the generated test file. 
+ * It tests the handler function in the api-authenticate function.
+ **/ 
+
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { handler } from "../amplify/functions/api-authenticate/handler";
 import { CognitoIdentityProviderClient, AdminInitiateAuthCommand } from "@aws-sdk/client-cognito-identity-provider";
@@ -31,12 +37,12 @@ describe("POST /authenticate", () => {
   it("should return 200 with a valid token for the given example", async () => {
     const event: APIGatewayProxyEvent = {
       body: JSON.stringify({
-        User: {
-          name: "ece30861defaultadminuser",
-          isAdmin: true
+        "User": {
+          "name": "ece30861defaultadminuser",
+          "isAdmin": true
         },
-        Secret: {
-          password: "correcthorsebatterystaple123(!__+@**(A'\"`;DROP TABLE packages;"
+        "Secret": {
+          "password": "correcthorsebatterystaple123(!__+@**(A'\"`;DROP TABLE packages;"
         }
       }),
     } as any;
@@ -50,6 +56,7 @@ describe("POST /authenticate", () => {
     const result: APIGatewayProxyResult = await handler(event, {} as any, () => {}) as APIGatewayProxyResult;
 
     expect(result.statusCode).toBe(200);
+    //console.log(result.body);
     expect(result.body).toBe(JSON.stringify(`bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c`));
   });
 

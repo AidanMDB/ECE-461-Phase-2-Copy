@@ -1,3 +1,7 @@
+/**
+ * This file handles the signup page of the Package Manager.
+**/
+
 "use client";
 import './signup.css';
 import { useState } from 'react';

@@ -2,10 +2,6 @@ import {Metric} from './Metric';
 import { URLHandler } from '../utils/URLHandler';
 import axios from 'axios';
 import { secret } from '@aws-amplify/backend';
-//import { Logger } from '../logUtils';
-//import { DatabaseSync } from 'node:sqlite';
-//import { Console } from 'node:console';
-
 
 export class BusFactor extends Metric {
     jsonKey: string = "BusFactor";
