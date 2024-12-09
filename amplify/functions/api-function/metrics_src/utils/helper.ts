@@ -1,3 +1,7 @@
+/**
+ * This file is for handling the helper functions used in the metrics functions.
+**/
+
 import axios, { isAxiosError } from 'axios';
 import { secret } from '@aws-amplify/backend';
 /**

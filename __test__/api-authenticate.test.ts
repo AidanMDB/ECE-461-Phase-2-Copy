@@ -1,3 +1,9 @@
+/**
+ * This file was created by running 'amplify mock function api-authenticate' 
+ * and then modifying the generated test file. 
+ * It tests the handler function in the api-authenticate function.
+ **/ 
+
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { handler } from "../amplify/functions/api-authenticate/handler";
 import { CognitoIdentityProviderClient, AdminInitiateAuthCommand } from "@aws-sdk/client-cognito-identity-provider";
