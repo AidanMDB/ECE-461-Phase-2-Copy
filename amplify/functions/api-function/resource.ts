@@ -7,5 +7,8 @@ export const myApiFunction = defineFunction({
     runtime: 20,
     bundling: {
         minify: true,
+    },
+    environment: {
+        TMP_PATH: '/tmp',
     }
 });

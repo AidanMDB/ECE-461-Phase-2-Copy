@@ -1,51 +1,23 @@
 import * as handler from '../amplify/functions/api-function/handler';
 import { mockClient } from 'aws-sdk-client-mock';
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { DynamoDBDocumentClient, GetCommand, PutCommand } from '@aws-sdk/lib-dynamodb';
+import { DynamoDBClient, PutItemCommand, GetItemCommand } from '@aws-sdk/client-dynamodb';
+//import { DynamoDBDocumentClient, GetItemCommand, PutItemCommand } from '@aws-sdk/lib-dynamodb';
 import { S3Client, PutObjectCommand} from '@aws-sdk/client-s3';
 import axios from 'axios';
 import { calcMetrics } from '../amplify/functions/api-function/metrics_src/api-metric-caller';
 import * as fs from 'fs';
 import * as path from 'path';
-import { json } from 'stream/consumers';
 
 // 'xit' rather than 'it' will make jest skip that test
 
-const dynamoDBMock = mockClient(DynamoDBDocumentClient);
+const dynamoDBMock = mockClient(DynamoDBClient);
 const s3Mock = mockClient(S3Client);
 jest.mock('../amplify/functions/api-function/metrics_src/api-metric-caller', () => ({
   calcMetrics: jest.fn()
 }));
 
 jest.mock('axios');
-
-/**
- * 
- * @param folderPath The path of the folder whose contents are to be deleted
- */
-async function deleteFolderContents(folderPath: string) {
-  try {
-    // Read the contents of the directory
-    const files = await fs.promises.readdir(folderPath);
-
-    // Loop through the contents and delete them
-    for (const file of files) {
-      const filePath = path.join(folderPath, file);
-      const stat = await fs.promises.stat(filePath);
-
-      if (stat.isDirectory()) {
-        // If it's a directory, recursively delete its contents
-        await deleteFolderContents(filePath);
-      } else {
-        // If it's a file, delete it
-        await fs.promises.unlink(filePath);
-      }
-    }
-    console.log(`All contents deleted from folder: ${folderPath}`);
-  } catch (error) {
-    console.error(`Error deleting contents of folder ${folderPath}:`, error);
-  }
-}
 
 
 describe('Lambda Function Handler', () => {
@@ -63,19 +35,19 @@ describe('Lambda Function Handler', () => {
   it('should return 403 error for missing X-authorization header', async () => {
 
     const event: APIGatewayProxyEvent = {
-      body: JSON.stringify({
+      body: {
         Content: 'content',
         URL: 'url',
         JSProgram: 'jsprogram',
         debloat: false,
         Name: 'name'
-      })
+      }
     } as any;
 
     const result = (await handler.handler(event, {} as any, () => {})) as APIGatewayProxyResult;
 
     expect(result.statusCode).toBe(403);
-    expect(result.body).toBe(JSON.stringify("Authentication failed due to invalid or missing AuthenticationToken."));
+    expect(result.body).toBe('Authentication failed due to invalid or missing AuthenticationToken.');
   });
 
 
@@ -84,18 +56,18 @@ describe('Lambda Function Handler', () => {
       headers: {
         'X-Authorization': 'your-auth-token', // Add your X-authorization header here
       },
-      body: JSON.stringify({
+      body: {
         Content: 'content',
         URL: 'url',
         debloat: false,
         Name: 'name'
-      })
+      }
     } as any;
 
     const result = (await handler.handler(event, {} as any, () => {})) as APIGatewayProxyResult;
 
     expect(result.statusCode).toBe(400);
-    expect(result.body).toBe(JSON.stringify('There is missing field(s) in the PackageData or it is formed improperly (e.g. Content and URL ar both set)'));
+    expect(result.body).toBe('There is missing field(s) in the PackageData or it is formed improperly (e.g. Content and URL are both set)');
   });
 
 
@@ -105,59 +77,47 @@ describe('Lambda Function Handler', () => {
       headers: {
         'X-Authorization': 'your-auth-token', // Add your X-authorization header here
       },
-      body: JSON.stringify({
+      body: {
         Content: 'content',
-      })
+      }
     } as any;
   
     const result = (await handler.handler(event, {} as any, () => {})) as APIGatewayProxyResult;
     
     expect(result.statusCode).toBe(400);
-    expect(result.body).toBe(JSON.stringify('There is missing field(s) in the PackageData or it is formed improperly (e.g. Content and URL ar both set)'));
+    expect(result.body).toBe('There is missing field(s) in the PackageData or it is formed improperly (e.g. Content and URL are both set)');
   });
 
   it('should return 409 for existing package', async () => {
-
-    // alter package writing path
-    const originalTmpPath = handler.TMP_PATH;
-    Object.defineProperty(handler, 'TMP_PATH', {
-      value: `${process.cwd()}/__test__/tmp`,
-      writable: true, // Allows modification in the test
-    });
 
     const event: APIGatewayProxyEvent = {
       headers: {
         'X-Authorization': 'your-auth-token', // Add your X-authorization header here
       },
       body: JSON.stringify({
-        Content: fs.readFileSync('__test__/braces.zip'),
+        Content: fs.readFileSync('__test__/braces.zip').toString('base64'),
         debloat: false,
         Name: 'name'
       })
     } as any;
 
     // mock S3 for no duplicate package
-    dynamoDBMock.on(GetCommand).resolves({
-      Item: {ID: 'braces3.0.3'}
+    dynamoDBMock.on(GetItemCommand).resolves({
+      Item: {}
     });
 
     const result = (await handler.handler(event, {} as any, () => {})) as APIGatewayProxyResult;
 
+    expect(result.body).toBe('Package exists already.');
     expect(result.statusCode).toBe(409);
-    expect(result.body).toBe(JSON.stringify('Package exists already.'));
-
-    // reset package writing path
-    Object.defineProperty(handler, 'TMP_PATH', {
-      value: originalTmpPath,
-    });
   });
 
 
   //add expects to this test
   xit('should return 201 for approved package through "Content"', async () => {
- 
+    
     // alter package writing path
-    const originalTmpPath = handler.TMP_PATH;
+    const originalTmpPath = process.env.TMP_PATH;
     Object.defineProperty(handler, 'TMP_PATH', {
       value: `${process.cwd()}/__test__/tmp`,
       writable: true, // Allows modification in the test
@@ -175,11 +135,11 @@ describe('Lambda Function Handler', () => {
     } as any;
 
     // mock dynamoDBMock for no duplicate package (doesn't contain item)
-    dynamoDBMock.on(GetCommand).resolves({
+    dynamoDBMock.on(GetItemCommand).resolves({
     });
 
     // mocking of metric calculation
-    const mockCalcMetricsResult = `{
+    /*const mockCalcMetricsResult = `{
       "URL": "https://github.com/nullivex/nodist",
       "NetScore": 0.9,
       "NetScore_Latency": 0.033,
@@ -194,10 +154,10 @@ describe('Lambda Function Handler', () => {
       "License": 1,
       "License_Latency": 0.001
     }`;
-    mockcalcMetrics.mockResolvedValue(mockCalcMetricsResult);
+    mockcalcMetrics.mockResolvedValue(mockCalcMetricsResult);*/
 
     // mocking of DynamoDB put
-    dynamoDBMock.on(PutCommand).resolves({
+    dynamoDBMock.on(PutItemCommand).resolves({
       $metadata:{
         httpStatusCode: 200
       }
@@ -234,7 +194,7 @@ describe('Lambda Function Handler', () => {
 
   xit('should return 201 for approved package through "URL" github', async () => {
     // alter package writing path
-    const originalTmpPath = handler.TMP_PATH;
+    const originalTmpPath = process.env.TMP_PATH;
     Object.defineProperty(handler, 'TMP_PATH', {
       value: `${process.cwd()}/__test__/tmp`,
       writable: true, // Allows modification in the test
@@ -258,7 +218,7 @@ describe('Lambda Function Handler', () => {
 
 
     // mock dynamoDBMock for no duplicate package (doesn't contain item)
-    dynamoDBMock.on(GetCommand).resolves({
+    dynamoDBMock.on(GetItemCommand).resolves({
     });
 
     // mocking of metric calculation
@@ -280,7 +240,7 @@ describe('Lambda Function Handler', () => {
     mockcalcMetrics.mockResolvedValue(mockCalcMetricsResult);
 
     // mocking of DynamoDB put
-    dynamoDBMock.on(PutCommand).resolves({
+    dynamoDBMock.on(PutItemCommand).resolves({
       $metadata:{
         httpStatusCode: 200
       }
@@ -319,7 +279,7 @@ describe('Lambda Function Handler', () => {
   // like 90% certain this one works fine but b/c windows uses compression level 5 and I'm using level 9, the compared file is different
   xit('should return 201 for approved package through "URL" npm', async () => {
     // alter package writing path
-    const originalTmpPath = handler.TMP_PATH;
+    const originalTmpPath = process.env.TMP_PATH;
     Object.defineProperty(handler, 'TMP_PATH', {
       value: `${process.cwd()}/__test__/tmp`,
       writable: true, // Allows modification in the test
@@ -349,7 +309,7 @@ describe('Lambda Function Handler', () => {
     } as any;
 
     // mock dynamoDBMock for no duplicate package (doesn't contain item)
-    dynamoDBMock.on(GetCommand).resolves({
+    dynamoDBMock.on(GetItemCommand).resolves({
     });
 
     // mocking of metric calculation
@@ -371,7 +331,7 @@ describe('Lambda Function Handler', () => {
     mockcalcMetrics.mockResolvedValue(mockCalcMetricsResult);
 
     // mocking of DynamoDB put
-    dynamoDBMock.on(PutCommand).resolves({
+    dynamoDBMock.on(PutItemCommand).resolves({
       $metadata:{
         httpStatusCode: 200
       }
@@ -404,7 +364,7 @@ describe('Lambda Function Handler', () => {
 
   xit("should return a 201 for approved package and its size should be smaller than original", async () => {
     // alter package writing path
-    const originalTmpPath = handler.TMP_PATH;
+    const originalTmpPath = process.env.TMP_PATH;
     Object.defineProperty(handler, 'TMP_PATH', {
       value: `${process.cwd()}/__test__/tmp`,
       writable: true, // Allows modification in the test
@@ -423,7 +383,7 @@ describe('Lambda Function Handler', () => {
     } as any;
 
     // mock dynamoDBMock for no duplicate package (doesn't contain item)
-    dynamoDBMock.on(GetCommand).resolves({
+    dynamoDBMock.on(GetItemCommand).resolves({
     });
 
     // mocking of metric calculation
@@ -445,7 +405,7 @@ describe('Lambda Function Handler', () => {
     mockcalcMetrics.mockResolvedValue(mockCalcMetricsResult);
 
     // mocking of DynamoDB put
-    dynamoDBMock.on(PutCommand).resolves({
+    dynamoDBMock.on(PutItemCommand).resolves({
       $metadata:{
         httpStatusCode: 200
       }
@@ -484,7 +444,7 @@ describe('Lambda Function Handler', () => {
 
   xtest("End to End test with metricCaller", async () => {
     // alter package writing path
-    const originalTmpPath = handler.TMP_PATH;
+    const originalTmpPath = process.env.TMP_PATH;
     Object.defineProperty(handler, 'TMP_PATH', {
       value: `${process.cwd()}/__test__/tmp`,
       writable: true, // Allows modification in the test
@@ -713,12 +673,12 @@ describe('Lambda Function Handler', () => {
     } as any;
 
     // mock dynamoDBMock for no duplicate package (doesn't contain item)
-    dynamoDBMock.on(GetCommand).resolves({
+    dynamoDBMock.on(GetItemCommand).resolves({
     });
 
 
     // mocking of DynamoDB put
-    dynamoDBMock.on(PutCommand).resolves({
+    dynamoDBMock.on(PutItemCommand).resolves({
       $metadata:{
         httpStatusCode: 200
       }
