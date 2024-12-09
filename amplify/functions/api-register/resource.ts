@@ -1,9 +1,7 @@
 import { defineFunction } from '@aws-amplify/backend';
-import { User } from 'aws-cdk-lib/aws-iam';
 
-export const myApiFunctionAuthenticate = defineFunction({ 
-    name: 'api-authenticate',
-    timeoutSeconds: 60,
+export const myApiFunctionRegister = defineFunction({ 
+    name: 'api-package-register',   
     runtime: 20,
     environment: {
         USER_POOL_ID: 'us-east-1_cwR5jLfKp',
