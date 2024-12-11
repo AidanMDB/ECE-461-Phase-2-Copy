@@ -95,6 +95,7 @@ describe("POST /authenticate", () => {
     const result: APIGatewayProxyResult = await handler(event, {} as any, () => {}) as APIGatewayProxyResult;
 
     expect(result.statusCode).toBe(401);
+    console.log(result.body);
     expect(result.body).toBe(JSON.stringify("The user or password is invalid."));
   });
 

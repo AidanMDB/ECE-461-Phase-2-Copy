@@ -47,8 +47,8 @@ export const handler: APIGatewayProxyHandler = async (event) => {
         } catch (error) {
             console.log("Error during authentication:", error);
             return {
-                statusCode: 402,
-                body: JSON.stringify(`The user or password is invalid. ${error}`),
+                statusCode: 401,
+                body: JSON.stringify(`The user or password is invalid.`),
             }
         }
         console.log("AuthResponse Return: ", authResponse)
