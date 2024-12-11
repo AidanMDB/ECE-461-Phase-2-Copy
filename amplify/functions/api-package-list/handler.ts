@@ -6,7 +6,7 @@ const dynamoDb = new DynamoDBClient();
 const TABLE_NAME = process.env.PACKAGES_TABLE || "packageTable";
 
 const s3 = new S3Client();
-const BUCKET_NAME = "packageStorage";
+const BUCKET_NAME = "amplify-dec29zvcbtyi8-mai-packagestoragebucketb9bb-glhgg0vatfdl ";
 
 export const handler: APIGatewayProxyHandler = async (event) => {
   // check for 'X-authorization' header
