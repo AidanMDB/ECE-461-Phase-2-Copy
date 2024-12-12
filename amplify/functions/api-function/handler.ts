@@ -8,8 +8,8 @@ import AdmZip from 'adm-zip';
 import * as terser from 'terser';
 
 const TMP_PATH = '/tmp';
-const TABLE_NAME = 'Package';
-const BUCKET_NAME = 'packageStorage';
+const TABLE_NAME = 'Package-r47dvjzscnahxbruc73kdpqjt4-NONE';
+const BUCKET_NAME = 'amplify-dec29zvcbtyi8-mai-packagestoragebucketb9bb-glhgg0vatfdl';
 const db = new DynamoDBClient({});
 const s3 = new S3Client({});
 
@@ -157,7 +157,7 @@ async function checkKeyExists(packageName: string, packageVersion: string): Prom
     
         const command = new GetItemCommand(params);
         const response = await db.send(command);
-    
+        console.log('Response:', response);
         // Check if the 'Item' exists in the response
         if (!!response.Item) {    // True if 'Item' doesn't exist
             return {
@@ -392,3 +392,4 @@ export const handler: APIGatewayProxyHandler = async (event) => {
         }
     }
 };
+

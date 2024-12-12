@@ -5,8 +5,8 @@ import AdmZip from "adm-zip";
 
 const s3 = new S3Client();
 const dynamoDB = new DynamoDBClient();
-const BUCKET_NAME = "packageStorage";
-const TABLE_NAME = process.env.PACKAGES_TABLE || "packageTable";
+const BUCKET_NAME = "amplify-dec29zvcbtyi8-mai-packagestoragebucketb9bb-glhgg0vatfdl ";
+const TABLE_NAME = process.env.PACKAGES_TABLE || "Package-r47dvjzscnahxbruc73kdpqjt4-NONE";
 
 export const handler: APIGatewayProxyHandler = async (event) => {
   console.log("event", event);

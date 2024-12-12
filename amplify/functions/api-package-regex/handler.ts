@@ -7,7 +7,7 @@ import { DynamoDBClient, ScanCommand } from "@aws-sdk/client-dynamodb";
 import safeRegex from "safe-regex";
 
 const dynamoDb = new DynamoDBClient();
-const TABLE_NAME = process.env.PACKAGES_TABLE || "packageTable";
+const TABLE_NAME = process.env.PACKAGES_TABLE || "Package-r47dvjzscnahxbruc73kdpqjt4-NONE";
 
 export const handler: APIGatewayProxyHandler = async (event) => {
   //console.log("event", event);

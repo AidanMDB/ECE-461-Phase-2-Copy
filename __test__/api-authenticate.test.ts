@@ -6,7 +6,7 @@
 
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { handler } from "../amplify/functions/api-authenticate/handler";
-import { CognitoIdentityProviderClient, AdminInitiateAuthCommand } from "@aws-sdk/client-cognito-identity-provider";
+import { CognitoIdentityProviderClient, InitiateAuthCommand } from "@aws-sdk/client-cognito-identity-provider";
 import { mockClient } from "aws-sdk-client-mock";
 
 // Mock the AWS SDK client
@@ -22,7 +22,7 @@ describe("POST /authenticate", () => {
       body: JSON.stringify({ User: { name: "testuser", isAdmin: true }, Secret: { password: "TestPassword123!" } }),
     } as any;
 
-    cognitoMock.on(AdminInitiateAuthCommand).resolves({
+    cognitoMock.on(InitiateAuthCommand).resolves({
       AuthenticationResult: {
         IdToken: "valid-id-token",
       },
@@ -47,7 +47,7 @@ describe("POST /authenticate", () => {
       }),
     } as any;
 
-    cognitoMock.on(AdminInitiateAuthCommand).resolves({
+    cognitoMock.on(InitiateAuthCommand).resolves({
       AuthenticationResult: {
         IdToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
       },
@@ -87,7 +87,7 @@ describe("POST /authenticate", () => {
       body: JSON.stringify({ User: { name: "testuser", isAdmin: true }, Secret: { password: "WrongPassword" } }),
     } as any;
 
-    cognitoMock.on(AdminInitiateAuthCommand).rejects({
+    cognitoMock.on(InitiateAuthCommand).rejects({
         name: "NotAuthorizedException",
         message: "Incorrect username or password.",
       });
@@ -95,6 +95,7 @@ describe("POST /authenticate", () => {
     const result: APIGatewayProxyResult = await handler(event, {} as any, () => {}) as APIGatewayProxyResult;
 
     expect(result.statusCode).toBe(401);
+    console.log(result.body);
     expect(result.body).toBe(JSON.stringify("The user or password is invalid."));
   });
 
@@ -103,7 +104,7 @@ describe("POST /authenticate", () => {
       body: JSON.stringify({ User: { name: "testuser" }, Secret: { password: "TestPassword123!" } }),
     } as any;
 
-    cognitoMock.on(AdminInitiateAuthCommand).rejects(new Error("InternalError"));
+    cognitoMock.on(InitiateAuthCommand).rejects(new Error("InternalError"));
 
     const result: APIGatewayProxyResult = await handler(event, {} as any, () => {}) as APIGatewayProxyResult;
 
